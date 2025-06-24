@@ -1,0 +1,23 @@
+{
+  "name": "joies-capstone-project-mu",
+  "version": "1.0.0",
+  "description": "**Deployed site**: <add a link to your deployment here, if you create one>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joieariel/joies-capstone-project-mu.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joieariel/joies-capstone-project-mu/issues"
+  },
+  "homepage": "https://github.com/joieariel/joies-capstone-project-mu#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
