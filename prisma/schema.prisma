@@ -27,7 +27,7 @@ model User {
   zip_code   String
   city       String
   state      String
-  createdAt  DateTime @default(now())
+  created_at  DateTime @default(now())
 
   reviews    Review[]
 }
@@ -37,13 +37,23 @@ model Review {
   rating              Int
   comment             String
   image_url           String
-  createdAt           DateTime @default(now())
+  created_at           DateTime @default(now())
 
   user_id             Int
-  communityCenter_id  Int
+  center_id  Int
 
   user                User            @relation(fields: [user_id], references: [id])
-  communityCenter     CommunityCenter @relation(fields: [communityCenter_id], references: [id])
+  community_center     CommunityCenter @relation(fields: [center_id], references: [id])
+
+  images ReviewImage[]
+}
+
+// to allow for multiple images per review
+model ReviewImage {
+  id          Int      @id @default(autoincrement())
+  image_url   String
+  review_id   Int
+  review      Review   @relation(fields: [review_id], references: [id])
 }
 
 model CommunityCenter {
@@ -57,7 +67,14 @@ model CommunityCenter {
   description  String
   latitude     Float
   longitude    Float
-  createdAt    DateTime @default(now())
+  created_at    DateTime @default(now())
 
   reviews      Review[]
+
+  hours CenterHours[]
+}
+
+model CenterHours {
+  id          Int      @id @default(autoincrement())
+
 }
