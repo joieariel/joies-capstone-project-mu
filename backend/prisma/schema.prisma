@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+generator client {
+ provider = "prisma-client-js"
+ output   = "../generated/prisma"
+}
+
+
+datasource db {
+ provider = "postgresql"
+ url      = env("DATABASE_URL")
+}
+
+
+
+
+
+
+model User {
+ id         Int      @id @default(autoincrement())
+ first_name String
+ last_name  String
+ username   String   @unique
+ email      String   @unique
+ status     String
+ birthdate  DateTime
+ zip_code   String
+ city       String
+ state      String
+ created_at  DateTime @default(now())
+
+
+ reviews    Review[]
+}
+
+
+model Review {
+ id                  Int      @id @default(autoincrement())
+ rating              Int
+ comment             String
+ image_url           String
+ created_at           DateTime @default(now())
+
+
+ user_id             Int
+ center_id  Int
+
+
+ user                User            @relation(fields: [user_id], references: [id])
+ community_center     CommunityCenter @relation(fields: [center_id], references: [id])
+
+
+ images ReviewImage[]
+}
+
+
+// to allow for multiple images per review
+model ReviewImage {
+ id          Int      @id @default(autoincrement())
+ image_url   String
+ review_id   Int
+ review      Review   @relation(fields: [review_id], references: [id])
+}
+
+
+model CommunityCenter {
+ id           Int      @id @default(autoincrement())
+ name         String
+ address      String
+ email        String
+ zip_code     String
+ phone_number String
+ image_url    String
+ description  String
+ latitude     Float
+ longitude    Float
+ created_at    DateTime @default(now())
+
+
+ reviews      Review[]
+
+
+ hours CenterHours[]
+}
+
+
+// to community center hours for open now enhanced search feature
+model CenterHours {
+ id          Int      @id @default(autoincrement())
+ center_id   Int
+ day         String
+ open_time   String // "e.g 1:00"
+ close_time  String
+ is_closed   Boolean @default(false)
+ center      CommunityCenter @relation(fields: [center_id], references: [id])
+
+
+}
