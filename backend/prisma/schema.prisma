@@ -18,10 +18,6 @@ datasource db {
 }
 
 
-
-
-
-
 model User {
  id         Int      @id @default(autoincrement())
  first_name String
@@ -97,8 +93,18 @@ model CenterHours {
  day         String
  open_time   String // "e.g 1:00"
  close_time  String
- is_closed   Boolean @default(false)
+ is_closed   Boolean @default(false) // if a center is always closed on a given day of the week
  center      CommunityCenter @relation(fields: [center_id], references: [id])
 
+}
 
+model Tag {
+ id          Int      @id @default(autoincrement())
+ name        String // tag label
+}
+
+model ReviewTag {
+ id          Int      @id @default(autoincrement())
+ review_id   Int
+ tag_id      Int
 }

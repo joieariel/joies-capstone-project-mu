@@ -1,0 +1,94 @@
+.banner {
+    background-color: #CED7E4;
+    padding: 4rem 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.banner-container {
+    max-width: 1200px; /* set the maximum width of the container so not stretched on larger screens */
+    margin: 0 auto; /* center the container */
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 4rem;
+}
+
+.banner-content {
+    flex: 1;
+    text-align: left;
+}
+
+.banner-intro-text {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+    font-weight: 400;
+}
+
+.banner-title {
+    font-size: 3rem;
+    font-weight: bold;
+    color: black;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.banner-description {
+    font-size: 1.1rem;
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.banner-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.banner-login-btn,
+.banner-signup-btn {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #486284;
+    background: transparent;
+    color: #486284;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.banner-login-btn:hover,
+.banner-signup-btn:hover {
+    background: #486284;
+    color: white;
+}
+
+.banner-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.banner-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .banner-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .banner-title {
+        font-size: 2rem;
+    }
+
+    .banner-buttons {
+        justify-content: center;
+    }
+}
