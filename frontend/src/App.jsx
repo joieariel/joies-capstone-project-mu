@@ -1,4 +1,5 @@
 import "./App.css";
+import Banner from "./Banner";
 import Header from "./Header";
 
 const App = () => {
@@ -7,6 +8,8 @@ const App = () => {
   return (
     <div className="app">
       <Header />
+
+      <Banner />
     </div>
   );
 };
