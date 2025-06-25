@@ -10,14 +10,14 @@ router.get("/", async (req, res) => {
   res.json(communityCenters);
 });
 
-// // (GET) get a specific community center from db
-// router.get("/:communityCenterId", async (req, res) => {
-//   const communityCenterId = parseInt(req.params.boardId);
-//   const communityCenters = await prisma.CommunityCenter.findUnique({
-//     where: { id: parseInt(communityCenterId) },
-//   });
-//   console.log(communityCenters);
-//   res.json(communityCenters);
-// });
+// (GET) get a specific community center from db
+router.get("/:communityCenterId", async (req, res) => {
+  const communityCenterId = parseInt(req.params.boardId);
+  const communityCenters = await prisma.CommunityCenter.findUnique({
+    where: { id: parseInt(communityCenterId) },
+  });
+  console.log(communityCenters);
+  res.json(communityCenters);
+});
 
 module.exports = router;
