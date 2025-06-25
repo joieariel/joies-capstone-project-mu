@@ -1,0 +1,65 @@
+.header {
+  background-color: #CED7E4;
+  color: black;
+  padding: 1rem 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.header-logo .logo-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.header-nav .nav-list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 2rem;
+}
+
+.header-nav a {
+  color: #486284;
+  text-decoration: none;
+}
+
+.home-link a {
+  color: black;
+}
+
+.header-nav a:hover {
+  text-decoration: underline;
+}
+
+.header-auth {
+  display: flex;
+  gap: 1rem;
+}
+
+
+
+.login-btn, .signup-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid white;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+}
+
+.login-btn:hover, .signup-btn:hover {
+  background: white;
+  color: #1f1f1f;
+}
+
+.header {
+    border-bottom: 1px solid #486284;
+}
