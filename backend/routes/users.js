@@ -70,14 +70,4 @@ router.delete("/:userId", async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
 module.exports = router;

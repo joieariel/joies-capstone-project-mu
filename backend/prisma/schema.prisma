@@ -8,7 +8,6 @@
 
 generator client {
  provider = "prisma-client-js"
- output   = "../generated/prisma"
 }
 
 
@@ -40,7 +39,6 @@ model Review {
  id                  Int      @id @default(autoincrement())
  rating              Int
  comment             String
- image_url           String
  created_at           DateTime @default(now())
 
 
@@ -80,8 +78,6 @@ model CommunityCenter {
 
 
  reviews      Review[]
-
-
  hours CenterHours[]
 }
 
@@ -105,6 +101,6 @@ model Tag {
 
 model ReviewTag {
  id          Int      @id @default(autoincrement())
- review_id   Int
+ name        String
  tag_id      Int
 }
