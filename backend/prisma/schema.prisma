@@ -78,7 +78,8 @@ model CommunityCenter {
 
 
  reviews      Review[]
- hours CenterHours[]
+ hours        CenterHours[]
+ centerTags   CenterTag[] // relationship to junction table allows commmunity centet to access their tags
 }
 
 
@@ -97,10 +98,18 @@ model CenterHours {
 model Tag {
  id          Int      @id @default(autoincrement())
  name        String // tag label
+
+ centerTags  CenterTag[] // relatinoship to junction table
 }
 
-model ReviewTag {
+// new junction table for many-to-many relationship between CommunityCenter and Tag
+model CenterTag {
  id          Int      @id @default(autoincrement())
- name        String
+ center_id   Int
  tag_id      Int
+
+ center      CommunityCenter @relation(fields: [center_id], references: [id])
+ tag         Tag             @relation(fields: [tag_id], references: [id])
+
+ @@unique([center_id, tag_id]) // to prevent duplicate tag assignments
 }
