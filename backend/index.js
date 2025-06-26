@@ -7,6 +7,7 @@ const cors = require("cors");
 const usersRouter = require("./routes/users");
 const communityCentersRouter = require("./routes/communityCenters");
 const reviewsRouter = require("./routes/reviews");
+const tagsRouter = require("./routes/tags");
 
 
 
@@ -20,6 +21,7 @@ app.use(cors());
 app.use("/users", usersRouter);
 app.use("/communityCenters", communityCentersRouter);
 app.use("/reviews", reviewsRouter);
+app.use("/tags", tagsRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
