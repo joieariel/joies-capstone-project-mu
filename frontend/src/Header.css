@@ -1,25 +1,38 @@
 .header {
-  background-color: #CED7E4;
+  background-color: #ced7e4;
   color: black;
   padding: 1rem 0;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  border-bottom: 1px solid #486284;
 }
 
 .header-container {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
   padding: 0 2rem;
 }
 
-.header-logo .logo-text {
-  font-size: 1.5rem;
-  font-weight: bold;
+.header-logo {
+  display: flex;
+  align-items: center;
 }
 
-.header-nav .nav-list {
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #486284;
+}
+
+.header-nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-list {
   display: flex;
   list-style: none;
   margin: 0;
@@ -27,39 +40,76 @@
   gap: 2rem;
 }
 
-.header-nav a {
-  color: #486284;
+.nav-list li {
+  margin: 0;
+}
+
+.nav-list a {
   text-decoration: none;
+  color: #486284;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
-.home-link a {
-  color: black;
-}
-
-.header-nav a:hover {
-  text-decoration: underline;
+.nav-list a:hover {
+  color: #3a4f6b;
 }
 
 .header-auth {
   display: flex;
   gap: 1rem;
+  align-items: center;
 }
 
-
-
-.login-btn, .signup-btn {
+.login-btn,
+.signup-btn {
   padding: 0.5rem 1rem;
-  border: 1px solid white;
-  background: transparent;
-  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.login-btn:hover, .signup-btn:hover {
-  background: white;
-  color: #1f1f1f;
+.login-btn {
+  background-color: transparent;
+  color: #486284;
+  border: 1px solid #486284;
 }
 
-.header {
-    border-bottom: 1px solid #486284;
+.login-btn:hover {
+  background-color: #486284;
+  color: white;
+}
+
+.signup-btn {
+  background-color: #486284;
+  color: white;
+}
+
+.signup-btn:hover {
+  background-color: #3a4f6b;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  .header-nav {
+    order: 2;
+  }
+
+  .header-auth {
+    order: 1;
+  }
+
+  .nav-list {
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }

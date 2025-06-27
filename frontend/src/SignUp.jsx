@@ -1,8 +1,16 @@
 import React, { useState } from "react";
-import { supabase } from "./supabaseClient"; //import supabase client
+import { useAuth } from "./AuthContext";
+import { useNavigate } from "react-router-dom";
 import "./SignUp.css";
 
 const SignUp = () => {
+  // get auth functions and state from AuthContext instead of calling supabase directly
+  const { signUp, loading } = useAuth();
+
+  // hook to navigate to different routes after successful signup
+  // will redirect user to login page after they create an account
+  const navigate = useNavigate();
+
   // create state to store all form input vlues
   const [formData, setFormData] = useState({
     firstName: "",
@@ -12,10 +20,7 @@ const SignUp = () => {
     confirmPassword: "",
   });
 
-  //create state to track if currently loading (prevent double clicks)
-  const [loading, setLoading] = useState(false);
-
-  // state to store error messageas
+  // state to store error messageas ( use this for auth errors from our context)
   const [error, setError] = useState("");
 
   // state to store success message
@@ -41,56 +46,52 @@ const SignUp = () => {
     setError("");
     setSuccess("");
 
-    // show loading state
-    setLoading(true);
-
-    // validating if passwords match
+    // validating if passwords match - do this before calling auth function
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
-      setLoading(false);
       return; // exit function early
     }
 
+    // validate password length before calling auth function
     if (formData.password.length < 8) {
       setError("Password must be at least 8 characters long");
-      setLoading(false);
       return;
     }
 
-    try {
-      // call supabase to create new user acc
-      const { error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-          },
-        },
+    // call signUp function from authcontext
+    // Call our AuthContext signUp function instead of calling Supabase directly
+    // Pass user data (firstName, lastName) as additional metadata
+    const { error: authError } = await signUp(
+      formData.email,
+      formData.password,
+      {
+        // Additional user data that gets stored in Supabase user metadata
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+      }
+    );
+
+    // check if signup was successful
+    if (authError) {
+      setError(authError);
+    } else {
+      setSuccess(
+        "Account created successfully! Please check your email to verify your account."
+      );
+
+      // clear the form fields after successful signup
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
       });
 
-      if (error) {
-        setError(error.message); // if error show error message
-      } else {
-        setSuccess(
-          "Account created successfully!"
-        );
-
-        // clear form
-        setFormData({
-          firstName: "",
-          lastName: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
-        });
-      }
-    } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
-    } finally {
-      // always runs whether error or success
-      setLoading(false); // stop loading state
+      // redirect user to login page after successful signup
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000); // wait 2 seconds to show success message, then redirect
     }
   };
 
