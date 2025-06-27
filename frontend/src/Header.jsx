@@ -5,7 +5,7 @@ import "./Header.css";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, signOut, user } = useAuth();
+  const { isAuthenticated, signOut, user } = useAuth(); // added user to  access user data and get the user's first name
 
   // define the functions that will be called when the buttons are clicked
   const handleLoginClick = () => {
@@ -16,14 +16,38 @@ const Header = () => {
   const handleSignUpClick = () => {
     navigate("/signup");
   };
-
+  // to get back to the home page
   const handleLogoClick = () => {
-    navigate("/");
+    if (isAuthenticated) {
+      navigate("/homepage");
+    } else {
+      navigate("/");
+    }
   };
 
   const handleLogoutClick = async () => {
     await signOut();
     navigate("/");
+  };
+  // programmatically navigate to the specified route page
+  const handleHomeClick = () => {
+    navigate("/homepage");
+  };
+
+  const handleCommunityCentersClick = () => {
+    navigate("/community-centers");
+  };
+
+  const handleDetailedViewClick = () => {
+    navigate("/detailed-view");
+  };
+
+  const handleResourcesClick = () => {
+    navigate("/resources");
+  };
+
+  const handleDeviceDonationClick = () => {
+    navigate("/device-donation");
   };
 
   return (
@@ -45,19 +69,59 @@ const Header = () => {
             <nav className="header-nav">
               <ul className="nav-list">
                 <li className="home-link">
-                  <a href="#home">Home</a>
+                  <a
+                    href="#home" // tells browers to scroll
+                    onClick={(e) => {
+                      e.preventDefault(); // prevents the default behavior of the link (scrolling)
+                      handleHomeClick(); // and this does the react router navigation
+                    }}
+                  >
+                    Home
+                  </a>
                 </li>
                 <li>
-                  <a href="#community-centers">Community Centers</a>
+                  <a
+                    href="#community-centers"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleCommunityCentersClick();
+                    }}
+                  >
+                    Community Centers
+                  </a>
                 </li>
                 <li>
-                  <a href="#detailed-view">Detailed View</a>
+                  <a
+                    href="#detailed-view"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDetailedViewClick();
+                    }}
+                  >
+                    Detailed View
+                  </a>
                 </li>
                 <li>
-                  <a href="#resources">Resources</a>
+                  <a
+                    href="#resources"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleResourcesClick();
+                    }}
+                  >
+                    Resources
+                  </a>
                 </li>
                 <li>
-                  <a href="#donation">Device Donation</a>
+                  <a
+                    href="#device-donation"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDeviceDonationClick();
+                    }}
+                  >
+                    Device Donation
+                  </a>
                 </li>
               </ul>
             </nav>
