@@ -1,5 +1,5 @@
 import "./App.css";
-import Banner from "./Banner";
+import LandingPage from "./LandingPage";
 import Header from "./Header";
 import SignUp from "./SignUp";
 import Login from "./Login";
@@ -13,7 +13,7 @@ const App = () => {
       <div className="app">
         <Header />
         <Routes>
-          <Route path="/" element={<Banner />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
         </Routes>
