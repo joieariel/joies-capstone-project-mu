@@ -1,0 +1,58 @@
+.dashboard-container {
+  min-height: calc(100vh - 80px); /* full height minus header */
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.dashboard-content {
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+.dashboard-welcome {
+  font-size: 3rem;
+  color: #486284;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dashboard-subtitle {
+  font-size: 1.3rem;
+  color: #6c757d;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+    min-height: calc(100vh - 70px); /* Adjust for smaller header on mobile */
+  }
+
+  .dashboard-welcome {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .dashboard-subtitle {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-welcome {
+    font-size: 1.8rem;
+  }
+
+  .dashboard-subtitle {
+    font-size: 1rem;
+  }
+}

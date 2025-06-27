@@ -1,0 +1,41 @@
+.resources-container {
+  min-height: calc(100vh - 80px); /* Full height minus header */
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.resources-content {
+  text-align: center;
+  max-width: 800px;
+  width: 100%;
+}
+
+.resources-title {
+  font-size: 2.5rem;
+  color: #486284;
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .resources-container {
+    padding: 1rem;
+    min-height: calc(100vh - 70px); /* Adjust for smaller header on mobile */
+  }
+
+  .resources-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .resources-title {
+    font-size: 1.6rem;
+  }
+}
