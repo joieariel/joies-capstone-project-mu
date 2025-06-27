@@ -1,18 +1,23 @@
 import React, { useState } from "react";
-import { supabase } from "./supabaseClient"; //import supabase client
+import { useAuth } from "./AuthContext";
+import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 const Login = () => {
+  // get auth functions and state from AuthContext instead of calling supabase directly
+  const { signIn, loading } = useAuth();
+
+  // hook to navigate to different routes after successful login
+  // will redirect user to dashboard/home page after they log in
+  const navigate = useNavigate();
+
   // create state to store all form input values
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  //create state to track if currently loading (prevent double clicks)
-  const [loading, setLoading] = useState(false);
-
-  // state to store error messages
+  // state to store error messages ( use this for auth errors from our context)
   const [error, setError] = useState("");
 
   // state to store success message
@@ -38,39 +43,34 @@ const Login = () => {
     setError("");
     setSuccess("");
 
-    // show loading state
-    setLoading(true);
-
-    // basic validation
+    // basic validation - check if user filled in all fields
     if (!formData.email || !formData.password) {
       setError("Please fill in all fields");
-      setLoading(false);
       return;
     }
 
-    try {
-      // call supabase to sign in user
-      const { error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+    // call authcontext's signin function instead of calling supabase directly
+    const { error: authError } = await signIn(
+      formData.email,
+      formData.password
+    );
+
+    // check success of login
+    if (authError) {
+      setError(authError);
+    } else {
+      setSuccess("Login successful! Welcome back!");
+
+      // clear form
+      setFormData({
+        email: "",
+        password: "",
       });
 
-      if (error) {
-        setError(error.message); // if error show error message
-      } else {
-        setSuccess("Login successful! Welcome back!");
-
-        // clear form
-        setFormData({
-          email: "",
-          password: "",
-        });
-      }
-    } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
-    } finally {
-      // always runs whether error or success
-      setLoading(false); // stop loading state
+      // redirect user to home page after successful login
+      setTimeout(() => {
+        navigate("/");
+      }, 1500); // wait 1.5 seconds to show success message, then redirect
     }
   };
 
