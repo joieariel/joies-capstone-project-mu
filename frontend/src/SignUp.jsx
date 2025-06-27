@@ -12,12 +12,19 @@ const SignUp = () => {
   const navigate = useNavigate();
 
   // create state to store all form input vlues
+  // added more values to the form to correspond to backend schema
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    status: "",
+    birthdate: "",
+    zipCode: "",
+    city: "",
+    state: "",
   });
 
   // state to store error messageas ( use this for auth errors from our context)
@@ -46,16 +53,25 @@ const SignUp = () => {
     setError("");
     setSuccess("");
 
+    // basic validation - check if user filled in all required fields
+    if (!formData.firstName || !formData.lastName || !formData.username ||
+        !formData.email || !formData.password || !formData.confirmPassword ||
+        !formData.status || !formData.birthdate || !formData.zipCode ||
+        !formData.city || !formData.state) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    // password length validation
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      return;
+    }
+
     // validating if passwords match - do this before calling auth function
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return; // exit function early
-    }
-
-    // validate password length before calling auth function
-    if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters long");
-      return;
     }
 
     // call signUp function from authcontext
@@ -83,9 +99,15 @@ const SignUp = () => {
       setFormData({
         firstName: "",
         lastName: "",
+        username: "",
         email: "",
         password: "",
         confirmPassword: "",
+        status: "",
+        birthdate: "",
+        zipCode: "",
+        city: "",
+        state: "",
       });
 
       // redirect user to login page after successful signup
@@ -136,6 +158,21 @@ const SignUp = () => {
           </div>
 
           <div className="form-group">
+            <label htmlFor="username" className="form-label">
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleInputChange}
+              className="form-input"
+              required
+            />
+          </div>
+
+          <div className="form-group">
             <label htmlFor="email" className="form-label">
               Email Address
             </label>
@@ -174,6 +211,85 @@ const SignUp = () => {
               id="confirmPassword"
               name="confirmPassword"
               value={formData.confirmPassword}
+              onChange={handleInputChange}
+              className="form-input"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="status" className="form-label">
+              Occupation Status
+            </label>
+            <select
+              id="status"
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className="form-input"
+              required
+            >
+              <option value="">Select your status</option>
+              <option value="Job Seeker">Job Seeker</option>
+              <option value="Student">Student</option>
+              <option value="Community Supporter">Community Supporter</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="birthdate" className="form-label">
+              Date of Birth
+            </label>
+            <input
+              type="date"
+              id="birthdate"
+              name="birthdate"
+              value={formData.birthdate}
+              onChange={handleInputChange}
+              className="form-input"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="zipCode" className="form-label">
+              Zip Code
+            </label>
+            <input
+              type="text"
+              id="zipCode"
+              name="zipCode"
+              value={formData.zipCode}
+              onChange={handleInputChange}
+              className="form-input"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="city" className="form-label">
+              City
+            </label>
+            <input
+              type="text"
+              id="city"
+              name="city"
+              value={formData.city}
+              onChange={handleInputChange}
+              className="form-input"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="state" className="form-label">
+              State
+            </label>
+            <input
+              type="text"
+              id="state"
+              name="state"
+              value={formData.state}
               onChange={handleInputChange}
               className="form-input"
               required
