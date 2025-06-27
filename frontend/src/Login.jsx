@@ -65,7 +65,6 @@ const Login = () => {
           email: "",
           password: "",
         });
-
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
