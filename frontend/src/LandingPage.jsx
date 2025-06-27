@@ -34,6 +34,21 @@ const LandingPage = () => {
               <h3 className="feature-title">Community Members</h3>
               <p className="feature-description">Give or volunteer</p>
             </div>
+            <div className="feature-card">
+              <div className="feature-icon">⭐</div>
+              <h3 className="feature-title">Reviews & Ratings</h3>
+              <p className="feature-description">
+                Read and share honest reviews of WiFi locations
+              </p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon">🗺️</div>
+              <h3 className="feature-title">Interactive Map</h3>
+              <p className="feature-description">
+                View WiFi centers on an interactive map with real-time
+                availability
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -72,9 +87,30 @@ const LandingPage = () => {
             </div>
             <div className="testimonial-card">
               <p className="testimonial-text">
-              “WiFind lets me read and leave real, honest reviews. Other sites are full of fake ratings — now I’ll never get stuck at a center with ‘great Wi-Fi’ that barely works!</p>
+                "WiFind lets me read and leave real, honest reviews. Other sites
+                are full of fake ratings — now I'll never get stuck at a center
+                with 'great Wi-Fi' that barely works!"
+              </p>
               <div className="testimonial-author">
                 <strong>- Lily Williams, Job Seeker</strong>
+              </div>
+            </div>
+            <div className="testimonial-card">
+              <p className="testimonial-text">
+                "The interactive map feature is amazing! I can see which WiFi
+                centers are busy before I even leave home."
+              </p>
+              <div className="testimonial-author">
+                <strong>- David Chen, Remote Worker</strong>
+              </div>
+            </div>
+            <div className="testimonial-card">
+              <p className="testimonial-text">
+                "As a parent, I love that I can find safe, family-friendly WiFi
+                spots where my kids can do homework while I work nearby."
+              </p>
+              <div className="testimonial-author">
+                <strong>- Maria Rodriguez, Parent & Freelancer</strong>
               </div>
             </div>
           </div>
