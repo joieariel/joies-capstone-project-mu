@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
+import { userAPI } from "./api";
 import "./SignUp.css";
 
 const SignUp = () => {
@@ -74,23 +75,43 @@ const SignUp = () => {
       return; // exit function early
     }
 
-    // call signUp function from authcontext
-    // Call our AuthContext signUp function instead of calling Supabase directly
-    // Pass user data (firstName, lastName) as additional metadata
-    const { error: authError } = await signUp(
-      formData.email,
-      formData.password,
-      {
-        // Additional user data that gets stored in Supabase user metadata
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-      }
-    );
+    try {
+      // 1. create supabase auth user
+      const { data: authData, error: authError } = await signUp(
+        formData.email,
+        formData.password,
+        {
+          // additional user data that gets stored in supabase user metadata
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+        }
+      );
 
-    // check if signup was successful
-    if (authError) {
-      setError(authError);
-    } else {
+      // check if supabase signup was successful
+      if (authError) {
+        setError(authError);
+        return;
+      }
+
+      // 2: create database user record with supabase user ID
+      if (authData?.user) {
+        const databaseUserData = {
+          supabase_user_id: authData.user.id, // link to Supabase auth user
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          username: formData.username,
+          email: formData.email,
+          status: formData.status,
+          birthdate: formData.birthdate,
+          zip_code: formData.zipCode,
+          city: formData.city,
+          state: formData.state,
+        };
+
+        // Create user in database
+        await userAPI.createUser(databaseUserData);
+      }
+
       setSuccess(
         "Account created successfully! Please check your email to verify your account."
       );
@@ -114,6 +135,10 @@ const SignUp = () => {
       setTimeout(() => {
         navigate("/login");
       }, 2000); // wait 2 seconds to show success message, then redirect
+
+    } catch (error) {
+      console.error('Signup error:', error);
+      setError(error.message || 'Failed to create account. Please try again.');
     }
   };
 

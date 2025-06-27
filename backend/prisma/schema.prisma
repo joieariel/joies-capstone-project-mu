@@ -19,6 +19,7 @@ datasource db {
 
 model User {
  id         Int      @id @default(autoincrement())
+ supabase_user_id String?  @unique // links to supabase auth user ID (nullable for migration)
  first_name String
  last_name  String
  username   String   @unique
