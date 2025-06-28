@@ -4,12 +4,6 @@ const { authenticateUser } = require("../middleware/auth");
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// // (GET) fetch all users
-// router.get("/", async (req, res) => {
-//   const users = await prisma.user.findMany();
-//   res.json(users);
-// });
-
 // (GET) fetch a single user's info - protected: users can only view their own profile
 router.get("/:userId", authenticateUser, async (req, res) => {
   try {
