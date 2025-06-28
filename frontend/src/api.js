@@ -1,7 +1,7 @@
 // this file is the bridge between react frontend and express backend
 import { supabase } from './supabaseClient';
 
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 //  function to get the current user's session token
 const getAuthToken = async () => {
