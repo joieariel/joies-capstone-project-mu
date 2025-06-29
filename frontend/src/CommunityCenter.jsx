@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { communityAPI } from "./api"; // to get acces to communtiy center functions
 import "./CommunityCenter.css";
 
@@ -7,6 +8,12 @@ const CommunityCenter = () => {
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  //  when user clicks reviews takes them to reviews page
+  const handleReviewsClick = () => {
+    navigate('/detailed-view');
+  };
 
   useEffect(() => {
     const fetchCenters = async () => {
@@ -75,6 +82,17 @@ const CommunityCenter = () => {
                 <p className="center-zip">
                   <strong>Zip Code:</strong> {center.zip_code}
                 </p>
+                <div className="center-buttons">
+                  <button
+                    className="reviews-button"
+                    onClick={handleReviewsClick}
+                  >
+                    Reviews
+                  </button>
+                  <button className="map-button">
+                    Map
+                  </button>
+                </div>
               </div>
             </div>
           ))}
