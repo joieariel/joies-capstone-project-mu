@@ -12,7 +12,7 @@ const CommunityCenter = () => {
 
   //  when user clicks reviews takes them to reviews page
   const handleReviewsClick = () => {
-    navigate('/detailed-view');
+    navigate('/reviews');
   };
 
   useEffect(() => {

@@ -1,41 +1,39 @@
-.detailed-view-container {
-  min-height: calc(100vh - 80px); /* Full height minus header */
+.reviews-container {
+  min-height: calc(100vh - 80px); /* full height minus header */
   background-color: #f8f9fa;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   padding: 2rem;
   font-family: "Plus Jakarta Sans", sans-serif;
 }
 
-.detailed-view-content {
+.reviews-content {
   text-align: center;
-  max-width: 800px;
+  max-width: 1200px;
   width: 100%;
+  margin: 0 auto;
 }
 
-.detailed-view-title {
+.reviews-title {
   font-size: 2.5rem;
   color: #486284;
-  margin: 0;
+  margin: 0 0 2rem 0;
   font-weight: 700;
   line-height: 1.2;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .detailed-view-container {
+  .reviews-container {
     padding: 1rem;
     min-height: calc(100vh - 70px); /* Adjust for smaller header on mobile */
   }
 
-  .detailed-view-title {
+  .reviews-title {
     font-size: 2rem;
   }
 }
 
 @media (max-width: 480px) {
-  .detailed-view-title {
+  .reviews-title {
     font-size: 1.6rem;
   }
 }
