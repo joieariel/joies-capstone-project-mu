@@ -4,6 +4,28 @@ const { authenticateUser } = require("../middleware/auth");
 const router = express.Router();
 const prisma = new PrismaClient();
 
+
+// (GET) fetch current user's info by their supabase ID - protected
+// instead of requiring prisma db id, use /me route ro get current user's data
+router.get("/me", authenticateUser, async (req, res) => {
+  try {
+    // find the user record using supabase user ID from the authenticated request
+    // instead of autho incremeted prisma id, user supabase_user_id field from JWT token (req.user.id) to bridge gap between supabase auth and prisma db
+    const user = await prisma.user.findUnique({
+      where: { supabase_user_id: req.user.id },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(user); //. return complete user object w all prof data
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
 // (GET) fetch a single user's info - protected: users can only view their own profile
 router.get("/:userId", authenticateUser, async (req, res) => {
   try {
