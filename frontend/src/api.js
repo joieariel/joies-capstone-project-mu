@@ -75,8 +75,10 @@ export const userAPI = {
 // api functions for other resources
 export const communityAPI = {
   getAllCenters: () => apiRequest('/communityCenters'),
+  getCenterById: (centerId) => apiRequest(`/communityCenters/${centerId}`),
+  getCentersByZipCode: (zipCode) => apiRequest(`/communityCenters?zip_code=${zipCode}`),
 
-  // Add more community center endpoints later
+
 };
 
 export const reviewAPI = {
