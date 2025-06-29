@@ -10,9 +10,12 @@ const CommunityCenter = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  //  when user clicks reviews takes them to reviews page
-  const handleReviewsClick = () => {
-    navigate('/reviews');
+  // when user clicks reviews button, show the reviews for that specific center
+  // modified to accept centerId paramer so that centers reviews are displayed
+  const handleReviewsClick = (centerId) => {
+    // navigate to /reviews/[centerId] which creates a url like /reviews/5 for center ID 5
+    // centerId becomes a url param that the Reviews component can read
+    navigate(`/reviews/${centerId}`);
   };
 
   useEffect(() => {
@@ -85,7 +88,10 @@ const CommunityCenter = () => {
                 <div className="center-buttons">
                   <button
                     className="reviews-button"
-                    onClick={handleReviewsClick}
+                    // Pass the center.id to the click handler - this is crucial because each card
+                    // represents a different community center, and we need to know which one's reviews to show
+                    // We use an arrow function to pass the center.id as an argument
+                    onClick={() => handleReviewsClick(center.id)}
                   >
                     Reviews
                   </button>

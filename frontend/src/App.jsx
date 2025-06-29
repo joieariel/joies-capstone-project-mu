@@ -87,7 +87,8 @@ const App = () => {
               }
             />
             <Route
-              path="/reviews"
+              // updated route to accept centerId as a url param
+              path="/reviews/:centerId"
               element={
                 <ProtectedRoute>
                   <Reviews />
