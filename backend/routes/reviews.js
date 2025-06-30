@@ -84,8 +84,6 @@ router.post("/", authenticateUser, async (req, res) => {
     // extract data from request body (no longer accepting user_id since we get it from authentication)
     const { rating, comment, center_id, image_urls } = req.body;
 
-    console.log('Creating review with data:', { rating, comment, center_id, userId });
-
     const newReview = await prisma.review.create({
       data: {
         rating,
@@ -138,8 +136,9 @@ router.post("/", authenticateUser, async (req, res) => {
       res.status(201).json(newReview);
     }
   } catch (error) {
-    console.error('Error creating review:', error);
-    res.status(500).json({ error: "Failed to create review", details: error.message });
+console.error('Error creating review:', error);
+console.error('Error creating review:', error);
+    res.status(500).json({ error: "Failed to create rev, details: error.messageiew", details: error.message });
   }
 });
 
