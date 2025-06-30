@@ -62,7 +62,7 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
     return (
       <span
         key={starNumber}
-        className={`star ${isFilled ? 'star-filled' : 'star-empty'}`}
+        className={`star ${isFilled ? 'filled' : 'empty'}`}
         onClick={() => handleStarClick(starNumber)}
         onMouseEnter={() => handleStarHover(starNumber)}
         onMouseLeave={handleStarLeave}

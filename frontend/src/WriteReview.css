@@ -38,20 +38,13 @@
 .star {
   font-size: 2rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   user-select: none;
 }
 
-.star-empty {
-  color: #ddd;
-}
-
-.star-filled {
-  color: #ffd700;
-}
-
 .star:hover {
-  transform: scale(1.1);
+  transform: scale(1.2);
+  color: #ff4500 !important;
 }
 
 .rating-text {

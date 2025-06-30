@@ -136,9 +136,7 @@ router.post("/", authenticateUser, async (req, res) => {
       res.status(201).json(newReview);
     }
   } catch (error) {
-console.error('Error creating review:', error);
-console.error('Error creating review:', error);
-    res.status(500).json({ error: "Failed to create rev, details: error.messageiew", details: error.message });
+    res.status(500).json({ error: "Failed to create review" });
   }
 });
 

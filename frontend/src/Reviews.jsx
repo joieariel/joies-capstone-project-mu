@@ -138,9 +138,15 @@ const Reviews = () => {
               centerId={centerId}
               // on cancel or success, hide the form
               onCancel={() => setShowWriteReviewForm(false)}
-              onSuccess={() => {
+              onSuccess={async () => {
                 setShowWriteReviewForm(false);
-                // TODO = refresh reviews list after successful submission
+                // refresh reviews list after successful submission
+                try {
+                  const reviewsData = await reviewAPI.getReviewsByCenter(centerId);
+                  setReviews(reviewsData);
+                } catch (err) {
+                  console.error("Error refreshing reviews:", err);
+                }
               }}
             />
           </div>
