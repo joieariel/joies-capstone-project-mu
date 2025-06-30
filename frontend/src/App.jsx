@@ -5,7 +5,7 @@ import SignUp from "./SignUp";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
 import CommunityCenter from "./CommunityCenter";
-import DetailedView from "./DetailedView";
+import Reviews from "./Reviews";
 import Resources from "./Resources";
 import DeviceDonation from "./DeviceDonation";
 import {
@@ -87,10 +87,11 @@ const App = () => {
               }
             />
             <Route
-              path="/detailed-view"
+              // updated route to accept centerId as a url param
+              path="/reviews/:centerId"
               element={
                 <ProtectedRoute>
-                  <DetailedView />
+                  <Reviews />
                 </ProtectedRoute>
               }
             />
