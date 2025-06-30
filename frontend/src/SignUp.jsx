@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import { userAPI } from "./api";
+import { validateNewUser } from "./utils/validation"; // add new validation function from utils.js
 import "./SignUp.css";
 
 const SignUp = () => {
@@ -55,13 +56,8 @@ const SignUp = () => {
     setSuccess("");
 
     // basic validation - check if user filled in all required fields
-    if (!formData.firstName || !formData.lastName || !formData.username ||
-        !formData.email || !formData.password || !formData.confirmPassword ||
-        !formData.status || !formData.birthdate || !formData.zipCode ||
-        !formData.city || !formData.state) {
-      setError("Please fill in all fields");
-      return;
-    }
+    // now call validation function from utils.js
+    const validationError = validateNewUser(formData);
 
     // password length validation
     if (formData.password.length < 8) {
@@ -135,10 +131,9 @@ const SignUp = () => {
       setTimeout(() => {
         navigate("/login");
       }, 2000); // wait 2 seconds to show success message, then redirect
-
     } catch (error) {
-      console.error('Signup error:', error);
-      setError(error.message || 'Failed to create account. Please try again.');
+      console.error("Signup error:", error);
+      setError(error.message || "Failed to create account. Please try again.");
     }
   };
 
