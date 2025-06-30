@@ -28,7 +28,7 @@ const Reviews = () => {
         // Fetch both center information and reviews in parallel for better performance
         const [centerData, reviewsData] = await Promise.all([
           communityAPI.getCenterById(centerId),
-          reviewAPI.getReviewsByCenter(centerId)
+          reviewAPI.getReviewsByCenter(centerId),
         ]);
 
         // store the fetched data in state, will trigger a re-render
@@ -36,7 +36,9 @@ const Reviews = () => {
         setReviews(reviewsData);
       } catch (err) {
         console.error("Error fetching data:", err);
-        setError("Failed to load center information and reviews. Please try again later.");
+        setError(
+          "Failed to load center information and reviews. Please try again later."
+        );
       } finally {
         setLoading(false);
       }
@@ -76,7 +78,10 @@ const Reviews = () => {
   const calculateAverageRating = (reviewsArray) => {
     if (!reviewsArray || reviewsArray.length === 0) return 0;
 
-    const totalRating = reviewsArray.reduce((sum, review) => sum + review.rating, 0);
+    const totalRating = reviewsArray.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
     return (totalRating / reviewsArray.length).toFixed(1);
   };
 
@@ -125,13 +130,16 @@ const Reviews = () => {
                 {reviews.length > 0 ? (
                   <>
                     <div className="average-rating">
-                      {renderStars(Math.round(parseFloat(calculateAverageRating(reviews))))}
+                      {renderStars(
+                        Math.round(parseFloat(calculateAverageRating(reviews)))
+                      )}
                       <span className="average-rating-number">
                         {calculateAverageRating(reviews)} out of 5
                       </span>
                     </div>
                     <div className="total-reviews">
-                      Based on {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+                      Based on {reviews.length}{" "}
+                      {reviews.length === 1 ? "review" : "reviews"}
                     </div>
                   </>
                 ) : (

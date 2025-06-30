@@ -88,6 +88,12 @@ const Dashboard = () => {
     // basic validation to make sure all fields are filled in
     // now call new validation function from utils
     const validationError = validateEditForm(editFormData);
+    // check if validation function returned an error message
+    if (validationError) {
+      // set the error message in state
+      setUpdateError(validationError);
+      return; // stop form submission if theres's an error
+    }
 
     try {
       setUpdateLoading(true);

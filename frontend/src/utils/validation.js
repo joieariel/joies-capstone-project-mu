@@ -14,8 +14,9 @@ export const validateNewUser = (formData) => {
     !formData.city ||
     !formData.state
   ) {
-    setError("Please fill in all fields");
-    return;
+    // remove setError bc it doesn't exist in this file
+    // utility functions should return values instead of setting state
+    return "Please fill in all fields";
   }
 
   return null; // no validation errors
@@ -34,8 +35,7 @@ export const validateEditForm = (editFormData) => {
     !editFormData.state ||
     !editFormData.zip_code
   ) {
-    setUpdateError("Please fill in all fields");
-    return;
+    return "Please fill in all fields";
   }
 
   return null;

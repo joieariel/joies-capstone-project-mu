@@ -58,6 +58,11 @@ const SignUp = () => {
     // basic validation - check if user filled in all required fields
     // now call validation function from utils.js
     const validationError = validateNewUser(formData);
+    // check if there are errors
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     // password length validation
     if (formData.password.length < 8) {
