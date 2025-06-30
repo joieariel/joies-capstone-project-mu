@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 const getUserIdFromSupabase = async (supabaseUserId) => {
   const user = await prisma.user.findUnique({
     // find user record by supabase id field and return id
-    where: { supabase_id: supabaseUserId },
+    where: { supabase_user_id: supabaseUserId },
     select: { id: true }
   });
   return user?.id;
@@ -84,12 +84,14 @@ router.post("/", authenticateUser, async (req, res) => {
     // extract data from request body (no longer accepting user_id since we get it from authentication)
     const { rating, comment, center_id, image_urls } = req.body;
 
+    console.log('Creating review with data:', { rating, comment, center_id, userId });
+
     const newReview = await prisma.review.create({
       data: {
         rating,
         comment,
         user_id: userId, // use the userId we got from the authenticated user
-        center_id,
+        center_id: parseInt(center_id), // convert string to integer
       },
       include: {
         images: true,
@@ -136,7 +138,8 @@ router.post("/", authenticateUser, async (req, res) => {
       res.status(201).json(newReview);
     }
   } catch (error) {
-    res.status(500).json({ error: "Failed to create review" });
+    console.error('Error creating review:', error);
+    res.status(500).json({ error: "Failed to create review", details: error.message });
   }
 });
 

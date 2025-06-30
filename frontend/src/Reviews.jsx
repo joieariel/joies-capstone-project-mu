@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 // import api functions to fetch reviews and community center info from backend
 import { reviewAPI, communityAPI } from "./api";
 import { renderStars, formatDate, calculateAverageRating } from "./utils/util.jsx";
+import WriteReview from "./WriteReview";
 import "./Reviews.css";
 
 const Reviews = () => {
@@ -18,6 +19,8 @@ const Reviews = () => {
   const [center, setCenter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  // state to control showing/hiding the write review form
+  const [showWriteReviewForm, setShowWriteReviewForm] = useState(false);
 
   // useEffect to fetch both center info and reviews when component mounts or centerId changes
   useEffect(() => {
@@ -118,7 +121,30 @@ const Reviews = () => {
           </div>
         )}
 
-        <h2 className="reviews-section-title"> Reviews</h2>
+        <div className="reviews-section-header">
+          <h2 className="reviews-section-title">Reviews</h2>
+          <button
+            className="write-review-button"
+            onClick={() => setShowWriteReviewForm(!showWriteReviewForm)}
+          >
+            + Write a Review
+          </button>
+        </div>
+
+        {/* write review form */}
+        {showWriteReviewForm && (
+          <div className="write-review-form-container">
+            <WriteReview
+              centerId={centerId}
+              // on cancel or success, hide the form
+              onCancel={() => setShowWriteReviewForm(false)}
+              onSuccess={() => {
+                setShowWriteReviewForm(false);
+                // TODO = refresh reviews list after successful submission
+              }}
+            />
+          </div>
+        )}
 
         {/* display reviews or message if no reviews */}
         {reviews.length === 0 ? (
