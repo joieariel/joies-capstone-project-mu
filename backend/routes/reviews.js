@@ -1,7 +1,18 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
+const { authenticateUser } = require("../middleware/auth"); // imports middleware function that verifies jwt tokens to verify user identity before allowing operations
 const router = express.Router();
 const prisma = new PrismaClient();
+
+// helper function to get user id from supabase user
+const getUserIdFromSupabase = async (supabaseUserId) => {
+  const user = await prisma.user.findUnique({
+    // find user record by supabase id field and return id
+    where: { supabase_id: supabaseUserId },
+    select: { id: true }
+  });
+  return user?.id;
+};
 
 // (GET) fetch all reviews (for testing)
 router.get("/", async (req, res) => {
@@ -60,16 +71,24 @@ router.get("/center/:center_id", async (req, res) => {
 });
 
 // (POST) create a new review for a specific community center
-router.post("/", async (req, res) => {
+// protected - requires authentication
+router.post("/", authenticateUser, async (req, res) => {
   try {
-    // extract data from request body
-    const { rating, comment, user_id, center_id, image_urls } = req.body;
+    // convert supabase id to database integer id from authenticated user instead of request body
+    //  prevents users from creating reviews as other users
+    const userId = await getUserIdFromSupabase(req.user.id);
+    if (!userId) {
+      return res.status(400).json({ error: "User not found in database" });
+    }
+
+    // extract data from request body (no longer accepting user_id since we get it from authentication)
+    const { rating, comment, center_id, image_urls } = req.body;
 
     const newReview = await prisma.review.create({
       data: {
         rating,
         comment,
-        user_id,
+        user_id: userId, // use the userId we got from the authenticated user
         center_id,
       },
       include: {
@@ -122,10 +141,34 @@ router.post("/", async (req, res) => {
 });
 
 // (PUT) edit existing review
-router.put("/:id", async (req, res) => {
+//  protected - requires authentication and authorization (valid jwt token)
+router.put("/:id", authenticateUser, async (req, res) => {
   try {
     const { id } = req.params;
     const { rating, comment, image_urls } = req.body;
+
+    // get db user ID from authenticated user
+    const userId = await getUserIdFromSupabase(req.user.id);
+    if (!userId) {
+      return res.status(400).json({ error: "User not found in database" });
+    }
+
+    // check if the review exists and belongs to the authenticated user
+    const existingReview = await prisma.review.findUnique({
+      where: { id: parseInt(id) },
+      select: { user_id: true }
+    });
+
+    if (!existingReview) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    // only the review author can update their review
+    if (existingReview.user_id !== userId) {
+      return res.status(403).json({
+        error: "Access denied. You can only edit your own reviews."
+      });
+    }
 
     // Update the review data
     const updatedReview = await prisma.review.update({
@@ -178,9 +221,31 @@ router.put("/:id", async (req, res) => {
 });
 
 // (DELETE) delete existing review
-router.delete("/:id", async (req, res) => {
+//protected - requires authentication and authorization
+router.delete("/:id", authenticateUser, async (req, res) => { // added authenticateUser middleware
   try {
     const { id } = req.params;
+
+    const userId = await getUserIdFromSupabase(req.user.id);
+    if (!userId) {
+      return res.status(400).json({ error: "User not found in database" });
+    }
+
+    const existingReview = await prisma.review.findUnique({
+      where: { id: parseInt(id) },
+      select: { user_id: true }
+    });
+
+    if (!existingReview) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    // only the review author can delete their review
+    if (existingReview.user_id !== userId) {
+      return res.status(403).json({
+        error: "Access denied. You can only delete your own reviews."
+      });
+    }
 
     // first delete all associated images
     await prisma.reviewImage.deleteMany({
@@ -205,7 +270,8 @@ router.delete("/:id", async (req, res) => {
 // so I added new endpoints to update the images separately
 
 // (POST) add new images to an existing review
-router.post("/:id/images", async (req, res) => {
+// protected
+router.post("/:id/images", authenticateUser, async (req, res) => {
   try {
     const { id } = req.params;
     const { image_urls } = req.body;
@@ -214,13 +280,27 @@ router.post("/:id/images", async (req, res) => {
       return res.status(400).json({ error: "image_urls array is required and cannot be empty" });
     }
 
-    // check if review exists
+
+    const userId = await getUserIdFromSupabase(req.user.id);
+    if (!userId) {
+      return res.status(400).json({ error: "User not found in database" });
+    }
+
+
     const review = await prisma.review.findUnique({
       where: { id: parseInt(id) },
+      select: { user_id: true }
     });
 
     if (!review) {
       return res.status(404).json({ error: "Review not found" });
+    }
+
+    // only the review author can add images to their review
+    if (review.user_id !== userId) {
+      return res.status(403).json({
+        error: "Access denied. You can only add images to your own reviews."
+      });
     }
 
     // create new images
@@ -255,9 +335,31 @@ router.post("/:id/images", async (req, res) => {
 });
 
 // (DELETE) delete a specific image from a review
-router.delete("/:id/images/:image_id", async (req, res) => {
+// protected - requires authentication and authorization
+router.delete("/:id/images/:image_id", authenticateUser, async (req, res) => {
   try {
     const { id, image_id } = req.params;
+
+    const userId = await getUserIdFromSupabase(req.user.id);
+    if (!userId) {
+      return res.status(400).json({ error: "User not found in database" });
+    }
+
+    const review = await prisma.review.findUnique({
+      where: { id: parseInt(id) },
+      select: { user_id: true }
+    });
+
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    // only the review author can delete images from their review
+    if (review.user_id !== userId) {
+      return res.status(403).json({
+        error: "Access denied. You can only delete images from your own reviews."
+      });
+    }
 
     // check if the image exists and belongs to the specified review
     const image = await prisma.reviewImage.findFirst({

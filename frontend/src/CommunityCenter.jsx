@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { communityAPI } from "./api"; // to get acces to communtiy center functions
 import "./CommunityCenter.css";
 
@@ -7,6 +8,15 @@ const CommunityCenter = () => {
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  // when user clicks reviews button, show the reviews for that specific center
+  // modified to accept centerId paramer so that centers reviews are displayed
+  const handleReviewsClick = (centerId) => {
+    // navigate to /reviews/[centerId] which creates a url like /reviews/5 for center ID 5
+    // centerId becomes a url param that the Reviews component can read
+    navigate(`/reviews/${centerId}`);
+  };
 
   useEffect(() => {
     const fetchCenters = async () => {
@@ -75,6 +85,20 @@ const CommunityCenter = () => {
                 <p className="center-zip">
                   <strong>Zip Code:</strong> {center.zip_code}
                 </p>
+                <div className="center-buttons">
+                  <button
+                    className="reviews-button"
+                    // Pass the center.id to the click handler - this is crucial because each card
+                    // represents a different community center, and we need to know which one's reviews to show
+                    // We use an arrow function to pass the center.id as an argument
+                    onClick={() => handleReviewsClick(center.id)}
+                  >
+                    Reviews
+                  </button>
+                  <button className="map-button">
+                    Map
+                  </button>
+                </div>
               </div>
             </div>
           ))}

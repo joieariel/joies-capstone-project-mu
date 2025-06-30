@@ -38,9 +38,6 @@ const Header = () => {
     navigate("/community-centers");
   };
 
-  const handleDetailedViewClick = () => {
-    navigate("/detailed-view");
-  };
 
   const handleResourcesClick = () => {
     navigate("/resources");
@@ -88,17 +85,6 @@ const Header = () => {
                     }}
                   >
                     Community Centers
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#detailed-view"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleDetailedViewClick();
-                    }}
-                  >
-                    Detailed View
                   </a>
                 </li>
                 <li>
