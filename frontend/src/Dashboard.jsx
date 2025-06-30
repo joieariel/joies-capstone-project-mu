@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 import { userAPI } from "./api"; // to make calls to backend
+import { validateEditForm } from "./utils/validation"; // import new validate function from utils
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -30,8 +31,8 @@ const Dashboard = () => {
         const data = await userAPI.getCurrentUser();
         setUserData(data); //store fetched data in state so it can be displayed
       } catch (err) {
-        console.error('Error fetching user data:', err);
-        setError('Failed to load user data');
+        console.error("Error fetching user data:", err);
+        setError("Failed to load user data");
       } finally {
         setLoading(false);
       }
@@ -54,7 +55,7 @@ const Dashboard = () => {
       username: userData.username,
       email: userData.email,
       status: userData.status,
-      birthdate: userData.birthdate.split('T')[0], // format date for input field
+      birthdate: userData.birthdate.split("T")[0], // format date for input field
       city: userData.city,
       state: userData.state,
       zip_code: userData.zip_code,
@@ -85,12 +86,8 @@ const Dashboard = () => {
     setUpdateError("");
 
     // basic validation to make sure all fields are filled in
-    if (!editFormData.first_name || !editFormData.last_name || !editFormData.username ||
-        !editFormData.email || !editFormData.status || !editFormData.birthdate ||
-        !editFormData.city || !editFormData.state || !editFormData.zip_code) {
-      setUpdateError("Please fill in all fields");
-      return;
-    }
+    // now call new validation function from utils
+    const validationError = validateEditForm(editFormData);
 
     try {
       setUpdateLoading(true);
@@ -102,8 +99,8 @@ const Dashboard = () => {
       setIsEditing(false);
       setEditFormData({});
     } catch (err) {
-      console.error('Error updating user data:', err);
-      setUpdateError(err.message || 'Failed to update profile');
+      console.error("Error updating user data:", err);
+      setUpdateError(err.message || "Failed to update profile");
     } finally {
       setUpdateLoading(false);
     }
@@ -119,7 +116,7 @@ const Dashboard = () => {
       </div>
     );
   }
-// if api call fails
+  // if api call fails
   if (error) {
     return (
       <div className="dashboard-container">
@@ -151,23 +148,44 @@ const Dashboard = () => {
               </button>
             )}
           </div>
-            {/* show error message if profile update failed */}
+          {/* show error message if profile update failed */}
           {updateError && <div className="error-message">{updateError}</div>}
-            {/* show profile info when not editing and data exists */}
+          {/* show profile info when not editing and data exists */}
           {userData && !isEditing && (
             <div className="profile-details">
-              <p><strong>Full Name:</strong> {userData.first_name} {userData.last_name}</p>
-              <p><strong>Username:</strong> {userData.username}</p>
-              <p><strong>Email:</strong> {userData.email}</p>
-              <p><strong>Status:</strong> {userData.status}</p>
-              <p><strong>Date of Birth:</strong> {new Date(userData.birthdate).toLocaleDateString()}</p>
-              <p><strong>City:</strong> {userData.city}</p>
-              <p><strong>State:</strong> {userData.state}</p>
-              <p><strong>Zip Code:</strong> {userData.zip_code}</p>
-              <p><strong>Member Since:</strong> {new Date(userData.created_at).toLocaleDateString()}</p>
+              <p>
+                <strong>Full Name:</strong> {userData.first_name}{" "}
+                {userData.last_name}
+              </p>
+              <p>
+                <strong>Username:</strong> {userData.username}
+              </p>
+              <p>
+                <strong>Email:</strong> {userData.email}
+              </p>
+              <p>
+                <strong>Status:</strong> {userData.status}
+              </p>
+              <p>
+                <strong>Date of Birth:</strong>{" "}
+                {new Date(userData.birthdate).toLocaleDateString()}
+              </p>
+              <p>
+                <strong>City:</strong> {userData.city}
+              </p>
+              <p>
+                <strong>State:</strong> {userData.state}
+              </p>
+              <p>
+                <strong>Zip Code:</strong> {userData.zip_code}
+              </p>
+              <p>
+                <strong>Member Since:</strong>{" "}
+                {new Date(userData.created_at).toLocaleDateString()}
+              </p>
             </div>
           )}
-            {/* show edit form when in edit mode */}
+          {/* show edit form when in edit mode */}
           {isEditing && (
             <form onSubmit={handleSaveEdit} className="edit-form">
               <div className="form-group">
@@ -217,7 +235,7 @@ const Dashboard = () => {
                   required
                 />
               </div>
-            {/* status field uses dropdown */}
+              {/* status field uses dropdown */}
               <div className="form-group">
                 <label htmlFor="status">Status</label>
                 <select
@@ -230,7 +248,9 @@ const Dashboard = () => {
                   <option value="">Select your status</option>
                   <option value="Job Seeker">Job Seeker</option>
                   <option value="Student">Student</option>
-                  <option value="Community Supporter">Community Supporter</option>
+                  <option value="Community Supporter">
+                    Community Supporter
+                  </option>
                 </select>
               </div>
 
