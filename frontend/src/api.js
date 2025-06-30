@@ -82,9 +82,58 @@ export const communityAPI = {
 };
 
 export const reviewAPI = {
+  // get all reviews (for testing purposes)
   getAllReviews: () => apiRequest('/reviews'),
 
-  // add more review endpoints later
+  // get reviews for a specific community center
+  // returns: array of review objects with user info and images
+  getReviewsByCenter: (centerId) => {
+    // convert centerId to number to ensure correct data type since backend expects integer
+    return apiRequest(`/reviews/center/${parseInt(centerId)}`);
+  },
+
+  // create a new review for a community center
+  // returns: newly created review object with user info and images
+  createReview: (reviewData) => {
+    return apiRequest('/reviews', {
+      method: 'POST',
+      body: JSON.stringify(reviewData),
+    });
+  },
+
+  // update an existing review
+  // returns: updated review object with user info and images
+  updateReview: (reviewId, reviewData) => {
+    return apiRequest(`/reviews/${parseInt(reviewId)}`, {
+      method: 'PUT',
+      body: JSON.stringify(reviewData),
+    });
+  },
+
+  // delete a review (alos deletes all associated images)
+  deleteReview: (reviewId) => {
+    return apiRequest(`/reviews/${parseInt(reviewId)}`, {
+      method: 'DELETE',
+    });
+  },
+
+
+  // add new images to an existing review
+  // returns: updated review object with all images
+  addImagesToReview: (reviewId, imageUrls) => {
+    return apiRequest(`/reviews/${parseInt(reviewId)}/images`, {
+      method: 'POST',
+      body: JSON.stringify({ image_urls: imageUrls }),
+    });
+  },
+
+  // delete a specific image from a review
+  // returns: empty response (204 status)
+  deleteImageFromReview: (reviewId, imageId) => {
+    return apiRequest(`/reviews/${parseInt(reviewId)}/images/${parseInt(imageId)}`, {
+      method: 'DELETE',
+    });
+  },
 };
 
 // export the base apiRequest function for custom requests
