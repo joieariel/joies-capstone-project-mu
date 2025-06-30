@@ -47,6 +47,10 @@ const apiRequest = async (endpoint, options = {}) => {
 
 // api functions for user operations
 export const userAPI = {
+  // get current user's data using their supabase ID (protected)
+  getCurrentUser: () => apiRequest('/users/me'), // calls new endpoint
+  // no params, since backend gets user if from jwt token
+
   // get a single user (protected)
   getUser: (userId) => apiRequest(`/users/${userId}`),
 
@@ -71,8 +75,10 @@ export const userAPI = {
 // api functions for other resources
 export const communityAPI = {
   getAllCenters: () => apiRequest('/communityCenters'),
+  getCenterById: (centerId) => apiRequest(`/communityCenters/${centerId}`),
+  getCentersByZipCode: (zipCode) => apiRequest(`/communityCenters?zip_code=${zipCode}`),
 
-  // Add more community center endpoints later
+
 };
 
 export const reviewAPI = {
