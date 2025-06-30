@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { supabase } from "./supabaseClient";
 
 // create a new react context with empty value
@@ -45,8 +45,8 @@ export const AuthProvider = ({ children }) => {
     // (clean up) to unsubscribe from auth changes when component unmounts/disappears from screen
     return () => subscription.unsubscribe();
   }, []);
-
-  const signUp = async (email, password, userData = {}) => {
+  //useCallback here per PR avoid creating a new function on every render
+  const signUp = useCallback(async (email, password, userData = {}) => {
     try {
       // show loading state while creating new user account
       setLoading(true);
@@ -67,9 +67,9 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const signIn = async (email, password) => {
+  }, []);
+  //useCallback here per PR too
+  const signIn = useCallback(async (email, password) => {
     try {
       setLoading(true);
       // call supabase to sign in user with email and password
@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const signOut = async () => {
     try {
