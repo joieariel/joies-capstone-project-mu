@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 // import api functions to fetch reviews and community center info from backend
 import { reviewAPI, communityAPI } from "./api";
+import { renderStars, formatDate, calculateAverageRating } from "./utils/util.jsx";
 import "./Reviews.css";
 
 const Reviews = () => {
@@ -49,41 +50,6 @@ const Reviews = () => {
       fetchData();
     }
   }, [centerId]); // re-run effect if centerId changes (user navigates to different center)
-
-  // function to render star rating display
-  const renderStars = (rating) => {
-    // create array of 5 elements to represent 5 possible stars
-    return Array.from({ length: 5 }, (_, index) => (
-      // use unicode for star character and add filled class if index is less than rating
-      <span
-        key={index}
-        className={`star ${index < rating ? "filled" : "empty"}`}
-      >
-        ★
-      </span>
-    ));
-  };
-
-  // function to format date for display
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  // function to calculate average rating from reviews
-  const calculateAverageRating = (reviewsArray) => {
-    if (!reviewsArray || reviewsArray.length === 0) return 0;
-
-    const totalRating = reviewsArray.reduce(
-      (sum, review) => sum + review.rating,
-      0
-    );
-    return (totalRating / reviewsArray.length).toFixed(1);
-  };
 
   if (loading) {
     return (
