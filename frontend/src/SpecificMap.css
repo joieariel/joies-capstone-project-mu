@@ -1,0 +1,41 @@
+.map-container {
+    min-height: calc(100vh - 80px); /* Full height minus header */
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    font-family: "Plus Jakarta Sans", sans-serif;
+  }
+
+  .map-content {
+    text-align: center;
+    max-width: 800px;
+    width: 100%;
+  }
+
+  .map-title {
+    font-size: 2.5rem;
+    color: #486284;
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .map-container {
+      padding: 1rem;
+      min-height: calc(100vh - 70px); /* Adjust for smaller header on mobile */
+    }
+
+    .map-title {
+      font-size: 2rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .map-title {
+      font-size: 1.6rem;
+    }
+  }

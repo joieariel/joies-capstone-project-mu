@@ -111,7 +111,8 @@
 
 /* button styles */
 .reviews-button,
-.map-button {
+.map-button
+{
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 6px;
@@ -132,13 +133,15 @@
   transform: translateY(-1px);
 }
 
-.map-button {
+.map-button,
+.mapview-button {
   background-color: #f8f9fa;
   color: #486284;
   border: 1px solid #486284;
 }
 
-.map-button:hover {
+.map-button:hover,
+.mapview-button:hover{
   background-color: #486284;
   color: white;
   transform: translateY(-1px);
