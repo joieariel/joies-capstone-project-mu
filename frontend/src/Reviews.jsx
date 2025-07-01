@@ -2,9 +2,15 @@ import React, { useState, useEffect } from "react";
 // Import useParams hook to read URL parameters so we can extract centerId from url path
 import { useParams } from "react-router-dom";
 // import api functions to fetch reviews and community center info from backend
-import { reviewAPI, communityAPI } from "./api";
-import { renderStars, formatDate, calculateAverageRating } from "./utils/util.jsx";
+import { reviewAPI, communityAPI, userAPI } from "./api"; // added import userAPI to fetch current user data from db
+import {
+  renderStars,
+  formatDate,
+  calculateAverageRating,
+} from "./utils/util.jsx";
+import { useAuth } from "./AuthContext"; //. get auth state and current user
 import WriteReview from "./WriteReview";
+import EditReviewForm from "./EditReviewForm"; // for inline editing of reviews
 import "./Reviews.css";
 
 const Reviews = () => {
@@ -13,14 +19,38 @@ const Reviews = () => {
   // Note: URL params are always strings, so we'll need to convert to number when making API calls
   const { centerId } = useParams();
 
+  // get current user from auth context
+  const { isAuthenticated } = useAuth();
+
   // state to store the reviews fetched from the backend
   const [reviews, setReviews] = useState([]);
   // state to store the community center information
   const [center, setCenter] = useState(null);
+  // state to store current user's database record (will need to compare with review authors)
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   // state to control showing/hiding the write review form
   const [showWriteReviewForm, setShowWriteReviewForm] = useState(false);
+  // state to track which review is being edited
+  const [editingReview, setEditingReview] = useState(null);
+
+  // useEffect to fetch current user's data in db when they log in
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      if (isAuthenticated) {
+        try {
+          // call backend api to fetch current user's data using their jwt token
+          const userData = await userAPI.getCurrentUser();
+          setCurrentUser(userData);
+        } catch (err) {
+          console.error("Error fetching current user:", err);
+        }
+      }
+    };
+
+    fetchCurrentUser();
+  }, [isAuthenticated]); // rerun when auth state changes
 
   // useEffect to fetch both center info and reviews when component mounts or centerId changes
   useEffect(() => {
@@ -53,6 +83,50 @@ const Reviews = () => {
       fetchData();
     }
   }, [centerId]); // re-run effect if centerId changes (user navigates to different center)
+
+  // helper function to check if current user owns the review
+  const isReviewOwner = (review) => {
+    return currentUser && review.user.id === currentUser.id;
+  };
+
+  // function to handle review deletion
+  const handleDeleteReview = async (reviewId) => {
+    if (window.confirm("Are you sure you want to delete this review?")) {
+      try {
+        await reviewAPI.deleteReview(reviewId);
+        // refreshthe reviews list after deletion
+        const reviewsData = await reviewAPI.getReviewsByCenter(centerId);
+        setReviews(reviewsData);
+      } catch (err) {
+        console.error("Error deleting review:", err);
+        alert("Failed to delete review. Please try again.");
+      }
+    }
+  };
+
+  // function to handle review editing
+  const handleEditReview = (review) => {
+    setEditingReview(review);
+  };
+
+  //  handle review update
+  const handleUpdateReview = async (reviewId, updatedData) => {
+    try {
+      await reviewAPI.updateReview(reviewId, updatedData);
+      setEditingReview(null);
+      // refresh reviews list after update
+      const reviewsData = await reviewAPI.getReviewsByCenter(centerId);
+      setReviews(reviewsData);
+    } catch (err) {
+      console.error("Error updating review:", err);
+      alert("Failed to update review. Please try again.");
+    }
+  };
+
+  //fucntion to handle if user wants to cancel editing without saving changes
+  const handleCancelEdit = () => {
+    setEditingReview(null);
+  };
 
   if (loading) {
     return (
@@ -142,7 +216,9 @@ const Reviews = () => {
                 setShowWriteReviewForm(false);
                 // refresh reviews list after successful submission
                 try {
-                  const reviewsData = await reviewAPI.getReviewsByCenter(centerId);
+                  const reviewsData = await reviewAPI.getReviewsByCenter(
+                    centerId
+                  );
                   setReviews(reviewsData);
                 } catch (err) {
                   console.error("Error refreshing reviews:", err);
@@ -179,23 +255,53 @@ const Reviews = () => {
                   </div>
                 </div>
 
-                {/* review comment text */}
-                <div className="review-comment">
-                  <p>{review.comment}</p>
-                </div>
+                {/* show edit form or show review content */}
+                {editingReview && editingReview.id === review.id ? (
+                  // add show edit form, when editingReview is true (review is being edited)
+                  <EditReviewForm
+                    review={review}
+                    onSave={handleUpdateReview}
+                    onCancel={handleCancelEdit}
+                  />
+                ) : (
+                  <>
+                    {/* review comment text */}
+                    <div className="review-comment">
+                      <p>{review.comment}</p>
+                    </div>
 
-                {/* display review images if they exist */}
-                {review.images && review.images.length > 0 && (
-                  <div className="review-images">
-                    {review.images.map((image) => (
-                      <img
-                        key={image.id}
-                        src={image.image_url}
-                        alt="Review"
-                        className="review-image"
-                      />
-                    ))}
-                  </div>
+                    {/* display review images if they exist */}
+                    {review.images && review.images.length > 0 && (
+                      <div className="review-images">
+                        {review.images.map((image) => (
+                          <img
+                            key={image.id}
+                            src={image.image_url}
+                            alt="Review"
+                            className="review-image"
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {/* edit/delete buttons for review owner only */}
+                    {isReviewOwner(review) && (
+                      <div className="review-actions">
+                        <button
+                          className="edit-review-button"
+                          onClick={() => handleEditReview(review)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="delete-review-button"
+                          onClick={() => handleDeleteReview(review.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ))}
