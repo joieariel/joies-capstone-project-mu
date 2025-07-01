@@ -147,12 +147,6 @@ const Dashboard = () => {
         <div className="user-profile-section">
           <div className="profile-header">
             <h2>Your Profile Information</h2>
-            {/* only show edit button when not in edit mode */}
-            {!isEditing && (
-              <button onClick={handleEditClick} className="edit-button">
-                ✏️ Edit
-              </button>
-            )}
           </div>
           {/* show error message if profile update failed */}
           {updateError && <div className="error-message">{updateError}</div>}
@@ -192,6 +186,12 @@ const Dashboard = () => {
                 <strong>Member Since:</strong>{" "}
                 {new Date(userData.created_at).toLocaleDateString()}
               </p>
+              {/* only show edit button when not in edit mode */}
+              {!isEditing && (
+                <button onClick={handleEditClick} className="edit-button">
+                  ✏️ Edit Your Information
+                </button>
+              )}
             </div>
           )}
           {/* show edit form when in edit mode */}
