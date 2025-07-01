@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 // Import useParams hook to read URL parameters so we can extract centerId from url path
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 // import api functions to fetch reviews and community center info from backend
 import { reviewAPI, communityAPI, userAPI } from "./api"; // added import userAPI to fetch current user data from db
 import {
@@ -18,6 +18,7 @@ const Reviews = () => {
   // When URL is /reviews/5, this will give us { centerId: "5" }
   // Note: URL params are always strings, so we'll need to convert to number when making API calls
   const { centerId } = useParams();
+  const navigate = useNavigate();
 
   // get current user from auth context
   const { isAuthenticated } = useAuth();
@@ -128,6 +129,11 @@ const Reviews = () => {
     setEditingReview(null);
   };
 
+  // function to handle back button click
+  const handleBackClick = () => {
+    navigate("/community-centers");
+  };
+
   if (loading) {
     return (
       <div className="reviews-container">
@@ -153,6 +159,13 @@ const Reviews = () => {
   return (
     <div className="reviews-container">
       <div className="reviews-content">
+        {/* back button */}
+        <div className="back-container">
+          <button className="back-button" onClick={handleBackClick}>
+            Back to Community Centers
+          </button>
+        </div>
+
         {/* community center header Section */}
         {center && (
           <div className="center-header">
