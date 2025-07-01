@@ -16,13 +16,13 @@ router.get("/me", authenticateUser, async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     res.json(user); //. return complete user object w all prof data
   } catch (error) {
-    console.error('Error fetching user:', error);
-    res.status(500).json({ error: 'Failed to fetch user' });
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Failed to fetch user" });
   }
 });
 
@@ -37,24 +37,37 @@ router.get("/:userId", authenticateUser, async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     // authorization check user can only view their own profile
     if (user.supabase_user_id !== req.user.id) {
-      return res.status(403).json({ error: 'You can only view your own profile' });
+      return res
+        .status(403)
+        .json({ error: "You can only view your own profile" });
     }
 
     res.json(user);
   } catch (error) {
-    console.error('Error fetching user:', error);
-    res.status(500).json({ error: 'Failed to fetch user' });
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Failed to fetch user" });
   }
 });
 
 // (POST) create a new user - now includes supabase user id
 router.post("/", async (req, res) => {
-  const { supabase_user_id, first_name, last_name, username, email, status, birthdate, zip_code, city, state} = req.body;
+  const {
+    supabase_user_id,
+    first_name,
+    last_name,
+    username,
+    email,
+    status,
+    birthdate,
+    zip_code,
+    city,
+    state,
+  } = req.body;
 
   try {
     const newUser = await prisma.user.create({
@@ -65,7 +78,7 @@ router.post("/", async (req, res) => {
         username,
         email,
         status,
-        birthdate: new Date(birthdate), // ensure birthdate is a Date object
+        birthdate: new Date(birthdate + "T00:00:00.000Z"), // ensure birthdate is stored as UTC midnight
         zip_code,
         city,
         state,
@@ -73,8 +86,8 @@ router.post("/", async (req, res) => {
     });
     res.json(newUser);
   } catch (error) {
-    console.error('Error creating user:', error);
-    res.status(500).json({ error: 'Failed to create user' });
+    console.error("Error creating user:", error);
+    res.status(500).json({ error: "Failed to create user" });
   }
 });
 
@@ -82,7 +95,17 @@ router.post("/", async (req, res) => {
 router.put("/:userId", authenticateUser, async (req, res) => {
   try {
     const { userId } = req.params;
-    const { first_name, last_name, username, email, status, birthdate, zip_code, city, state} = req.body;
+    const {
+      first_name,
+      last_name,
+      username,
+      email,
+      status,
+      birthdate,
+      zip_code,
+      city,
+      state,
+    } = req.body;
 
     // find the user record first
     const user = await prisma.user.findUnique({
@@ -90,12 +113,14 @@ router.put("/:userId", authenticateUser, async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     // authorization check: user can only update their own profile
     if (user.supabase_user_id !== req.user.id) {
-      return res.status(403).json({ error: 'You can only update your own profile' });
+      return res
+        .status(403)
+        .json({ error: "You can only update your own profile" });
     }
 
     const updatedUser = await prisma.user.update({
@@ -106,7 +131,7 @@ router.put("/:userId", authenticateUser, async (req, res) => {
         username,
         email,
         status,
-        birthdate: new Date(birthdate),
+        birthdate: new Date(birthdate + "T00:00:00.000Z"),
         zip_code,
         city,
         state,
@@ -114,8 +139,8 @@ router.put("/:userId", authenticateUser, async (req, res) => {
     });
     res.json(updatedUser);
   } catch (error) {
-    console.error('Error updating user:', error);
-    res.status(500).json({ error: 'Failed to update user' });
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: "Failed to update user" });
   }
 });
 
@@ -129,11 +154,13 @@ router.delete("/:userId", authenticateUser, async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     if (user.supabase_user_id !== req.user.id) {
-      return res.status(403).json({ error: 'You can only delete your own profile' });
+      return res
+        .status(403)
+        .json({ error: "You can only delete your own profile" });
     }
 
     const deletedUser = await prisma.user.delete({
@@ -141,11 +168,9 @@ router.delete("/:userId", authenticateUser, async (req, res) => {
     });
     res.json(deletedUser);
   } catch (error) {
-    console.error('Error deleting user:', error);
-    res.status(500).json({ error: 'Failed to delete user' });
+    console.error("Error deleting user:", error);
+    res.status(500).json({ error: "Failed to delete user" });
   }
 });
-
-
 
 module.exports = router;
