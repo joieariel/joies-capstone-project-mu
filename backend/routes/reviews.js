@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 const getUserIdFromSupabase = async (supabaseUserId) => {
   const user = await prisma.user.findUnique({
     // find user record by supabase id field and return id
-    where: { supabase_id: supabaseUserId },
+    where: { supabase_user_id: supabaseUserId },
     select: { id: true }
   });
   return user?.id;
@@ -89,7 +89,7 @@ router.post("/", authenticateUser, async (req, res) => {
         rating,
         comment,
         user_id: userId, // use the userId we got from the authenticated user
-        center_id,
+        center_id: parseInt(center_id), // convert string to integer
       },
       include: {
         images: true,
