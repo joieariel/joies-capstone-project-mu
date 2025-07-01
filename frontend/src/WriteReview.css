@@ -29,6 +29,43 @@
   margin-bottom: 5px;
 }
 
+/* comment section */
+.comment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comment-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.comment-textbox {
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  transition: all 0.3s ease;
+  background-color: #fff;
+}
+
+.comment-textbox:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.comment-textbox::placeholder {
+  color: #6c757d;
+  font-style: italic;
+}
+
 .star-rating {
   display: flex;
   gap: 5px;
