@@ -10,6 +10,8 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
   // state for loading and error handling
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  // state for input text for review (initalized as empty string)
+  const [reviewText, setReviewText] = useState("");
 
   // handle star click
   const handleStarClick = (starValue) => {
@@ -26,12 +28,31 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
     setHoverRating(0);
   };
 
+  // handle comment text change when user types in textarea
+  const handleCommentChange = (e) => {
+    setReviewText(e.target.value);
+  };
+
   // handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // validate rating is selected
     if (rating === 0) {
       setError("Please select a rating");
+      return;
+    }
+
+    // validate review text is not empty and has minimum length
+    // trim() removes leading and trailing whitespace
+    if (!reviewText.trim()) {
+      // if review text is empty, show error message
+      setError("Please write a review comment");
+      return;
+    }
+    // make sure review text is at least 10 characters long to prevent bad/unhelpful reviews
+    if (reviewText.trim().length < 10) {
+      setError("Review comment must be at least 10 characters long");
       return;
     }
 
@@ -42,7 +63,7 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
       await reviewAPI.createReview({
         rating,
         center_id: centerId,
-        comment: "" // empty comment for now since  only have star rating
+        comment: reviewText.trim() // send the actual review text instead of empty string
       });
 
       // call success callback to close and refresh reviews
@@ -90,6 +111,18 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
           )}
         </div>
 
+        {/* comment section - textbox for user to write their review */}
+        <div className="comment-section">
+          <label className="comment-label">Your Review *</label>
+          <textarea
+            className="comment-textbox"
+            placeholder="Share your experience at this community center..."
+            rows={4}
+            value={reviewText}
+            onChange={handleCommentChange}
+          />
+        </div>
+
         {/* error message */}
         {error && (
           <div className="error-message" style={{ color: 'red', marginBottom: '1rem' }}>
@@ -102,7 +135,8 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
           <button type="button" className="cancel-button" onClick={onCancel} disabled={isSubmitting}>
             Cancel
           </button>
-          <button type="submit" className="submit-button" disabled={rating === 0 || isSubmitting}>
+          {/*  button is disabled if user hasnt rated, review textbox is empty, form is being submitted to the server  */}
+          <button type="submit" className="submit-button" disabled={rating === 0 || !reviewText.trim() || isSubmitting}>
             {isSubmitting ? "Submitting..." : "Submit Review"}
           </button>
         </div>

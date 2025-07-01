@@ -131,7 +131,7 @@ router.put("/:userId", authenticateUser, async (req, res) => {
         username,
         email,
         status,
-        birthdate: new Date(birthdate + "T00:00:00.000Z"),
+        birthdate: new Date(birthdate + "T00:00:00.000Z"), // ensure birthdate is stored as UTC midnight
         zip_code,
         city,
         state,
