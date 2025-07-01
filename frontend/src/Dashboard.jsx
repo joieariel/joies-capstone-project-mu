@@ -174,7 +174,10 @@ const Dashboard = () => {
               </p>
               <p>
                 <strong>Date of Birth:</strong>{" "}
-                {new Date(userData.birthdate).toLocaleDateString()}
+                {/* display the date in UTC timezone to prevent any local timezone conversion */}
+                {new Date(userData.birthdate).toLocaleDateString("en-US", {
+                  timeZone: "UTC",
+                })}
               </p>
               <p>
                 <strong>City:</strong> {userData.city}
