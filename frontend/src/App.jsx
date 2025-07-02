@@ -8,7 +8,10 @@ import CommunityCenter from "./CommunityCenter";
 import Reviews from "./Reviews";
 import Resources from "./Resources";
 import DeviceDonation from "./DeviceDonation";
+import MapView from "./MapView";
+import SpecificMap from "./SpecificMap";
 import {
+
   BrowserRouter as Router,
   Routes,
   Route,
@@ -95,6 +98,25 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            <Route
+              // route for specific center on map
+              path="/map/:centerId"
+              element={
+                <ProtectedRoute>
+                  <SpecificMap />
+                </ProtectedRoute>
+              }
+            />
+            {/* add route for mapview in community center */}
+            <Route
+              path="/mapview"
+              element={
+                <ProtectedRoute>
+                  <MapView />
+                </ProtectedRoute>
+              }
+            />
+
             <Route
               path="/resources"
               element={
