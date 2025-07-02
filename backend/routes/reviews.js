@@ -313,7 +313,7 @@ router.put("/:id", authenticateUser, async (req, res) => {
       }
     }
 
-    // Fetch the updated review with images and user info
+    // Fetch the updated review with images, user info, and tags
     const reviewWithImages = await prisma.review.findUnique({
       where: { id: parseInt(id) },
       include: {
@@ -324,6 +324,12 @@ router.put("/:id", authenticateUser, async (req, res) => {
             first_name: true,
             last_name: true,
             username: true,
+          },
+        },
+        // include reviewTags relationship so frontend gets updated tags
+        reviewTags: {
+          include: {
+            tag: true,
           },
         },
       },
