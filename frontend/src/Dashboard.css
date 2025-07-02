@@ -30,6 +30,30 @@
   margin: 0;
 }
 
+/* form input */
+#first_name, 
+#last_name,
+#username, 
+#email, 
+#status, 
+#birthdate, 
+#city, 
+#state, 
+#zip_code {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: larger;
+}
+
+
+/* edit button */
+.edit-button {
+  background-color: #CED7E4 ;
+}
+
+
+
+
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .dashboard-container {

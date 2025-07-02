@@ -10,6 +10,11 @@ const CommunityCenter = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // when user clicks map view button at top of page, show the map view ( navigate to map page and show all community centers on map)
+  const handleMapViewClick = () => {
+    navigate("/mapview"); // navigate to /map which will show all community centers on map
+  };
+
   // when user clicks reviews button, show the reviews for that specific center
   // modified to accept centerId paramer so that centers reviews are displayed
   const handleReviewsClick = (centerId) => {
@@ -17,6 +22,14 @@ const CommunityCenter = () => {
     // centerId becomes a url param that the Reviews component can read
     navigate(`/reviews/${centerId}`);
   };
+
+  // when user clicks map button, show the map view for that specific center
+  const handleMapClick = (centerId) => {
+    // navigate to /map/[centerId] which creates a url like /map/5 for center ID 5
+    // centerId becomes a url param that the Map component can read
+    navigate(`/map/${centerId}`);
+  }
+
 
   useEffect(() => {
     const fetchCenters = async () => {
@@ -64,7 +77,11 @@ const CommunityCenter = () => {
         <h1 className="community-center-title">
           Find community centers near you
         </h1>
-{/* loop through each communiy center in array and create one card for each center returned from db*/}
+        <div className="community-center-nav">
+        {/* add a nav within the communnity center page to switch from list view to map view */}
+        <button className="mapview-button" onClick={() => handleMapViewClick()}>Map View</button>
+      </div>
+  {/* loop through each communiy center in array and create one card for each center returned from db*/}
         <div className="centers-grid">
           {centers.map((center) => (
             // each card needs a unique key, center id
@@ -95,7 +112,9 @@ const CommunityCenter = () => {
                   >
                     Reviews
                   </button>
-                  <button className="map-button">
+                  <button className="map-button"
+                  onClick={() => handleMapClick(center.id)}
+                  >
                     Map
                   </button>
                 </div>
