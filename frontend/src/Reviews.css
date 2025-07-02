@@ -285,6 +285,27 @@
   margin: 0;
 }
 
+/* review tags */
+.review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.review-tag {
+  padding: 8px 16px;
+  border: 1px solid #486284;
+  border-radius: 6px;
+  background-color: #486284;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  user-select: none;
+}
+
 /* review images */
 .review-images {
   display: flex;

@@ -283,6 +283,18 @@ const Reviews = () => {
                       <p>{review.comment}</p>
                     </div>
 
+                    {/* display review tags if they exist */}
+                    {review.reviewTags && review.reviewTags.length > 0 && (
+                      <div className="review-tags">
+                        {/* render each tag */}
+                        {review.reviewTags.map((reviewTag) => (
+                          <span key={reviewTag.id} className="review-tag">
+                            {reviewTag.tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     {/* display review images if they exist */}
                     {review.images && review.images.length > 0 && (
                       <div className="review-images">
