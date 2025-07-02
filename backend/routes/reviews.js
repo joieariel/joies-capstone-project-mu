@@ -213,11 +213,11 @@ router.put("/:id", authenticateUser, async (req, res) => {
     // validate selected_tags if provided
     if (
       selected_tags &&
-      (!Array.isArray(selected_tags) || selected_tags.length > 5)
+      (!Array.isArray(selected_tags) || selected_tags.length > 3)
     ) {
       return res
         .status(400)
-        .json({ error: "selected_tags must be an array with maximum 5 tags" });
+        .json({ error: "selected_tags must be an array with maximum 3 tags" });
     }
 
     // get db user ID from authenticated user

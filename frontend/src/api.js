@@ -164,6 +164,10 @@ export const tagAPI = {
   // get tags for a specific community center
   getCenterTags: (centerId) => apiRequest(`/tags/center/${parseInt(centerId)}`),
 
+  // get most popular tags for a specific community center based on reviews
+  getPopularCenterTags: (centerId, limit = 5) =>
+    apiRequest(`/tags/center/${parseInt(centerId)}/popular?limit=${limit}`),
+
   // add a tag to a community center
   addTagToCenter: (centerId, tagId) =>
     apiRequest(`/tags/center/${parseInt(centerId)}`, {
