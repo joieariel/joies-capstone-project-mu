@@ -143,7 +143,6 @@
   transform: translateY(-1px);
 }
 
-
 /* write review form */
 .write-review-form-container {
   background-color: #f8f9fa;
@@ -152,8 +151,6 @@
   padding: 20px;
   margin-bottom: 30px;
 }
-
-
 
 /* loading and error states */
 .loading-message {
@@ -307,7 +304,56 @@
 
 .review-image:hover {
   transform: scale(1.05);
+}
+
+/* review actions -edit and delete buttons */
+.review-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.edit-review-button,
+.delete-review-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.edit-review-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.edit-review-button:hover {
+  background-color: #0056b3;
+}
+
+.delete-review-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-review-button:hover {
+  background-color: #c82333;
+}
+
+/* responsive adjustments for review actions */
+@media (max-width: 768px) {
+  .review-actions {
+    flex-direction: column;
+  }
+
+  .edit-review-button,
+  .delete-review-button {
+    width: 100%;
+  }
 }
 
 /* responsive Design */

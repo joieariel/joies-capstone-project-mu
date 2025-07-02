@@ -12,6 +12,10 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
   const [error, setError] = useState(null);
   // state for input text for review (initalized as empty string)
   const [reviewText, setReviewText] = useState("");
+  // state for managing image URLs
+  const [imageUrls, setImageUrls] = useState([]);
+  // state for new image URL input
+  const [newImageUrl, setNewImageUrl] = useState("");
 
   // handle star click
   const handleStarClick = (starValue) => {
@@ -31,6 +35,19 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
   // handle comment text change when user types in textarea
   const handleCommentChange = (e) => {
     setReviewText(e.target.value);
+  };
+
+  // handle adding new image URL
+  const handleAddImage = () => {
+    if (newImageUrl.trim() && !imageUrls.includes(newImageUrl.trim())) {
+      setImageUrls([...imageUrls, newImageUrl.trim()]);
+      setNewImageUrl("");
+    }
+  };
+
+  // handle removing image at specific index
+  const handleRemoveImage = (indexToRemove) => {
+    setImageUrls(imageUrls.filter((_, index) => index !== indexToRemove));
   };
 
   // handle form submission
@@ -63,7 +80,8 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
       await reviewAPI.createReview({
         rating,
         center_id: centerId,
-        comment: reviewText.trim() // send the actual review text instead of empty string
+        comment: reviewText.trim(), // send the actual review text instead of empty string
+        image_urls: imageUrls.filter((url) => url.trim() !== ""), // include image URLs, filter out empty ones
       });
 
       // call success callback to close and refresh reviews
@@ -83,7 +101,7 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
     return (
       <span
         key={starNumber}
-        className={`star ${isFilled ? 'filled' : 'empty'}`}
+        className={`star ${isFilled ? "filled" : "empty"}`}
         onClick={() => handleStarClick(starNumber)}
         onMouseEnter={() => handleStarHover(starNumber)}
         onMouseLeave={handleStarLeave}
@@ -101,9 +119,7 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
         {/* star rating section */}
         <div className="rating-section">
           <label className="rating-label">Rating *</label>
-          <div className="star-rating">
-            {[1, 2, 3, 4, 5].map(renderStar)}
-          </div>
+          <div className="star-rating">{[1, 2, 3, 4, 5].map(renderStar)}</div>
           {rating > 0 && (
             <div className="rating-text">
               You rated: {rating} out of 5 stars
@@ -123,20 +139,74 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
           />
         </div>
 
+        {/* images section - optional image uploads */}
+        <div className="images-section">
+          <label className="images-label">Images (optional)</label>
+
+          {/* display current images */}
+          {imageUrls.length > 0 && (
+            <div className="current-images">
+              {imageUrls.map((url, index) => (
+                <div key={index} className="image-preview">
+                  <img src={url} alt={`Review image ${index + 1}`} />
+                  <button
+                    type="button"
+                    className="remove-image-button"
+                    onClick={() => handleRemoveImage(index)}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* add new image section */}
+          <div className="add-image-section">
+            <input
+              type="url"
+              className="image-url-input"
+              value={newImageUrl}
+              onChange={(e) => setNewImageUrl(e.target.value)}
+              placeholder="Enter image URL"
+            />
+            <button
+              type="button"
+              className="add-image-button"
+              onClick={handleAddImage}
+              disabled={!newImageUrl.trim()}
+            >
+              Add Image
+            </button>
+          </div>
+        </div>
+
         {/* error message */}
         {error && (
-          <div className="error-message" style={{ color: 'red', marginBottom: '1rem' }}>
+          <div
+            className="error-message"
+            style={{ color: "red", marginBottom: "1rem" }}
+          >
             {error}
           </div>
         )}
 
         {/* form buttons */}
         <div className="form-buttons">
-          <button type="button" className="cancel-button" onClick={onCancel} disabled={isSubmitting}>
+          <button
+            type="button"
+            className="cancel-button"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
             Cancel
           </button>
           {/*  button is disabled if user hasnt rated, review textbox is empty, form is being submitted to the server  */}
-          <button type="submit" className="submit-button" disabled={rating === 0 || !reviewText.trim() || isSubmitting}>
+          <button
+            type="submit"
+            className="submit-button"
+            disabled={rating === 0 || !reviewText.trim() || isSubmitting}
+          >
             {isSubmitting ? "Submitting..." : "Submit Review"}
           </button>
         </div>
