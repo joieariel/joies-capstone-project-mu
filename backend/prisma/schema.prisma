@@ -98,7 +98,7 @@ model CenterHours {
 
 model Tag {
  id          Int      @id @default(autoincrement())
- name        String // tag label
+ name        String   @unique // tag label - made unique to prevent duplicates
 
  centerTags  CenterTag[] // relatinoship to junction table
 }
