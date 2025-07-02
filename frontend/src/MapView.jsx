@@ -12,7 +12,7 @@ const MapView = () => {
   return (
     <div className="mapview-container">
       <div className="back-container">
-        <button className="back-button" onClick={handleBackClick}>Back</button>
+        <button className="back-button" onClick={handleBackClick}>Back to List View</button>
       </div>
       <div className="mapview-content">
         <h1 className="mapview-title">Map View</h1>
