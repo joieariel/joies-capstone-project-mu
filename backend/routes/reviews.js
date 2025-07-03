@@ -1,6 +1,7 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const { authenticateUser } = require("../middleware/auth"); // imports middleware function that verifies jwt tokens to verify user identity before allowing operations
+const { MAX_TAGS_PER_REVIEW } = require("../config/constants");
 const router = express.Router();
 const prisma = new PrismaClient();
 
@@ -97,14 +98,17 @@ router.post("/", authenticateUser, async (req, res) => {
     // extract data from request body (no longer accepting user_id since we get it from authentication)
     const { rating, comment, center_id, image_urls, selected_tags } = req.body;
 
-    // validate if selected_tags exists and is an array with maximum 5 tags
+    // validate if selected_tags exists and is an array with maximum allowed tags
     if (
       selected_tags &&
-      (!Array.isArray(selected_tags) || selected_tags.length > 5)
+      (!Array.isArray(selected_tags) ||
+        selected_tags.length > MAX_TAGS_PER_REVIEW)
     ) {
       return res
         .status(400)
-        .json({ error: "selected_tags must be an array with maximum 5 tags" });
+        .json({
+          error: `selected_tags must be an array with maximum ${MAX_TAGS_PER_REVIEW} tags`,
+        });
     }
 
     const newReview = await prisma.review.create({
@@ -213,11 +217,14 @@ router.put("/:id", authenticateUser, async (req, res) => {
     // validate selected_tags if provided
     if (
       selected_tags &&
-      (!Array.isArray(selected_tags) || selected_tags.length > 3)
+      (!Array.isArray(selected_tags) ||
+        selected_tags.length > MAX_TAGS_PER_REVIEW)
     ) {
       return res
         .status(400)
-        .json({ error: "selected_tags must be an array with maximum 3 tags" });
+        .json({
+          error: `selected_tags must be an array with maximum ${MAX_TAGS_PER_REVIEW} tags`,
+        });
     }
 
     // get db user ID from authenticated user
