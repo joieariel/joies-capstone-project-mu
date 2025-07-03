@@ -357,10 +357,6 @@ router.delete("/:id", authenticateUser, async (req, res) => {
       where: { review_id: parseInt(id) },
     });
 
-    // delete all associated review tags
-    await prisma.reviewTag.deleteMany({
-      where: { review_id: parseInt(id) },
-    });
 
     // now delete the review
     await prisma.review.delete({

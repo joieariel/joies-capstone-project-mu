@@ -123,7 +123,7 @@ model ReviewTag {
  review_id   Int
  tag_id      Int
 
- review      Review @relation(fields: [review_id], references: [id])
+ review      Review @relation(fields: [review_id], references: [id], onDelete: Cascade)
  tag         Tag    @relation(fields: [tag_id], references: [id])
 
  @@unique([review_id, tag_id]) // to prevent duplicate tag assignments for same review
