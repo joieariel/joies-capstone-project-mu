@@ -3,7 +3,7 @@ import "./TagSelector.css";
 import { tagAPI } from "./api";
 
 // destructuring props to make it easier to use with default values
-const TagSelector = ({ selectedTags = [], onTagsChange, maxTags = 5 }) => {
+const TagSelector = ({ selectedTags = [], onTagsChange, maxTags = 3 }) => {
   // state for available tags from the api
   const [availableTags, setAvailableTags] = useState([]);
   // state for loading and error handling
@@ -35,7 +35,7 @@ const TagSelector = ({ selectedTags = [], onTagsChange, maxTags = 5 }) => {
 
     if (selectedTags.includes(tagId)) {
       // tag is already selected, remove it
-      newSelectedTags = selectedTags.filter(id => id !== tagId);
+      newSelectedTags = selectedTags.filter((id) => id !== tagId);
     } else {
       // tag is not selected, add it if under max limit
       if (selectedTags.length >= maxTags) {
@@ -115,11 +115,17 @@ const TagSelector = ({ selectedTags = [], onTagsChange, maxTags = 5 }) => {
             <button
               key={tag.id}
               type="button"
-              className={`tag-chip ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
+              className={`tag-chip ${isSelected ? "selected" : ""} ${
+                isDisabled ? "disabled" : ""
+              }`}
               onClick={() => handleTagClick(tag.id)}
               disabled={isDisabled}
               // dynamic tooltip text that explains what will happen when clicked
-              title={isDisabled ? `Maximum ${maxTags} tags allowed` : `Click to ${isSelected ? 'deselect' : 'select'} ${tag.name}`}
+              title={
+                isDisabled
+                  ? `Maximum ${maxTags} tags allowed`
+                  : `Click to ${isSelected ? "deselect" : "select"} ${tag.name}`
+              }
             >
               {/* display the tag name from the database */}
               {tag.name}

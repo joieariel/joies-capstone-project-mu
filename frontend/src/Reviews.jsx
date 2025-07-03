@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 // Import useParams hook to read URL parameters so we can extract centerId from url path
 import { useParams, useNavigate } from "react-router-dom";
 // import api functions to fetch reviews and community center info from backend
-import { reviewAPI, communityAPI, userAPI } from "./api"; // added import userAPI to fetch current user data from db
+import { reviewAPI, communityAPI, userAPI, tagAPI } from "./api"; // added import userAPI to fetch current user data from db
+// added tagAPI to fetch popular tags
 import {
   renderStars,
   formatDate,
@@ -29,6 +30,8 @@ const Reviews = () => {
   const [center, setCenter] = useState(null);
   // state to store current user's database record (will need to compare with review authors)
   const [currentUser, setCurrentUser] = useState(null);
+  // state to store popular tags for this center
+  const [popularTags, setPopularTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   // state to control showing/hiding the write review form
@@ -60,15 +63,17 @@ const Reviews = () => {
         setLoading(true);
         setError("");
 
-        // Fetch both center information and reviews in parallel for better performance
-        const [centerData, reviewsData] = await Promise.all([
+        // Fetch center information, reviews, and popular tags in parallel for better performance
+        const [centerData, reviewsData, popularTagsData] = await Promise.all([
           communityAPI.getCenterById(centerId),
           reviewAPI.getReviewsByCenter(centerId),
+          tagAPI.getPopularCenterTags(centerId, 5), // get top 5 popular tags
         ]);
 
         // store the fetched data in state, will trigger a re-render
         setCenter(centerData);
         setReviews(reviewsData);
+        setPopularTags(popularTagsData);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError(
@@ -95,9 +100,13 @@ const Reviews = () => {
     if (window.confirm("Are you sure you want to delete this review?")) {
       try {
         await reviewAPI.deleteReview(reviewId);
-        // refreshthe reviews list after deletion
-        const reviewsData = await reviewAPI.getReviewsByCenter(centerId);
+        // refresh both reviews list and popular tags after deletion
+        const [reviewsData, popularTagsData] = await Promise.all([
+          reviewAPI.getReviewsByCenter(centerId),
+          tagAPI.getPopularCenterTags(centerId, 5),
+        ]);
         setReviews(reviewsData);
+        setPopularTags(popularTagsData);
       } catch (err) {
         console.error("Error deleting review:", err);
         alert("Failed to delete review. Please try again.");
@@ -115,9 +124,13 @@ const Reviews = () => {
     try {
       await reviewAPI.updateReview(reviewId, updatedData);
       setEditingReview(null);
-      // refresh reviews list after update
-      const reviewsData = await reviewAPI.getReviewsByCenter(centerId);
+      // refresh both reviews list and popular tags after update
+      const [reviewsData, popularTagsData] = await Promise.all([
+        reviewAPI.getReviewsByCenter(centerId),
+        tagAPI.getPopularCenterTags(centerId, 5),
+      ]);
       setReviews(reviewsData);
+      setPopularTags(popularTagsData);
     } catch (err) {
       console.error("Error updating review:", err);
       alert("Failed to update review. Please try again.");
@@ -204,6 +217,21 @@ const Reviews = () => {
                   </div>
                 )}
               </div>
+
+              {/* popular tags section - only show if tags exist*/}
+              {popularTags.length > 0 && (
+                <div className="center-popular-tags">
+                  <div className="popular-tags-title">Associated Tags:</div>
+                  <div className="popular-tags-list">
+                    {popularTags.map((tag) => (
+                      <span key={tag.id} className="popular-tag">
+                        {tag.name}
+                        <span className="tag-count">({tag.usage_count})</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -227,14 +255,16 @@ const Reviews = () => {
               onCancel={() => setShowWriteReviewForm(false)}
               onSuccess={async () => {
                 setShowWriteReviewForm(false);
-                // refresh reviews list after successful submission
+                // refresh both reviews list and popular tags after successful submission
                 try {
-                  const reviewsData = await reviewAPI.getReviewsByCenter(
-                    centerId
-                  );
+                  const [reviewsData, popularTagsData] = await Promise.all([
+                    reviewAPI.getReviewsByCenter(centerId),
+                    tagAPI.getPopularCenterTags(centerId, 5),
+                  ]);
                   setReviews(reviewsData);
+                  setPopularTags(popularTagsData);
                 } catch (err) {
-                  console.error("Error refreshing reviews:", err);
+                  console.error("Error refreshing data:", err);
                 }
               }}
             />
@@ -282,6 +312,18 @@ const Reviews = () => {
                     <div className="review-comment">
                       <p>{review.comment}</p>
                     </div>
+
+                    {/* display review tags if they exist */}
+                    {review.reviewTags && review.reviewTags.length > 0 && (
+                      <div className="review-tags">
+                        {/* render each tag */}
+                        {review.reviewTags.map((reviewTag) => (
+                          <span key={reviewTag.id} className="review-tag">
+                            {reviewTag.tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
                     {/* display review images if they exist */}
                     {review.images && review.images.length > 0 && (

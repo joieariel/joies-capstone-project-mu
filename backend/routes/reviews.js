@@ -9,7 +9,7 @@ const getUserIdFromSupabase = async (supabaseUserId) => {
   const user = await prisma.user.findUnique({
     // find user record by supabase id field and return id
     where: { supabase_user_id: supabaseUserId },
-    select: { id: true }
+    select: { id: true },
   });
   return user?.id;
 };
@@ -28,6 +28,12 @@ router.get("/", async (req, res) => {
           },
         },
         images: true,
+        // include reviewTags relationship and include tag data
+        reviewTags: {
+          include: {
+            tag: true,
+          },
+        },
       },
       orderBy: { created_at: "desc" },
     });
@@ -56,7 +62,13 @@ router.get("/center/:center_id", async (req, res) => {
             username: true,
           },
         },
+        // include reviewTags relationship and include tag data
         images: true,
+        reviewTags: {
+          include: {
+            tag: true,
+          },
+        },
       },
       orderBy: { created_at: "desc" }, // sort by newest first
     });
@@ -64,9 +76,10 @@ router.get("/center/:center_id", async (req, res) => {
     res.json(reviews);
   } catch (error) {
     console.error("Error fetching reviews:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to fetch reviews for community center", details: error.message }); //more detailed error message
+    res.status(500).json({
+      error: "Failed to fetch reviews for community center",
+      details: error.message,
+    }); //more detailed error message
   }
 });
 
@@ -85,8 +98,13 @@ router.post("/", authenticateUser, async (req, res) => {
     const { rating, comment, center_id, image_urls, selected_tags } = req.body;
 
     // validate if selected_tags exists and is an array with maximum 5 tags
-    if (selected_tags && (!Array.isArray(selected_tags) || selected_tags.length > 5)) {
-      return res.status(400).json({ error: "selected_tags must be an array with maximum 5 tags" });
+    if (
+      selected_tags &&
+      (!Array.isArray(selected_tags) || selected_tags.length > 5)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "selected_tags must be an array with maximum 5 tags" });
     }
 
     const newReview = await prisma.review.create({
@@ -109,11 +127,25 @@ router.post("/", authenticateUser, async (req, res) => {
       },
     });
 
-
-    // handle selected tags - add them to the community center
+    // handle selected tags - add them to the community center and review
     // validate that selected_tags exists and is not empty
     if (selected_tags && selected_tags.length > 0) {
       for (const tagId of selected_tags) {
+        try {
+          // add tag to review using ReviewTag model to link review and tag
+          await prisma.reviewTag.create({
+            data: {
+              review_id: newReview.id, // links to review just created
+              tag_id: parseInt(tagId), // links to selected tag
+            },
+          });
+        } catch (tagError) {
+          // if P2002 (unique constraint violation), tag already exists for this review skip to prevent dups
+          if (tagError.code !== "P2002") {
+            console.error("Error adding tag to review:", tagError);
+          }
+        }
+
         try {
           // attempt to create the center-tag relationship
           // if it already exists, the unique constraint will prevent duplicates
@@ -125,7 +157,7 @@ router.post("/", authenticateUser, async (req, res) => {
           });
         } catch (tagError) {
           // if P2002 (unique constraint violation), tag already exists for this center - skip
-          if (tagError.code !== 'P2002') {
+          if (tagError.code !== "P2002") {
             console.error("Error adding tag to center:", tagError);
           }
         }
@@ -134,7 +166,7 @@ router.post("/", authenticateUser, async (req, res) => {
 
     // if image urls are provided
     if (image_urls && image_urls.length > 0) {
-        //create multiple ReviewImage records
+      //create multiple ReviewImage records
       await prisma.reviewImage.createMany({
         data: image_urls.map((url) => ({
           image_url: url,
@@ -160,12 +192,14 @@ router.post("/", authenticateUser, async (req, res) => {
       // return review w images
       res.status(201).json(reviewWithImages);
     } else {
-        // if no images provide, return review as is
+      // if no images provide, return review as is
       res.status(201).json(newReview);
     }
   } catch (error) {
     console.error("Error creating review:", error);
-    res.status(500).json({ error: "Failed to create review", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to create review", details: error.message });
   }
 });
 
@@ -177,8 +211,13 @@ router.put("/:id", authenticateUser, async (req, res) => {
     const { rating, comment, image_urls, selected_tags } = req.body;
 
     // validate selected_tags if provided
-    if (selected_tags && (!Array.isArray(selected_tags) || selected_tags.length > 5)) {
-      return res.status(400).json({ error: "selected_tags must be an array with maximum 5 tags" });
+    if (
+      selected_tags &&
+      (!Array.isArray(selected_tags) || selected_tags.length > 3)
+    ) {
+      return res
+        .status(400)
+        .json({ error: "selected_tags must be an array with maximum 3 tags" });
     }
 
     // get db user ID from authenticated user
@@ -190,7 +229,7 @@ router.put("/:id", authenticateUser, async (req, res) => {
     // check if the review exists and belongs to the authenticated user
     const existingReview = await prisma.review.findUnique({
       where: { id: parseInt(id) },
-      select: { user_id: true, center_id: true } // add centerid bc we need to know which center to add tags to
+      select: { user_id: true, center_id: true }, // add centerid bc we need to know which center to add tags to
     });
 
     if (!existingReview) {
@@ -200,7 +239,7 @@ router.put("/:id", authenticateUser, async (req, res) => {
     // only the review author can update their review
     if (existingReview.user_id !== userId) {
       return res.status(403).json({
-        error: "Access denied. You can only edit your own reviews."
+        error: "Access denied. You can only edit your own reviews.",
       });
     }
 
@@ -213,10 +252,31 @@ router.put("/:id", authenticateUser, async (req, res) => {
       },
     });
 
-    // handle selected tags - add them to the community center
-    // same a create route, but uses existingReview.center_id instead
+    // handle selected tags - update review tags and add to community center
     if (selected_tags && selected_tags.length > 0) {
+      // first, remove existing tags from review
+      // ensures old tag selection is replaced with the new one
+      await prisma.reviewTag.deleteMany({
+        where: { review_id: parseInt(id) },
+      });
+
+      // then add new tags to review and center
       for (const tagId of selected_tags) {
+        try {
+          // create new reviewtag entries for updated selection (add tag to review)
+          await prisma.reviewTag.create({
+            data: {
+              review_id: parseInt(id), // links to review just updated
+              tag_id: parseInt(tagId), // links to newly selected tag
+            },
+          });
+        } catch (tagError) {
+          // if P2002 (unique constraint violation), tag already exists for this review - skip
+          if (tagError.code !== "P2002") {
+            console.error("Error adding tag to review:", tagError);
+          }
+        }
+
         try {
           // attempt to create the center-tag relationship
           // if it already exists, the unique constraint will prevent duplicates
@@ -228,7 +288,7 @@ router.put("/:id", authenticateUser, async (req, res) => {
           });
         } catch (tagError) {
           // if P2002 (unique constraint violation), tag already exists for this center - skip
-          if (tagError.code !== 'P2002') {
+          if (tagError.code !== "P2002") {
             console.error("Error adding tag to center:", tagError);
           }
         }
@@ -272,13 +332,16 @@ router.put("/:id", authenticateUser, async (req, res) => {
     res.json(reviewWithImages);
   } catch (error) {
     console.error("Error updating review:", error);
-    res.status(500).json({ error: "Failed to update review", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to update review", details: error.message });
   }
 });
 
 // (DELETE) delete existing review
 //protected - requires authentication and authorization
-router.delete("/:id", authenticateUser, async (req, res) => { // added authenticateUser middleware
+router.delete("/:id", authenticateUser, async (req, res) => {
+  // added authenticateUser middleware
   try {
     const { id } = req.params;
 
@@ -289,7 +352,7 @@ router.delete("/:id", authenticateUser, async (req, res) => { // added authentic
 
     const existingReview = await prisma.review.findUnique({
       where: { id: parseInt(id) },
-      select: { user_id: true }
+      select: { user_id: true },
     });
 
     if (!existingReview) {
@@ -299,12 +362,17 @@ router.delete("/:id", authenticateUser, async (req, res) => { // added authentic
     // only the review author can delete their review
     if (existingReview.user_id !== userId) {
       return res.status(403).json({
-        error: "Access denied. You can only delete your own reviews."
+        error: "Access denied. You can only delete your own reviews.",
       });
     }
 
     // first delete all associated images
     await prisma.reviewImage.deleteMany({
+      where: { review_id: parseInt(id) },
+    });
+
+    // delete all associated review tags
+    await prisma.reviewTag.deleteMany({
       where: { review_id: parseInt(id) },
     });
 
@@ -316,7 +384,9 @@ router.delete("/:id", authenticateUser, async (req, res) => { // added authentic
     res.status(204).send();
   } catch (error) {
     console.error("Error deleting review:", error);
-    res.status(500).json({ error: "Failed to delete review", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to delete review", details: error.message });
   }
 });
 
@@ -333,19 +403,19 @@ router.post("/:id/images", authenticateUser, async (req, res) => {
     const { image_urls } = req.body;
 
     if (!image_urls || !Array.isArray(image_urls) || image_urls.length === 0) {
-      return res.status(400).json({ error: "image_urls array is required and cannot be empty" });
+      return res
+        .status(400)
+        .json({ error: "image_urls array is required and cannot be empty" });
     }
-
 
     const userId = await getUserIdFromSupabase(req.user.id);
     if (!userId) {
       return res.status(400).json({ error: "User not found in database" });
     }
 
-
     const review = await prisma.review.findUnique({
       where: { id: parseInt(id) },
-      select: { user_id: true }
+      select: { user_id: true },
     });
 
     if (!review) {
@@ -355,7 +425,7 @@ router.post("/:id/images", authenticateUser, async (req, res) => {
     // only the review author can add images to their review
     if (review.user_id !== userId) {
       return res.status(403).json({
-        error: "Access denied. You can only add images to your own reviews."
+        error: "Access denied. You can only add images to your own reviews.",
       });
     }
 
@@ -386,7 +456,10 @@ router.post("/:id/images", authenticateUser, async (req, res) => {
     res.status(201).json(updatedReview);
   } catch (error) {
     console.error("Error adding images to review:", error);
-    res.status(500).json({ error: "Failed to add images to review", details: error.message });
+    res.status(500).json({
+      error: "Failed to add images to review",
+      details: error.message,
+    });
   }
 });
 
@@ -403,7 +476,7 @@ router.delete("/:id/images/:image_id", authenticateUser, async (req, res) => {
 
     const review = await prisma.review.findUnique({
       where: { id: parseInt(id) },
-      select: { user_id: true }
+      select: { user_id: true },
     });
 
     if (!review) {
@@ -413,7 +486,8 @@ router.delete("/:id/images/:image_id", authenticateUser, async (req, res) => {
     // only the review author can delete images from their review
     if (review.user_id !== userId) {
       return res.status(403).json({
-        error: "Access denied. You can only delete images from your own reviews."
+        error:
+          "Access denied. You can only delete images from your own reviews.",
       });
     }
 
@@ -426,7 +500,9 @@ router.delete("/:id/images/:image_id", authenticateUser, async (req, res) => {
     });
 
     if (!image) {
-      return res.status(404).json({ error: "Image not found or does not belong to this review" });
+      return res
+        .status(404)
+        .json({ error: "Image not found or does not belong to this review" });
     }
 
     // delete the image
@@ -437,7 +513,9 @@ router.delete("/:id/images/:image_id", authenticateUser, async (req, res) => {
     res.status(204).send();
   } catch (error) {
     console.error("Error deleting image:", error);
-    res.status(500).json({ error: "Failed to delete image", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to delete image", details: error.message });
   }
 });
 

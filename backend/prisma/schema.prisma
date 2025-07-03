@@ -52,6 +52,7 @@ model Review {
 
 
  images ReviewImage[]
+ reviewTags ReviewTag[] // relationship to junction table for review-specific tags
 }
 
 
@@ -101,6 +102,7 @@ model Tag {
  name        String   @unique // tag label - made unique to prevent duplicates
 
  centerTags  CenterTag[] // relatinoship to junction table
+ reviewTags  ReviewTag[] // relationship to junction table for review-specific tags
 }
 
 // new junction table for many-to-many relationship between CommunityCenter and Tag
@@ -113,4 +115,16 @@ model CenterTag {
  tag         Tag             @relation(fields: [tag_id], references: [id])
 
  @@unique([center_id, tag_id]) // to prevent duplicate tag assignments
+}
+
+// junction table for many-to-many relationship between Review and Tag
+model ReviewTag {
+ id          Int      @id @default(autoincrement())
+ review_id   Int
+ tag_id      Int
+
+ review      Review @relation(fields: [review_id], references: [id])
+ tag         Tag    @relation(fields: [tag_id], references: [id])
+
+ @@unique([review_id, tag_id]) // to prevent duplicate tag assignments for same review
 }
