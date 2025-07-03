@@ -32,9 +32,10 @@ const Banner = () => {
             connected world.
 
             <br />
-            Whether you're looking to get connected, grow your skills, or give back — WiFind
-            helps you bridge the digital gap. Discover local resources, explore opportunities,
-            and join a community working toward digital equity.
+            Whether you're looking to get connected, grow your skills, or give
+            back — WiFind helps you bridge the digital gap. Discover local
+            resources, explore opportunities, and join a community working
+            toward digital equity.
           </p>
 
           <div className="banner-btns">

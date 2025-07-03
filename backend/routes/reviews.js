@@ -131,36 +131,36 @@ router.post("/", authenticateUser, async (req, res) => {
     // validate that selected_tags exists and is not empty
     if (selected_tags && selected_tags.length > 0) {
       for (const tagId of selected_tags) {
-        try {
-          // add tag to review using ReviewTag model to link review and tag
-          await prisma.reviewTag.create({
-            data: {
-              review_id: newReview.id, // links to review just created
-              tag_id: parseInt(tagId), // links to selected tag
+        // add tag to review using ReviewTag model to link review and tag
+        await prisma.reviewTag.upsert({
+          where: {
+            review_id_tag_id: {
+              review_id: newReview.id,
+              tag_id: parseInt(tagId),
             },
-          });
-        } catch (tagError) {
-          // if P2002 (unique constraint violation), tag already exists for this review skip to prevent dups
-          if (tagError.code !== "P2002") {
-            console.error("Error adding tag to review:", tagError);
-          }
-        }
+          },
+          update: {}, // no updates needed if it exists
+          create: {
+            review_id: newReview.id, // links to review just created
+            tag_id: parseInt(tagId), // links to selected tag
+          },
+        });
 
-        try {
-          // attempt to create the center-tag relationship
-          // if it already exists, the unique constraint will prevent duplicates
-          await prisma.centerTag.create({
-            data: {
+        // attempt to create the center-tag relationship
+        // if it already exists, upsert will prevent duplicates
+        await prisma.centerTag.upsert({
+          where: {
+            center_id_tag_id: {
               center_id: parseInt(center_id),
               tag_id: parseInt(tagId),
             },
-          });
-        } catch (tagError) {
-          // if P2002 (unique constraint violation), tag already exists for this center - skip
-          if (tagError.code !== "P2002") {
-            console.error("Error adding tag to center:", tagError);
-          }
-        }
+          },
+          update: {}, // no updates needed if it exists
+          create: {
+            center_id: parseInt(center_id),
+            tag_id: parseInt(tagId),
+          },
+        });
       }
     }
 
@@ -262,36 +262,36 @@ router.put("/:id", authenticateUser, async (req, res) => {
 
       // then add new tags to review and center
       for (const tagId of selected_tags) {
-        try {
-          // create new reviewtag entries for updated selection (add tag to review)
-          await prisma.reviewTag.create({
-            data: {
-              review_id: parseInt(id), // links to review just updated
-              tag_id: parseInt(tagId), // links to newly selected tag
+        // create new reviewtag entries for updated selection (add tag to review)
+        await prisma.reviewTag.upsert({
+          where: {
+            review_id_tag_id: {
+              review_id: parseInt(id),
+              tag_id: parseInt(tagId),
             },
-          });
-        } catch (tagError) {
-          // if P2002 (unique constraint violation), tag already exists for this review - skip
-          if (tagError.code !== "P2002") {
-            console.error("Error adding tag to review:", tagError);
-          }
-        }
+          },
+          update: {}, // No updates needed if it exists
+          create: {
+            review_id: parseInt(id), // links to review just updated
+            tag_id: parseInt(tagId), // links to newly selected tag
+          },
+        });
 
-        try {
-          // attempt to create the center-tag relationship
-          // if it already exists, the unique constraint will prevent duplicates
-          await prisma.centerTag.create({
-            data: {
+        // attempt to create the center-tag relationship
+        // if it already exists, upsert will prevent duplicates
+        await prisma.centerTag.upsert({
+          where: {
+            center_id_tag_id: {
               center_id: existingReview.center_id,
               tag_id: parseInt(tagId),
             },
-          });
-        } catch (tagError) {
-          // if P2002 (unique constraint violation), tag already exists for this center - skip
-          if (tagError.code !== "P2002") {
-            console.error("Error adding tag to center:", tagError);
-          }
-        }
+          },
+          update: {}, // No updates needed if it exists
+          create: {
+            center_id: existingReview.center_id,
+            tag_id: parseInt(tagId),
+          },
+        });
       }
     }
 
