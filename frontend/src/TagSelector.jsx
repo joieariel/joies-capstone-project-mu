@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "./TagSelector.css";
 import { tagAPI } from "./api";
+import { MAX_TAGS_PER_REVIEW } from "./constants";
 
 // destructuring props to make it easier to use with default values
-const TagSelector = ({ selectedTags = [], onTagsChange, maxTags = 3 }) => {
+const TagSelector = ({
+  selectedTags = [],
+  onTagsChange,
+  maxTags = MAX_TAGS_PER_REVIEW,
+}) => {
   // state for available tags from the api
   const [availableTags, setAvailableTags] = useState([]);
   // state for loading and error handling
