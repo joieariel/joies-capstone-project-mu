@@ -82,7 +82,12 @@ router.post("/", authenticateUser, async (req, res) => {
     }
 
     // extract data from request body (no longer accepting user_id since we get it from authentication)
-    const { rating, comment, center_id, image_urls } = req.body;
+    const { rating, comment, center_id, image_urls, selected_tags } = req.body;
+
+    // validate if selected_tags exists and is an array with maximum 5 tags
+    if (selected_tags && (!Array.isArray(selected_tags) || selected_tags.length > 5)) {
+      return res.status(400).json({ error: "selected_tags must be an array with maximum 5 tags" });
+    }
 
     const newReview = await prisma.review.create({
       data: {
@@ -103,6 +108,29 @@ router.post("/", authenticateUser, async (req, res) => {
         },
       },
     });
+
+
+    // handle selected tags - add them to the community center
+    // validate that selected_tags exists and is not empty
+    if (selected_tags && selected_tags.length > 0) {
+      for (const tagId of selected_tags) {
+        try {
+          // attempt to create the center-tag relationship
+          // if it already exists, the unique constraint will prevent duplicates
+          await prisma.centerTag.create({
+            data: {
+              center_id: parseInt(center_id),
+              tag_id: parseInt(tagId),
+            },
+          });
+        } catch (tagError) {
+          // if P2002 (unique constraint violation), tag already exists for this center - skip
+          if (tagError.code !== 'P2002') {
+            console.error("Error adding tag to center:", tagError);
+          }
+        }
+      }
+    }
 
     // if image urls are provided
     if (image_urls && image_urls.length > 0) {
@@ -136,7 +164,8 @@ router.post("/", authenticateUser, async (req, res) => {
       res.status(201).json(newReview);
     }
   } catch (error) {
-    res.status(500).json({ error: "Failed to create review" });
+    console.error("Error creating review:", error);
+    res.status(500).json({ error: "Failed to create review", details: error.message });
   }
 });
 
@@ -145,7 +174,12 @@ router.post("/", authenticateUser, async (req, res) => {
 router.put("/:id", authenticateUser, async (req, res) => {
   try {
     const { id } = req.params;
-    const { rating, comment, image_urls } = req.body;
+    const { rating, comment, image_urls, selected_tags } = req.body;
+
+    // validate selected_tags if provided
+    if (selected_tags && (!Array.isArray(selected_tags) || selected_tags.length > 5)) {
+      return res.status(400).json({ error: "selected_tags must be an array with maximum 5 tags" });
+    }
 
     // get db user ID from authenticated user
     const userId = await getUserIdFromSupabase(req.user.id);
@@ -156,7 +190,7 @@ router.put("/:id", authenticateUser, async (req, res) => {
     // check if the review exists and belongs to the authenticated user
     const existingReview = await prisma.review.findUnique({
       where: { id: parseInt(id) },
-      select: { user_id: true }
+      select: { user_id: true, center_id: true } // add centerid bc we need to know which center to add tags to
     });
 
     if (!existingReview) {
@@ -178,6 +212,28 @@ router.put("/:id", authenticateUser, async (req, res) => {
         comment,
       },
     });
+
+    // handle selected tags - add them to the community center
+    // same a create route, but uses existingReview.center_id instead
+    if (selected_tags && selected_tags.length > 0) {
+      for (const tagId of selected_tags) {
+        try {
+          // attempt to create the center-tag relationship
+          // if it already exists, the unique constraint will prevent duplicates
+          await prisma.centerTag.create({
+            data: {
+              center_id: existingReview.center_id,
+              tag_id: parseInt(tagId),
+            },
+          });
+        } catch (tagError) {
+          // if P2002 (unique constraint violation), tag already exists for this center - skip
+          if (tagError.code !== 'P2002') {
+            console.error("Error adding tag to center:", tagError);
+          }
+        }
+      }
+    }
 
     // if image_urls are provided, update the images
     if (image_urls !== undefined) {

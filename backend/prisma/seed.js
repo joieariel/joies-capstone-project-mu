@@ -2,6 +2,32 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
+  // create predefined tags that users can choose from when writing reviews
+  const tags = [
+    { name: "Family Friendly" },
+    { name: "Fast WiFi" },
+    { name: "Open Late" },
+    { name: "Early Hours" },
+    { name: "Near Transportation" },
+    { name: "24/7" },
+    { name: "Quiet" },
+    { name: "Safe" },
+    { name: "Clean" },
+    { name: " Wheelchair Accessible" },
+    { name: "Printer Access" },
+    { name: "Open Weekends" },
+    { name: "Busy" }
+  ];
+
+  // create each tag using upsert to avoid duplicates
+  for (const tagData of tags) {
+    await prisma.tag.upsert({
+      where: { name: tagData.name },
+      update: {}, // don't update anything if it exists
+      create: tagData, // create if it doesn't exist
+    });
+  }
+
   // Create 5 Community Centers with simple data
   const centers = [
     {

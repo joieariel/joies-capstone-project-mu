@@ -1,0 +1,128 @@
+.tag-selector {
+  margin-bottom: 1.5rem;
+}
+
+.tag-selector-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.tag-selector-info {
+  margin-bottom: 15px;
+}
+
+.selected-count {
+  font-size: 0.9rem;
+  color: #486284;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.max-reached {
+  font-size: 0.85rem;
+  color: #dc3545;
+  font-style: italic;
+  background-color: #f8d7da;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #f5c6cb;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.tag-chip {
+  padding: 8px 16px;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.tag-chip:hover:not(:disabled) {
+  border-color: #486284;
+  background-color: #f8f9fa;
+}
+
+.tag-chip.selected {
+  background-color: #486284;
+  color: white;
+  border-color: #486284;
+}
+
+.tag-chip.selected:hover {
+  background-color: #3a4f6b;
+  border-color: #3a4f6b;
+}
+
+.tag-chip.disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border-color: #dee2e6;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.tag-chip.disabled:hover {
+  border-color: #dee2e6;
+  background-color: #f8f9fa;
+}
+
+.tag-loading {
+  color: #6c757d;
+  font-style: italic;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.tag-error {
+  color: #dc3545;
+  background-color: #f8d7da;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 1px solid #f5c6cb;
+  font-size: 0.9rem;
+}
+
+.no-tags {
+  color: #6c757d;
+  font-style: italic;
+  padding: 20px 0;
+  text-align: center;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .tags-container {
+    gap: 8px;
+  }
+
+  .tag-chip {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  .max-reached {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+}
+
+/* focus styles for accessibility */
+.tag-chip:focus {
+  outline: none;
+  border-color: #486284;
+}

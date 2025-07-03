@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./WriteReview.css";
 import { reviewAPI } from "./api";
+import TagSelector from "./TagSelector";
 
 const WriteReview = ({ centerId, onCancel, onSuccess }) => {
   // state for star rating intial calue 0
@@ -16,6 +17,8 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
   const [imageUrls, setImageUrls] = useState([]);
   // state for new image URL input
   const [newImageUrl, setNewImageUrl] = useState("");
+  // state for selected tags
+  const [selectedTags, setSelectedTags] = useState([]);
 
   // handle star click
   const handleStarClick = (starValue) => {
@@ -82,6 +85,7 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
         center_id: centerId,
         comment: reviewText.trim(), // send the actual review text instead of empty string
         image_urls: imageUrls.filter((url) => url.trim() !== ""), // include image URLs, filter out empty ones
+        selected_tags: selectedTags, // include selected tag ids
       });
 
       // call success callback to close and refresh reviews
@@ -138,6 +142,13 @@ const WriteReview = ({ centerId, onCancel, onSuccess }) => {
             onChange={handleCommentChange}
           />
         </div>
+
+        {/* tag selection section - optional tags */}
+        <TagSelector
+          selectedTags={selectedTags}
+          onTagsChange={setSelectedTags}
+          maxTags={3}
+        />
 
         {/* images section - optional image uploads */}
         <div className="images-section">

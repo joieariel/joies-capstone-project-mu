@@ -156,5 +156,27 @@ export const reviewAPI = {
   },
 };
 
+// api functions for tag operations
+export const tagAPI = {
+  // get all available tags
+  getAllTags: () => apiRequest("/tags"),
+
+  // get tags for a specific community center
+  getCenterTags: (centerId) => apiRequest(`/tags/center/${parseInt(centerId)}`),
+
+  // add a tag to a community center
+  addTagToCenter: (centerId, tagId) =>
+    apiRequest(`/tags/center/${parseInt(centerId)}`, {
+      method: "POST",
+      body: JSON.stringify({ tag_id: tagId }),
+    }),
+
+  // remove a tag from a community center
+  removeTagFromCenter: (centerId, tagId) =>
+    apiRequest(`/tags/center/${parseInt(centerId)}/tag/${parseInt(tagId)}`, {
+      method: "DELETE",
+    }),
+};
+
 // export the base apiRequest function for custom requests
 export { apiRequest };
