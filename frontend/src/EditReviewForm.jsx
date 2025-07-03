@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./EditReviewForm.css";
+import TagSelector from "./TagSelector";
 
 // this component receives a review object as a prop and allows the user to edit its rating, comment, and images
 const EditReviewForm = ({ review, onSave, onCancel }) => {
@@ -15,6 +16,12 @@ const EditReviewForm = ({ review, onSave, onCancel }) => {
   const [newImageUrl, setNewImageUrl] = useState("");
   // loading state for submit button
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // state to manage which tags are selected
+  // initialize with existing tags from reviewTags relationship
+  const [selectedTags, setSelectedTags] = useState(
+    review.reviewTags ? review.reviewTags.map((reviewTag) => reviewTag.tag.id) : []
+  )
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,6 +45,7 @@ const EditReviewForm = ({ review, onSave, onCancel }) => {
         rating: parseInt(rating),
         comment: comment.trim(),
         image_urls: imageUrls.filter((url) => url.trim() !== ""), // remove empty urls
+        selected_tags: selectedTags, // pass selected tags to parent component
       });
       // if successful, parent will handle closing the form and refreshing the data
     } catch (error) {
@@ -102,6 +110,12 @@ const EditReviewForm = ({ review, onSave, onCancel }) => {
             required
           />
         </div>
+        {/* tag selection section - added so users can edit tags when editing review */}
+        <TagSelector
+          selectedTags={selectedTags}
+          onTagsChange={setSelectedTags}
+          maxTags={3}
+          />
 
         {/* images section */}
         <div className="form-group">
