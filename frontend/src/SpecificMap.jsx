@@ -41,10 +41,8 @@ const SpecificMap = () => {
         const data = await response.json();
         // store fetched data in state
         setCenter(data);
-        console.log('Fetched center data:', data);
       } catch (err) {
         setError(err.message);
-        console.error('Error fetching center:', err);
       } finally {
         setLoading(false);
       }
