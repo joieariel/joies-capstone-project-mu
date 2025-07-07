@@ -13,6 +13,8 @@ const MapView = () => {
   const navigate = useNavigate();
   // state to store all cc data
   const [centers, setCenters] = useState([]);
+  // state to store user's current location
+  const [userLocation, setUserLocation] = useState(null);
   //loading and error state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,6 +28,34 @@ const MapView = () => {
   const handleBackClick = () => {
     navigate("/community-centers");
   };
+
+  // useeffect to get user's current location
+  // using built in navigator.geolocation API
+  useEffect(() => {
+    const getCurrentLocation = () => {
+      // if the browser supports geolocation
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setUserLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            });
+          },
+          (error) => {
+            console.error("Error getting location:", error);
+            // fallback will be handled in mapCenter calculation
+            setUserLocation(null);
+          }
+        );
+      } else { // browser doesn't support geolocation
+        // fallback will be handled in mapCenter calculation
+        setUserLocation(null);
+      }
+    };
+
+    getCurrentLocation();
+  }, []);
 
   // useeffect to fetch all cc data from api
   useEffect(() => {
@@ -86,9 +116,10 @@ const MapView = () => {
     );
   }
 
-  // calculate center point for map (avg of all locations)
+  // use user's current location as map center, fallback to average of all community centers if no user location
   const mapCenter =
-    centers.length > 0
+    userLocation ||
+    (centers.length > 0
       ? {
           lat:
             centers.reduce((sum, center) => sum + center.latitude, 0) /
@@ -97,7 +128,7 @@ const MapView = () => {
             centers.reduce((sum, center) => sum + center.longitude, 0) /
             centers.length,
         }
-      : { lat: 40.7128, lng: -74.006 }; // default to NYC if no centers
+      : null); // if no centers, fallback to null
 
   return (
     <div className="mapview-container">
@@ -110,14 +141,33 @@ const MapView = () => {
         <h1 className="mapview-title">All Community Centers</h1>
         <p className="mapview-description">
           Showing {centers.length} community centers on the map
+          <br />
+          Scroll and zoom out to view all markers
+          <br />
+          Click on a marker to view the details of that community center
+
+
         </p>
 
         {centers.length > 0 ? (
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
-            zoom={10}
+            zoom={12}
             center={mapCenter}
           >
+            {/* User location marker */}
+            {userLocation && (
+              <Marker
+                position={userLocation}
+                title="Your Location"
+                icon={{
+                  url: "data:image/svg+xml;charset=UTF-8,%3csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='10' cy='10' r='8' fill='%234285f4' stroke='white' stroke-width='2'/%3e%3c/svg%3e",
+                  scaledSize: { width: 20, height: 20 },
+                }}
+              />
+            )}
+
+            {/* Community center markers */}
             {centers.map((center) => (
               <Marker
                 key={center.id}
