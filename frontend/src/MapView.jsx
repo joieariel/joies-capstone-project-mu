@@ -43,12 +43,22 @@ const MapView = () => {
             });
           },
           (error) => {
-            console.error("Error getting location:", error);
+            // differentiate between permission denied and other errors
+            if (error.code === error.PERMISSION_DENIED) {
+              console.log("User denied geolocation permission");
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+              console.error("Location information unavailable");
+            } else if (error.code === error.TIMEOUT) {
+              console.error("Location request timed out");
+            } else {
+              console.error("Unknown geolocation error:", error);
+            }
             // fallback will be handled in mapCenter calculation
             setUserLocation(null);
           }
         );
       } else { // browser doesn't support geolocation
+        console.log("Geolocation is not supported by this browser");
         // fallback will be handled in mapCenter calculation
         setUserLocation(null);
       }
