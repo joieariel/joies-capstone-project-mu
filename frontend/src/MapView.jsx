@@ -18,6 +18,8 @@ const MapView = () => {
   //loading and error state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // state to track geolocation permission status
+  const [locationPermissionDenied, setLocationPermissionDenied] = useState(false);
 
   // load google maps api
   const { isLoaded, loadError } = useLoadScript({
@@ -45,7 +47,7 @@ const MapView = () => {
           (error) => {
             // differentiate between permission denied and other errors
             if (error.code === error.PERMISSION_DENIED) {
-              console.log("User denied geolocation permission");
+              setLocationPermissionDenied(true);
             } else if (error.code === error.POSITION_UNAVAILABLE) {
               console.error("Location information unavailable");
             } else if (error.code === error.TIMEOUT) {
@@ -58,7 +60,7 @@ const MapView = () => {
           }
         );
       } else { // browser doesn't support geolocation
-        console.log("Geolocation is not supported by this browser");
+        setLocationPermissionDenied(true);
         // fallback will be handled in mapCenter calculation
         setUserLocation(null);
       }
@@ -149,14 +151,20 @@ const MapView = () => {
       </div>
       <div className="mapview-content">
         <h1 className="mapview-title">All Community Centers</h1>
+
+        {/* show location permission message if permission was denied */}
+        {locationPermissionDenied && (
+          <div className="permission-notice">
+            <strong>Location Access Unavailable:</strong> Unable to show your current location on the map as location permission was not granted. You can still view all community center locations below.
+          </div>
+        )}
+
         <p className="mapview-description">
           Showing {centers.length} community centers on the map
           <br />
           Scroll and zoom out to view all markers
           <br />
           Click on a marker to view the details of that community center
-
-
         </p>
 
         {centers.length > 0 ? (
