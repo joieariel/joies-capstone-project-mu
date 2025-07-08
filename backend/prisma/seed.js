@@ -182,10 +182,6 @@ async function main() {
       });
     }
   }
-
-  console.log('✅ Seeded community centers with operating hours');
-  console.log('📍 Downtown Digital Hub is open 24/7');
-  console.log('📍 Other centers have varied operating hours');
 }
 
 main()
