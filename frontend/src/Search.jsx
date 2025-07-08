@@ -7,6 +7,7 @@ const Search = ({ onSearch }) => {
     distance: [],
     hours: [],
     rating: [],
+    tags: [],
   });
 
   // predefined filter options
@@ -26,6 +27,29 @@ const Search = ({ onSearch }) => {
     { id: "highestRated", label: "Highest Rated" },
     { id: "mostReviewed", label: "Most Reviewed" },
     { id: "recentlyReviewed", label: "Most Recently Reviewed" },
+  ];
+
+  // TODO: adding tag options as filters
+  const tagOptions = [
+    { id: "wheelchair", label: "Wheelchair Accessible" },
+    { id: "24/7", label: "24/7" },
+    { id: "busy", label: "Busy" },
+    { id: "clean", label: "Clean" },
+    { id: "earlyHours", label: "Early Hours" },
+    { id: "familyFriendly", label: "Family Friendly" },
+    { id: "fastWiFi", label: "Fast WiFi" },
+    { id: "freeCoffee", label: "Free Coffee" },
+    { id: "freeWiFi", label: "Free WiFi" },
+    { id: "goodWifiSpeed", label: "Good Wifi Speed" },
+    { id: "lateHours", label: "Late Hours" },
+    { id: "nearTransport", label: "Near Transportation" },
+    { id: "openLate", label: "Open Late" },
+    { id: "openWeekends", label: "Open Weekends" },
+    { id: "petsWelcome", label: "Pet Welcome" },
+    { id: "printerAccess", label: "Printer Access" },
+    { id: "quiet", label: "Quiet" },
+    { id: "safe", label: "Safe" },
+    { id: "spacious", label: "Spacious" },
   ];
 
   // handle filter selection/deselection
@@ -64,6 +88,7 @@ const Search = ({ onSearch }) => {
       distance: [],
       hours: [],
       rating: [],
+      tags: [],
     };
     setSelectedFilters(clearedFilters);
     onSearch(clearedFilters);
@@ -119,8 +144,9 @@ const Search = ({ onSearch }) => {
         {renderFilterSection("Distance", distanceOptions, "distance")}
         {renderFilterSection("Operating Hours", hoursOptions, "hours")}
         {renderFilterSection("Rating & Reviews", ratingOptions, "rating")}
+        {renderFilterSection("Tags", tagOptions, "tags")}
       </div>
-        {/* summary section to show the number of active filters */}
+      {/* summary section to show the number of active filters */}
       {hasActiveFilters() && (
         <div className="active-filters-summary">
           <div className="summary-label">Active Filters:</div>

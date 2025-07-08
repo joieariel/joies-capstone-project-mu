@@ -4,6 +4,9 @@ import { communityAPI } from "./api"; // to get acces to communtiy center functi
 import "./CommunityCenter.css";
 import Search from "./Search";
 
+// TODO: import getUserLocation function from api.js when added
+// import { communityAPI, getUserLocation } from "./api";
+
 const CommunityCenter = () => {
   // state to store list of centes from db, initialized as empty
   const [centers, setCenters] = useState([]);
@@ -15,6 +18,8 @@ const CommunityCenter = () => {
     hours: [],
     rating: [],
   });
+
+  // TODO: add new state variables for advanced search functionality
 
   const navigate = useNavigate();
 
@@ -39,9 +44,15 @@ const CommunityCenter = () => {
   };
 
   // function to handle search filters change
+  // TODO: update this function to actually perform the search with filters
+  // instead of just updating state, call the new getCentersWithFilters API function
+  // this should: 1) set loading state, 2) call API with filters and userLocation, 3) update centers state
   const handleSearch = (filters) => {
     setSearchFilters(filters); // update searchFilters state
+    // TODO: add actual search logic here
   };
+
+  // TODO: add new useEffect to get user location on component mount
 
   useEffect(() => {
     const fetchCenters = async () => {
@@ -105,6 +116,11 @@ const CommunityCenter = () => {
             Map View
           </button>
         </div>
+        {/* TODO: add loading and error states for search functionality */}
+
+        {/* TODO: add search results summary */}
+
+
         {/* loop through each communiy center in array and create one card for each center returned from db*/}
         <div className="centers-grid">
           {centers.map((center) => (
@@ -126,6 +142,10 @@ const CommunityCenter = () => {
                 <p className="center-zip">
                   <strong>Zip Code:</strong> {center.zip_code}
                 </p>
+
+                {/* TODO: add new fields from advanced search results */}
+
+
                 <div className="center-buttons">
                   <button
                     className="reviews-button"

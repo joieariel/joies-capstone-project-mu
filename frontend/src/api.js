@@ -97,7 +97,19 @@ export const communityAPI = {
   getCenterById: (centerId) => apiRequest(`/communityCenters/${centerId}`),
   getCentersByZipCode: (zipCode) =>
     apiRequest(`/communityCenters?zip_code=${zipCode}`),
+
+  // TODO: add new function here for advanced search filtering
+  // getCentersWithFilters: async (filters, userLocation = null) => { ... }
+  // this function will take the filters object from Search component
+  // and convert it to query parameters to send to the backend
+  // filters object structure: { distance: [], hours: [], rating: [] }
+  // userLocation structure: { latitude: number, longitude: number }
 };
+
+// TODO: add new helper function here for getting user's current location
+// function will use navigator.geolocation.getCurrentPosition()
+// to get the user's current coordinates for distance filtering
+// handle permission denied, unavailable, and timeout errors
 
 export const reviewAPI = {
   // get all reviews (for testing purposes)
