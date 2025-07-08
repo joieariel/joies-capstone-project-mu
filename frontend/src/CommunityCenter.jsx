@@ -2,13 +2,19 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { communityAPI } from "./api"; // to get acces to communtiy center functions
 import "./CommunityCenter.css";
+import Search from "./Search";
 
 const CommunityCenter = () => {
   // state to store list of centes from db, initialized as empty
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  // state to track search query for advanced search feature
+  const [searchQuery, setSearchQuery] = useState("");
+
   const navigate = useNavigate();
+
+
 
   // when user clicks map view button at top of page, show the map view ( navigate to map page and show all community centers on map)
   const handleMapViewClick = () => {
@@ -29,6 +35,11 @@ const CommunityCenter = () => {
     // centerId becomes a url param that the Map component can read
     navigate(`/map/${centerId}`);
   }
+
+  // function to handle search query change
+  const handleSearch = (query) => {
+    setSearchQuery(query); // update searchQuery state
+  };
 
 
   useEffect(() => {
@@ -77,6 +88,9 @@ const CommunityCenter = () => {
         <h1 className="community-center-title">
           Find community centers near you
         </h1>
+        <div className="community-center-search">
+          <Search onSearch={handleSearch} />
+        </div>
         <div className="community-center-nav">
         {/* add a nav within the communnity center page to switch from list view to map view */}
         <button className="mapview-button" onClick={() => handleMapViewClick()}>Map View</button>
