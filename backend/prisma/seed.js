@@ -97,13 +97,11 @@ async function main() {
     },
   ];
 
-  // create and store each community center using upsert to prevent duplicates
+  // create and store each community center
   const createdCenters = [];
   for (const centerData of centers) {
-    const center = await prisma.communityCenter.upsert({
-      where: { name: centerData.name },
-      update: {}, // don't update anything if it exists
-      create: centerData, // create if it doesn't exist
+    const center = await prisma.communityCenter.create({
+      data: centerData
     });
     createdCenters.push(center);
   }
@@ -171,13 +169,16 @@ async function main() {
         dayPattern = hourPattern.weekday;
       }
 
+      // creates one centerhours record for each center and day combo
       await prisma.centerHours.create({
         data: {
-          center_id: center.id,
           day: day,
           open_time: dayPattern.open_time,
           close_time: dayPattern.close_time,
-          is_closed: dayPattern.is_closed
+          is_closed: dayPattern.is_closed,
+          center: {
+            connect: { id: center.id }
+          }
         }
       });
     }

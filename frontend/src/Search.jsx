@@ -1,53 +1,138 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Search.css";
 
 const Search = ({ onSearch }) => {
-  // state to track the search query
-  const [query, setQuery] = useState("");
+  // state to track all selected filters
+  const [selectedFilters, setSelectedFilters] = useState({
+    distance: [],
+    hours: [],
+    rating: [],
+  });
 
-  // handle input changes
-  const handleInputChange = (e) => {
-    setQuery(e.target.value);
+  // predefined filter options
+  const distanceOptions = [
+    { id: "5miles", label: "Within 5 miles" },
+    { id: "10miles", label: "Within 10 miles" },
+    { id: "25miles", label: "Within 25+ miles" },
+  ];
+
+  const hoursOptions = [
+    { id: "openNow", label: "Open Now" },
+    { id: "openLate", label: "Open Late (until 9pm+)" },
+    { id: "openWeekends", label: "Open Weekends" },
+  ];
+
+  const ratingOptions = [
+    { id: "highestRated", label: "Highest Rated" },
+    { id: "mostReviewed", label: "Most Reviewed" },
+    { id: "recentlyReviewed", label: "Most Recently Reviewed" },
+  ];
+
+  // handle filter selection/deselection
+  const handleFilterClick = (filterType, filterId) => {
+    setSelectedFilters((prevFilters) => {
+      const currentFilters = prevFilters[filterType];
+      let newFilters;
+
+      if (currentFilters.includes(filterId)) {
+        // filter is already selected, remove it
+        newFilters = currentFilters.filter((id) => id !== filterId);
+      } else {
+        // filter is not selected, add it
+        newFilters = [...currentFilters, filterId];
+      }
+
+      const updatedFilters = {
+        ...prevFilters, // keep other filter types as is
+        [filterType]: newFilters, // update the specific filter type
+      };
+
+      // call parent component's callback with new filters (pass in filter object)
+      onSearch(updatedFilters);
+      return updatedFilters;
+    });
   };
 
-  // handle search submission
-  const handleSearch = () => {
-    onSearch(query);
+  // helper to check if a filter is selected used to style the filter if its toggled or not
+  const isFilterSelected = (filterType, filterId) => {
+    return selectedFilters[filterType].includes(filterId);
   };
 
-  // handle key down (for Enter key)
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
+  // clear all selected filters by resetting them all to empty arrays
+  const handleClearAll = () => {
+    const clearedFilters = {
+      distance: [],
+      hours: [],
+      rating: [],
+    };
+    setSelectedFilters(clearedFilters);
+    onSearch(clearedFilters);
   };
 
-  // clear the search input
-  const handleClear = () => {
-    setQuery("");
-    onSearch("");
+  // helper to check if any filters are selected
+  const hasActiveFilters = () => {
+    return Object.values(selectedFilters).some((filters) => filters.length > 0);
+  };
+
+  // render filter section with chips
+  // takes in title, options, and filter type for the filter chip sections so its consistent
+  const renderFilterSection = (title, options, filterType) => {
+    return (
+      <div className="filter-section">
+        <div className="filter-section-label">{title}</div>
+        <div className="filter-chips-container">
+          {/* loop thru each option in array to make it a button (chip) */}
+          {options.map((option) => {
+            const isSelected = isFilterSelected(filterType, option.id);
+            return (
+              <button
+                key={option.id}
+                type="button"
+                className={`filter-chip ${isSelected ? "selected" : ""}`}
+                onClick={() => handleFilterClick(filterType, option.id)}
+                title={`Click to ${isSelected ? "deselect" : "select"} ${
+                  option.label
+                }`}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="search-container">
-      <div className="search-bar">
-        <input
-          type="text"
-          placeholder="Search community centers..."
-          value={query}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          className="search-input"
-        />
-        <div className="search-button-container">
-          <button onClick={handleSearch} className="search-button">
-            Search
+      <div className="search-header">
+        <h3 className="search-title">Search for Community Centers</h3>
+        {hasActiveFilters() && (
+          <button onClick={handleClearAll} className="clear-all-button">
+            Clear All Filters
           </button>
-          <button onClick={handleClear} className="clear-button-text">
-            Clear
-          </button>
-        </div>
+        )}
       </div>
+      {/* container for all fsections */}
+      <div className="advanced-search-container">
+        {/* the 3 filter sections using reusable render function */}
+        {renderFilterSection("Distance", distanceOptions, "distance")}
+        {renderFilterSection("Operating Hours", hoursOptions, "hours")}
+        {renderFilterSection("Rating & Reviews", ratingOptions, "rating")}
+      </div>
+        {/* summary section to show the number of active filters */}
+      {hasActiveFilters() && (
+        <div className="active-filters-summary">
+          <div className="summary-label">Active Filters:</div>
+          <div className="summary-count">
+            {Object.values(selectedFilters).reduce(
+              (total, filters) => total + filters.length,
+              0
+            )}{" "}
+            filters selected
+          </div>
+        </div>
+      )}
     </div>
   );
 };
