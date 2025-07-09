@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.2",
     "@prisma/client": "^6.11.1",
     "@supabase/supabase-js": "^2.50.2",
     "cors": "^2.8.5",

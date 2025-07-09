@@ -1,7 +1,9 @@
 const express = require("express"); //import express
 const { PrismaClient } = require("@prisma/client"); // require prisma client
+const { Client } = require("@googlemaps/google-maps-services-js"); // import Google Maps client
 const router = express.Router(); // import express router
 const prisma = new PrismaClient(); // create new prisma client
+const googleMapsClient = new Client({}); // create Google Maps client
 
 // helper functions  for advanced search functionality (distance, operating hours checks, rating)
 // maybe add to utils.js file later
@@ -13,34 +15,26 @@ class Coordinate {
     this.longitude = longitude;
   }
 }
-// TODO: change to user distance matrix api instead of calculating distance manually!!
+// get distances from Google Distance Matrix API
+const getDistancesFromGoogle = async (userCoord, centerCoords) => {
+  try {
+    const response = await googleMapsClient.distancematrix({
+      params: {
+        origins: [`${userCoord.latitude},${userCoord.longitude}`],
+        destinations: centerCoords.map(coord => `${coord.latitude},${coord.longitude}`),
+        units: 'imperial', // for miles
+        key: process.env.GOOGLE_MAPS_API_KEY,
+      }
+    });
 
-// calculate the distance using the Haversine formula to calculate miles between two lat/long points
-const calculateDistance = (coord1, coord2) => {
-  const earthRadius = 3959; // earth's radious in miles
-  const latDiff = ((coord2.latitude - coord1.latitude) * Math.PI) / 180; // difference in latitude
-  const lonDiff = ((coord2.longitude - coord1.longitude) * Math.PI) / 180; // difference in longitude
-  // convert lat values to radians for calculations
-  const lat1Rad = (coord1.latitude * Math.PI) / 180;
-  const lat2Rad = (coord2.latitude * Math.PI) / 180;
-  // note: a chord is a line segement that connects 2 points on a sphere (earth)
-  // - half-chord is half the length or chord
-  // calculate the squared half-chord length (haversin) between the 2 poitns (done to simplify the calculations and make more efficient)
-  const sqHalfChord =
-    Math.sin(latDiff / 2) * Math.sin(latDiff / 2) +
-    Math.sin(lonDiff / 2) *
-      Math.sin(lonDiff / 2) *
-      Math.cos(lat1Rad) *
-      Math.cos(lat2Rad);
-
-  // calculate angular distance (arcsin) between the 2 points
-  const angDis =
-    2 * Math.atan2(Math.sqrt(sqHalfChord), Math.sqrt(1 - sqHalfChord));
-  // calculate linear dis between the 2 points using earth's radius var and angular distance var
-  const distance = earthRadius * angDis;
-
-  // return calculate distance in miles
-  return distance;
+    return response.data.rows[0].elements.map(element => ({
+      distance: element.status === 'OK' ? parseFloat(element.distance.text.replace(' mi', '')) : null,
+      duration: element.status === 'OK' ? element.duration.text : null
+    }));
+  } catch (error) {
+    console.error('Google Distance Matrix API error:', error);
+    return null;
+  }
 };
 
 // fucntion to check if a center is currently open based on current day/time vs center hours
@@ -145,39 +139,18 @@ const getCenterStatus = (centerHours, centerTimezone) => {
 };
 
 
-// (GET) fetch all community centers with advanced search filters
-// TODO: update this route to handle new query parameters from frontend Search component
-// new params: distance[], hours[], rating[], userLat, userLng (in addition to existing zip_code)
-// will need to include related data (hours, reviews) in prisma query for filtering
+/*
 router.get("/", async (req, res) => {
   try {
-    // TODO: extract all new query params here (distance, hours, rating, userLat, userLng)
-    // destructure them from req.query along with existing zip_code
+
     const { zip_code, distance, hours, rating, userLat, userLng } = req.query;
 
-    // TODO: update this filter logic to handle zip_code as before
-    // but also prepare for additional filtering steps below
+
     const filter = zip_code ? { zip_code: { equals: zip_code } } : {};
 
-    // TODO: update this prisma query to include related data needed for filtering
-    // add include: { hours: true, reviews: { select: { rating: true, created_at: true } } }
-    // this will give you access to center hours and review data for advanced filtering
-    const communityCenters = await prisma.CommunityCenter.findMany({
+
       where: filter,
     });
-
-    // TODO: add filtering logic here after fetching from database
-    // 1. start with let filteredCenters = communityCenters;
-    // 2. apply distance filtering if distance filters and user location provided
-    //    Example: const userCoord = new Coordinate(parseFloat(userLat), parseFloat(userLng));
-    //    filteredCenters = filteredCenters.filter(center => {
-    //      const centerCoord = new Coordinate(center.latitude, center.longitude);
-    //      const distance = calculateDistance(userCoord, centerCoord);
-    //      return distance <= maxDistance;
-    //    });
-    // 3. apply hours filtering if hours filters provided
-    // 4. apply rating filtering if rating filters provided
-    // 5. map results to add calculated fields (avgRating, reviewCount, distance)
 
     res.json(communityCenters);
   } catch (error) {
@@ -209,5 +182,5 @@ router.get("/:communityCenterId", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch community center" });
   }
 });
-
+*/
 module.exports = router;
