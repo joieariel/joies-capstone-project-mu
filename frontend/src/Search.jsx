@@ -29,8 +29,10 @@ const Search = ({ onSearch }) => {
   ];
 
   const ratingOptions = [
-    { id: "4plus", label: "4+ Stars Only" },
-    { id: "10reviews", label: "10+ Reviews" },
+    { id: "highestRated", label: "Highest Rated" },
+    { id: "mostReviewed", label: "Most Reviewed" },
+    { id: "mostRecentlyReviewed", label: "Most Recently Reviewed" },
+    { id: "recommended", label: "Recommended" }, // will combine the highest rated and most reviewed to recommend the best centers
   ];
 
   // TODO: adding tag options as filters
@@ -80,17 +82,19 @@ const Search = ({ onSearch }) => {
       const currentFilters = prevFilters[filterType];
       let newFilters;
 
-      if (filterType === "distance") {
-        // for distance: single selection only
+      if (filterType === "distance" || filterType === "rating") {
+        // for distance and rating: single selection only
         if (currentFilters.includes(filterId)) {
-          //if clicking the same distance filter, deselect it
+          //if clicking the same filter, deselect it
           newFilters = [];
         } else {
-          // select only this distance filter
+          // select only this filter
           newFilters = [filterId];
-          // hide custom distance if selecting predefined option
-          setShowCustomDistance(false);
-          setCustomDistance("");
+          // hide custom distance if selecting predefined option (only for distance)
+          if (filterType === "distance") {
+            setShowCustomDistance(false);
+            setCustomDistance("");
+          }
         }
       } else {
         // For other filters: multiple selection allowed
