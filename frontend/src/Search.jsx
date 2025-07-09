@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./Search.css";
 
 const Search = ({ onSearch }) => {
@@ -9,11 +9,16 @@ const Search = ({ onSearch }) => {
     rating: [],
   });
 
+  // state for custom distance input
+  const [customDistance, setCustomDistance] = useState("");
+  const [showCustomDistance, setShowCustomDistance] = useState(false);
+
   // predefined filter options
   const distanceOptions = [
     { id: "5miles", label: "Within 5 miles" },
     { id: "10miles", label: "Within 10 miles" },
     { id: "25miles", label: "Within 25+ miles" },
+    { id: "custom", label: "Custom Distance" },
   ];
 
   const hoursOptions = [
@@ -23,23 +28,55 @@ const Search = ({ onSearch }) => {
   ];
 
   const ratingOptions = [
-    { id: "highestRated", label: "Highest Rated" },
-    { id: "mostReviewed", label: "Most Reviewed" },
-    { id: "recentlyReviewed", label: "Most Recently Reviewed" },
+    { id: "4plus", label: "4+ Stars Only" },
+    { id: "10reviews", label: "10+ Reviews" },
   ];
 
   // handle filter selection/deselection
   const handleFilterClick = (filterType, filterId) => {
+    // handle custom distance selection
+    if (filterId === "custom") {
+      setShowCustomDistance(!showCustomDistance);
+      if (showCustomDistance) {
+        // if hiding custom distance, clear it from filters
+        setSelectedFilters((prevFilters) => {
+          const updatedFilters = {
+            ...prevFilters,
+            distance: prevFilters.distance.filter((id) => id !== "custom"),
+          };
+          onSearch(updatedFilters);
+          return updatedFilters;
+        });
+        setCustomDistance("");
+      }
+      return;
+    }
+
     setSelectedFilters((prevFilters) => {
       const currentFilters = prevFilters[filterType];
       let newFilters;
 
-      if (currentFilters.includes(filterId)) {
-        // filter is already selected, remove it
-        newFilters = currentFilters.filter((id) => id !== filterId);
+      if (filterType === "distance") {
+        // for distance: single selection only
+        if (currentFilters.includes(filterId)) {
+          //if clicking the same distance filter, deselect it
+          newFilters = [];
+        } else {
+          // select only this distance filter
+          newFilters = [filterId];
+          // hide custom distance if selecting predefined option
+          setShowCustomDistance(false);
+          setCustomDistance("");
+        }
       } else {
-        // filter is not selected, add it
-        newFilters = [...currentFilters, filterId];
+        // For other filters: multiple selection allowed
+        if (currentFilters.includes(filterId)) {
+          // filter is already selected, remove it
+          newFilters = currentFilters.filter((id) => id !== filterId);
+        } else {
+          // filter is not selected, add it
+          newFilters = [...currentFilters, filterId];
+        }
       }
 
       const updatedFilters = {
@@ -51,6 +88,34 @@ const Search = ({ onSearch }) => {
       onSearch(updatedFilters);
       return updatedFilters;
     });
+  };
+
+  // handle custom distance input change
+  const handleCustomDistanceChange = (e) => {
+    const value = e.target.value;
+    setCustomDistance(value);
+
+    if (value.trim() !== "") {
+      // ddd custom distance to filters
+      setSelectedFilters((prevFilters) => {
+        const updatedFilters = {
+          ...prevFilters,
+          distance: ["custom"],
+        };
+        onSearch(updatedFilters);
+        return updatedFilters;
+      });
+    } else {
+      // remove custom distance from filters if input is empty
+      setSelectedFilters((prevFilters) => {
+        const updatedFilters = {
+          ...prevFilters,
+          distance: prevFilters.distance.filter((id) => id !== "custom"),
+        };
+        onSearch(updatedFilters);
+        return updatedFilters;
+      });
+    }
   };
 
   // helper to check if a filter is selected used to style the filter if its toggled or not
@@ -117,10 +182,30 @@ const Search = ({ onSearch }) => {
       <div className="advanced-search-container">
         {/* the 3 filter sections using reusable render function */}
         {renderFilterSection("Distance", distanceOptions, "distance")}
+
+        {/* Custom distance input */}
+        {showCustomDistance && (
+          <div className="custom-distance-container">
+            <label htmlFor="customDistance" className="custom-distance-label">
+              Enter distance in miles:
+            </label>
+            <input
+              id="customDistance"
+              type="number"
+              min="1"
+              max="100"
+              value={customDistance}
+              onChange={handleCustomDistanceChange}
+              placeholder="e.g., 15"
+              className="custom-distance-input"
+            />
+          </div>
+        )}
+
         {renderFilterSection("Operating Hours", hoursOptions, "hours")}
         {renderFilterSection("Rating & Reviews", ratingOptions, "rating")}
       </div>
-        {/* summary section to show the number of active filters */}
+      {/* summary section to show the number of active filters */}
       {hasActiveFilters() && (
         <div className="active-filters-summary">
           <div className="summary-label">Active Filters:</div>
