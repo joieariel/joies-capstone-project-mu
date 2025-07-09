@@ -17,6 +17,7 @@ const CommunityCenter = () => {
     distance: [],
     hours: [],
     rating: [],
+    tags: []
   });
 
   // TODO: add new state variables for advanced search functionality

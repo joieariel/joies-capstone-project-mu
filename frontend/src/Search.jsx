@@ -16,9 +16,10 @@ const Search = ({ onSearch }) => {
 
   // predefined filter options
   const distanceOptions = [
-    { id: "5miles", label: "Within 5 miles" },
-    { id: "10miles", label: "Within 10 miles" },
-    { id: "25miles", label: "Within 25+ miles" },
+    { id: "5miles", label: "Within 0-5 miles" },
+    { id: "10miles", label: "Within 6-10 miles" },
+    { id: "25miles", label: "Within 11-25 miles" },
+    { id: "25+miles", label: "Over 25+ miles" },
     { id: "custom", label: "Custom Distance" },
   ];
 

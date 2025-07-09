@@ -161,14 +161,195 @@ const getCenterStatus = (centerHours, centerTimezone) => {
 // (GET) fetch all community centers
 router.get("/", async (req, res) => {
   try {
+    // extract all query parameters including new advanced search params
     const { zip_code, distance, hours, rating, userLat, userLng } = req.query;
+
+    // parse arrays from query strings (frontend sends arrays as comma-separated strings)
+    const distanceFilters = distance ? distance.split(',') : [];
+    const hoursFilters = hours ? hours.split(',') : [];
+    const ratingFilters = rating ? rating.split(',') : [];
+
+    // parse user location coordinates
+    const userLatitude = userLat ? parseFloat(userLat) : null;
+    const userLongitude = userLng ? parseFloat(userLng) : null;
+
+    // basic filter for zip code ( existing functionality)
     const filter = zip_code ? { zip_code: { equals: zip_code } } : {};
 
+    // fetch community centers with related data needed for filtering
     const communityCenters = await prisma.CommunityCenter.findMany({
       where: filter,
+      include: {
+        hours: true,
+        reviews: {
+          select: {
+            rating: true,
+            created_at: true
+          }
+        }
+      }
     });
 
-    res.json(communityCenters);
+    // intialize filtered centers with with all fetched centers
+    let filteredCenters = communityCenters;
+
+    // apply distance filtering only if distance filters (user selected at least one distance filter) and user location is provided
+    if (distanceFilters.length > 0 && userLatitude && userLongitude) {
+      // calculate distance once and store it, then filter based on stored distance
+      filteredCenters = filteredCenters.map(center => ({
+        ...center,
+        calculatedDistance: calculateDistance(
+          userLatitude,
+          userLongitude,
+          center.latitude,
+          center.longitude
+        )
+      })).filter(center => {
+        // use stored distance for filtering to avoid recalculating
+        return distanceFilters.some(distanceFilter => {
+          switch (distanceFilter) {
+            case '5miles':
+              return center.calculatedDistance <= 5; // 0-5 miles
+
+            case '10miles':
+              return center.calculatedDistance > 5 && center.calculatedDistance <= 10; // 6-10 miles
+            case '25miles':
+              return center.calculatedDistance > 10 && center.calculatedDistance <= 25; // 11-25 miles
+            case '25+miles':
+              return center.calculatedDistance > 25; // 25+ miles
+            default:
+              return false; // fallback case for invalid/unexpected distance filter
+          }
+        });
+      });
+    } else if (userLatitude && userLongitude) {
+      // if user location provided but no distance filters, still calculate distance for display
+      filteredCenters = filteredCenters.map(center => ({
+        ...center,
+        calculatedDistance: calculateDistance(
+          userLatitude,
+          userLongitude,
+          center.latitude,
+          center.longitude
+        )
+      }));
+    }
+
+    // apply hours filtering only if hours filters (user selected at least one hours filter)
+    // check if hours filter array has any alements
+    if (hoursFilters.length > 0) {
+      filteredCenters = filteredCenters.filter(center => {
+        return hoursFilters.some(hoursFilter => {
+          switch (hoursFilter) {
+            case 'openNow':
+              return isOpenNow(center.hours); // returns true if center is open now and keeps it in array; false otherwise
+            case 'openLate':
+              // check if center is open until 9pm or later on any day
+              return center.hours.some(hour => {
+                if (hour.is_closed) return false;
+                const closeTime = hour.close_time;
+                return closeTime >= '21:00'; // 9pm or later
+              });
+            case 'openWeekends':
+              // check if center is open on Saturday or Sunday
+              return center.hours.some(hour => {
+                const day = hour.day.toLowerCase();
+                return (day === 'saturday' || day === 'sunday') && !hour.is_closed;
+              });
+            default:
+              return false; // fallback case for invalid/unexpected hours filter
+          }
+        });
+      });
+    }
+
+    // sort centers based on rating filters before enrichment
+    // use let since we are reassigning the value during sorting operations
+    let sortedCenters = filteredCenters;
+    // check if user selected at least one rating filter
+    if (ratingFilters.length > 0) {
+      // sort centers based on rating filters
+      // apply each rating filter to the centers array in sequence and reassign it to the sorted centers array
+      // if user selected multiple rating filters, they stack
+      ratingFilters.forEach(ratingFilter => {
+        switch (ratingFilter) {
+          case 'highestRated':
+            // calculate avgRating for sorting
+            sortedCenters = sortedCenters.sort((a, b) => {
+              // only calculate avgRating if there are reviews
+              const aAvgRating = a.reviews.length > 0
+              // sum all ratings and divide by number of reviews, default to 0 if no reviews
+                ? a.reviews.reduce((sum, review) => sum + review.rating, 0) / a.reviews.length
+                : 0;
+              const bAvgRating = b.reviews.length > 0
+                ? b.reviews.reduce((sum, review) => sum + review.rating, 0) / b.reviews.length
+                : 0;
+                // descending order, higher rating first
+              return bAvgRating - aAvgRating;
+            });
+            break;
+          case 'mostReviewed':
+            // sort by review count puts highest reviewed first
+            sortedCenters = sortedCenters.sort((a, b) => b.reviews.length - a.reviews.length);
+            break;
+            // find the most recent created_at date from reviews
+          case 'recentlyReviewed':
+            // sort by most recent review date (most recent first)
+            sortedCenters = sortedCenters.sort((a, b) => {
+              // get most recent review date for each center
+              const getMostRecentDate = (center) => {
+                if (center.reviews.length === 0) return null;
+                // find the most recent created_at date from reviews
+                const dates = center.reviews.map(review => new Date(review.created_at));
+                return dates.length > 0 ? Math.max(...dates) : null;
+              };
+
+              const aRecentDate = getMostRecentDate(a);
+              const bRecentDate = getMostRecentDate(b);
+
+              // handle centers with no reviews (put them at the end)
+              if (aRecentDate === null && bRecentDate === null) return 0;
+              if (aRecentDate === null) return 1; // a is null and goes after b which has reviews
+              if (bRecentDate === null) return -1;
+
+              // sort by most recent date first (descending, most recent first)
+              return bRecentDate - aRecentDate;
+            });
+            break;
+        }
+      });
+    }
+    // data enrichment after sorting since reviews are needed for rating and review count
+
+    // map results to add calculated fields (avgRating, reviewCount, distance) AFTER sorting
+    const enrichedCenters = sortedCenters.map(center => {
+      // calculate average rating
+      // extract just the rating numbers from the reviews array and create new array from those number
+      const ratings = center.reviews.map(review => review.rating);
+      // if there are ratings calculate average by adding all tg and dividing by length and round to 1 decimal place
+      const avgRating = ratings.length > 0
+        ? (ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1)
+        : null;
+
+      // count total reviews
+      const reviewCount = center.reviews.length;
+
+      // use stored calculated distance if available, otherwise null
+      const distance = center.calculatedDistance
+        ? center.calculatedDistance.toFixed(1)
+        : null;
+
+      // return center with calculated fields (exclude reviews array to reduce response size)
+      const { reviews, calculatedDistance, ...centerWithoutReviews } = center;
+      return {
+        ...centerWithoutReviews,
+        avgRating: avgRating ? parseFloat(avgRating) : null,
+        reviewCount,
+        distance: distance ? parseFloat(distance) : null
+      };
+    });
+
+    res.json(enrichedCenters);
   } catch (error) {
     console.error("Error fetching community centers:", error);
     res.status(500).json({ error: "Failed to fetch community centers" });
