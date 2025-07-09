@@ -76,6 +76,7 @@ model CommunityCenter {
  description  String
  latitude     Float
  longitude    Float
+ timezone     String   @default("America/New_York") // timezone where the center is located
  created_at    DateTime @default(now())
 
 

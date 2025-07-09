@@ -42,6 +42,7 @@ async function main() {
         "A modern community center offering free internet access, computer training, and digital literacy programs.",
       latitude: 37.7749,
       longitude: -122.4194,
+      timezone: "America/Los_Angeles", // Pacific Time
     },
     {
       name: "Eastside Learning Center",
@@ -55,6 +56,7 @@ async function main() {
         "Community-focused center providing job training, computer classes, and study spaces.",
       latitude: 37.8044,
       longitude: -122.2712,
+      timezone: "America/Los_Angeles", // Pacific Time
     },
     {
       name: "Westside Tech Commons",
@@ -68,6 +70,7 @@ async function main() {
         "Tech-focused community space with high-speed internet, 3D printing, and coding workshops.",
       latitude: 37.3382,
       longitude: -121.8863,
+      timezone: "America/Los_Angeles", // Pacific Time
     },
     {
       name: "Northside Community Hub",
@@ -81,6 +84,7 @@ async function main() {
         "Friendly neighborhood center offering free WiFi, printing services, and community events.",
       latitude: 37.8715,
       longitude: -122.273,
+      timezone: "America/Los_Angeles", // Pacific Time
     },
     {
       name: "Southside Innovation Lab",
@@ -94,6 +98,7 @@ async function main() {
         "Innovation-focused space with maker tools, business mentoring, and entrepreneurship programs.",
       latitude: 37.4419,
       longitude: -122.143,
+      timezone: "America/Los_Angeles", // Pacific Time
     },
   ];
 
