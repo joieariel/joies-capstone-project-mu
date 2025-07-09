@@ -15,24 +15,31 @@ class Coordinate {
     this.longitude = longitude;
   }
 }
-// get distances from Google Distance Matrix API
+// get distances from google distance matrix ai
+// takes in user coordinates and array of center coordinates (one to many)
 const getDistancesFromGoogle = async (userCoord, centerCoords) => {
   try {
     const response = await googleMapsClient.distancematrix({
       params: {
         origins: [`${userCoord.latitude},${userCoord.longitude}`],
-        destinations: centerCoords.map(coord => `${coord.latitude},${coord.longitude}`),
-        units: 'imperial', // for miles
+        destinations: centerCoords.map(
+          (coord) => `${coord.latitude},${coord.longitude}`
+        ),
+        units: "imperial", // for miles
         key: process.env.GOOGLE_MAPS_API_KEY,
-      }
+      },
     });
-
-    return response.data.rows[0].elements.map(element => ({
-      distance: element.status === 'OK' ? parseFloat(element.distance.text.replace(' mi', '')) : null,
-      duration: element.status === 'OK' ? element.duration.text : null
+    // process response from api, get first row (users location) and map over elements (centers)
+    return response.data.rows[0].elements.map((element) => ({
+      // extract distance and duration text from response, null if api fails
+      distance:
+        element.status === "OK"
+          ? parseFloat(element.distance.text.replace(" mi", ""))
+          : null,
+      duration: element.status === "OK" ? element.duration.text : null,
     }));
   } catch (error) {
-    console.error('Google Distance Matrix API error:', error);
+    console.error("Google Distance Matrix API error:", error);
     return null;
   }
 };
@@ -42,21 +49,27 @@ const getDistancesFromGoogle = async (userCoord, centerCoords) => {
 const isOpenNow = (centerHours, centerTimezone) => {
   // get current time in the center's timezone
   const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', {
-    weekday: 'long',
-    timeZone: centerTimezone
-  }).toLowerCase();
-  const currentTime = now.toLocaleTimeString('en-US', {
+  const currentDay = now
+    .toLocaleDateString("en-US", {
+      weekday: "long",
+      timeZone: centerTimezone,
+    })
+    .toLowerCase();
+  const currentTime = now.toLocaleTimeString("en-US", {
     hour12: false,
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: centerTimezone
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: centerTimezone,
   });
 
-  const todayHours = centerHours.find(h => h.day.toLowerCase() === currentDay);
+  const todayHours = centerHours.find(
+    (h) => h.day.toLowerCase() === currentDay
+  );
   if (!todayHours || todayHours.is_closed) return false;
 
-  return currentTime >= todayHours.open_time && currentTime <= todayHours.close_time;
+  return (
+    currentTime >= todayHours.open_time && currentTime <= todayHours.close_time
+  );
 };
 
 // enhanced function to get detailed center status including hours until closing
@@ -64,18 +77,22 @@ const isOpenNow = (centerHours, centerTimezone) => {
 const getCenterStatus = (centerHours, centerTimezone) => {
   // get current time in the center's timezone
   const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', {
-    weekday: 'long',
-    timeZone: centerTimezone
-  }).toLowerCase();
-  const currentTime = now.toLocaleTimeString('en-US', {
+  const currentDay = now
+    .toLocaleDateString("en-US", {
+      weekday: "long",
+      timeZone: centerTimezone,
+    })
+    .toLowerCase();
+  const currentTime = now.toLocaleTimeString("en-US", {
     hour12: false,
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: centerTimezone
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: centerTimezone,
   });
 
-  const todayHours = centerHours.find(h => h.day.toLowerCase() === currentDay);
+  const todayHours = centerHours.find(
+    (h) => h.day.toLowerCase() === currentDay
+  );
 
   // if closed today or no hours found
   if (!todayHours || todayHours.is_closed) {
@@ -84,12 +101,13 @@ const getCenterStatus = (centerHours, centerTimezone) => {
       hoursUntilClose: null,
       minutesUntilClose: null,
       closingTime: null,
-      status: 'closed',
-      message: 'Closed today'
+      status: "closed",
+      message: "Closed today",
     };
   }
   // check if center is currently open
-  const isCurrentlyOpen = currentTime >= todayHours.open_time && currentTime <= todayHours.close_time;
+  const isCurrentlyOpen =
+    currentTime >= todayHours.open_time && currentTime <= todayHours.close_time;
 
   // if currently closed
   if (!isCurrentlyOpen) {
@@ -98,14 +116,14 @@ const getCenterStatus = (centerHours, centerTimezone) => {
       hoursUntilClose: null,
       minutesUntilClose: null,
       closingTime: todayHours.close_time,
-      status: 'closed',
-      message: `Closed • Opens at ${todayHours.open_time}` // show when it opens
+      status: "closed",
+      message: `Closed • Opens at ${todayHours.open_time}`, // show when it opens
     };
   }
 
   // calculate time until closing
-  const [currentHour, currentMinute] = currentTime.split(':').map(Number);
-  const [closeHour, closeMinute] = todayHours.close_time.split(':').map(Number);
+  const [currentHour, currentMinute] = currentTime.split(":").map(Number);
+  const [closeHour, closeMinute] = todayHours.close_time.split(":").map(Number);
 
   const currentTotalMinutes = currentHour * 60 + currentMinute;
   const closeTotalMinutes = closeHour * 60 + closeMinute;
@@ -113,18 +131,20 @@ const getCenterStatus = (centerHours, centerTimezone) => {
   const hoursUntilClose = minutesUntilClose / 60;
 
   // determine status based on time remaining
-  let status = 'open';
+  let status = "open";
   let message = `Open • Closes at ${todayHours.close_time}`;
 
   if (minutesUntilClose <= 30) {
-    status = 'closing_very_soon';
+    status = "closing_very_soon";
     message = `Closing in ${minutesUntilClose} minutes`;
   } else if (minutesUntilClose <= 60) {
-    status = 'closing_soon';
+    status = "closing_soon";
     message = `Closing soon • Closes at ${todayHours.close_time}`;
   } else if (hoursUntilClose < 2) {
-    status = 'closing_later';
-    message = `Open • Closes in ${Math.floor(hoursUntilClose)} hour${Math.floor(hoursUntilClose) !== 1 ? 's' : ''}`;
+    status = "closing_later";
+    message = `Open • Closes in ${Math.floor(hoursUntilClose)} hour${
+      Math.floor(hoursUntilClose) !== 1 ? "s" : ""
+    }`;
   }
 
   // return status object
@@ -134,10 +154,9 @@ const getCenterStatus = (centerHours, centerTimezone) => {
     minutesUntilClose: minutesUntilClose,
     closingTime: todayHours.close_time,
     status: status,
-    message: message
+    message: message,
   };
 };
-
 
 /*
 router.get("/", async (req, res) => {
