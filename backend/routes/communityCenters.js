@@ -158,16 +158,13 @@ const getCenterStatus = (centerHours, centerTimezone) => {
   };
 };
 
-/*
+// (GET) fetch all community centers
 router.get("/", async (req, res) => {
   try {
-
     const { zip_code, distance, hours, rating, userLat, userLng } = req.query;
-
-
     const filter = zip_code ? { zip_code: { equals: zip_code } } : {};
 
-
+    const communityCenters = await prisma.CommunityCenter.findMany({
       where: filter,
     });
 
@@ -201,5 +198,4 @@ router.get("/:communityCenterId", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch community center" });
   }
 });
-*/
 module.exports = router;
