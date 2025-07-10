@@ -19,25 +19,67 @@ class Coordinate {
 // takes in user coordinates and array of center coordinates (one to many)
 const getDistancesFromGoogle = async (userCoord, centerCoords) => {
   try {
+    // firs validate coordinates to avoid invalid api calls
+    const validCenterCoords = centerCoords.filter(coord => {
+      // check if coordinates are valid (not 0,0 and within reasonable bounds)
+      return (
+        coord.latitude !== 0 &&
+        coord.longitude !== 0 &&
+        Math.abs(coord.latitude) <= 90 &&
+        Math.abs(coord.longitude) <= 180
+      );
+    });
+
+    // if no valid coordinates, return null
+    if (validCenterCoords.length === 0) {
+      console.error("No valid center coordinates provided");
+      return null;
+    }
+
     const response = await googleMapsClient.distancematrix({
       params: {
         origins: [`${userCoord.latitude},${userCoord.longitude}`],
-        destinations: centerCoords.map(
+        destinations: validCenterCoords.map(
           (coord) => `${coord.latitude},${coord.longitude}`
         ),
         units: "imperial", // for miles
         key: process.env.GOOGLE_MAPS_API_KEY,
       },
     });
-    // process response from api, get first row (users location) and map over elements (centers)
-    return response.data.rows[0].elements.map((element) => ({
-      // extract distance and duration text from response, null if api fails
-      distance:
-        element.status === "OK"
-          ? parseFloat(element.distance.text.replace(" mi", ""))
-          : null,
-      duration: element.status === "OK" ? element.duration.text : null,
-    }));
+
+    // create a result array with the same length as the original centerCoords
+    const results = [];
+    let validIndex = 0;
+
+    // map each center to its distance result
+    for (let i = 0; i < centerCoords.length; i++) {
+      const coord = centerCoords[i];
+
+      // if this coordinate was invalid (0,0 or out of bounds), add null
+      if (
+        coord.latitude === 0 ||
+        coord.longitude === 0 ||
+        Math.abs(coord.latitude) > 90 ||
+        Math.abs(coord.longitude) > 180
+      ) {
+        results.push({
+          distance: null,
+          duration: null
+        });
+      } else {
+        // otherwise, get the result from the API response
+        const element = response.data.rows[0].elements[validIndex++];
+        results.push({
+          distance:
+            element.status === "OK"
+              ? parseFloat(element.distance.text.replace(" mi", ""))
+              : null,
+          duration: element.status === "OK" ? element.duration.text : null,
+        });
+      }
+    }
+
+    return results;
   } catch (error) {
     console.error("Google Distance Matrix API error:", error);
     return null;
@@ -307,6 +349,17 @@ router.get("/", async (req, res) => {
 
               // check if center matches any of the selected distance filters
               return distanceFilters.some((distanceFilter) => {
+                // check for custom distance format (e.g., "15miles")
+                const customDistanceMatch = distanceFilter.match(/^(\d+)miles$/);
+
+                if (customDistanceMatch) {
+                  // extract the numeric value from the custom distance
+                  const customDistance = parseInt(customDistanceMatch[1]);
+                  // return centers within the exact custom distance
+                  return center.calculatedDistance <= customDistance;
+                }
+
+                // handle predefined distance ranges
                 switch (distanceFilter) {
                   case "5miles":
                     return center.calculatedDistance <= 5; // 0-5 miles
