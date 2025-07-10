@@ -20,7 +20,7 @@ class Coordinate {
 const getDistancesFromGoogle = async (userCoord, centerCoords) => {
   try {
     // firs validate coordinates to avoid invalid api calls
-    const validCenterCoords = centerCoords.filter(coord => {
+    const validCenterCoords = centerCoords.filter((coord) => {
       // check if coordinates are valid (not 0,0 and within reasonable bounds)
       return (
         coord.latitude !== 0 &&
@@ -64,7 +64,7 @@ const getDistancesFromGoogle = async (userCoord, centerCoords) => {
       ) {
         results.push({
           distance: null,
-          duration: null
+          duration: null,
         });
       } else {
         // otherwise, get the result from the API response
@@ -99,16 +99,20 @@ const isOpenNow = (centerHours, centerTimezone) => {
     .toLowerCase();
 
   // get current hour and minute in 24-hour format
-  const currentHour = parseInt(now.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    hour12: false,
-    timeZone: centerTimezone,
-  }));
+  const currentHour = parseInt(
+    now.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: centerTimezone,
+    })
+  );
 
-  const currentMinute = parseInt(now.toLocaleTimeString("en-US", {
-    minute: "numeric",
-    timeZone: centerTimezone,
-  }));
+  const currentMinute = parseInt(
+    now.toLocaleTimeString("en-US", {
+      minute: "numeric",
+      timeZone: centerTimezone,
+    })
+  );
 
   // find today's hours
   const todayHours = centerHours.find(
@@ -116,7 +120,13 @@ const isOpenNow = (centerHours, centerTimezone) => {
   );
 
   // if closed today or no hours data
-  if (!todayHours || todayHours.is_closed || !todayHours.open_time || !todayHours.close_time) return false;
+  if (
+    !todayHours ||
+    todayHours.is_closed ||
+    !todayHours.open_time ||
+    !todayHours.close_time
+  )
+    return false;
 
   // convert open time from 12-hour format to 24-hour
   const openTime = todayHours.open_time;
@@ -144,7 +154,10 @@ const isOpenNow = (centerHours, centerTimezone) => {
   const closeTotalMinutes = closeHour * 60 + closeMinute;
 
   // check if current time is between open and close times
-  return currentTotalMinutes >= openTotalMinutes && currentTotalMinutes <= closeTotalMinutes;
+  return (
+    currentTotalMinutes >= openTotalMinutes &&
+    currentTotalMinutes <= closeTotalMinutes
+  );
 };
 
 // enhanced function to get detailed center status including hours until closing
@@ -160,16 +173,20 @@ const getCenterStatus = (centerHours, centerTimezone) => {
     .toLowerCase();
 
   // get current hour and minute in 24-hour format
-  const currentHour = parseInt(now.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    hour12: false,
-    timeZone: centerTimezone,
-  }));
+  const currentHour = parseInt(
+    now.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: centerTimezone,
+    })
+  );
 
-  const currentMinute = parseInt(now.toLocaleTimeString("en-US", {
-    minute: "numeric",
-    timeZone: centerTimezone,
-  }));
+  const currentMinute = parseInt(
+    now.toLocaleTimeString("en-US", {
+      minute: "numeric",
+      timeZone: centerTimezone,
+    })
+  );
 
   // current time in minutes since midnight
   const currentTotalMinutes = currentHour * 60 + currentMinute;
@@ -179,7 +196,12 @@ const getCenterStatus = (centerHours, centerTimezone) => {
   );
 
   // if closed today or no hours found
-  if (!todayHours || todayHours.is_closed || !todayHours.open_time || !todayHours.close_time) {
+  if (
+    !todayHours ||
+    todayHours.is_closed ||
+    !todayHours.open_time ||
+    !todayHours.close_time
+  ) {
     return {
       isOpen: false,
       hoursUntilClose: null,
@@ -216,7 +238,8 @@ const getCenterStatus = (centerHours, centerTimezone) => {
 
   // check if center is currently open
   const isCurrentlyOpen =
-    currentTotalMinutes >= openTotalMinutes && currentTotalMinutes <= closeTotalMinutes;
+    currentTotalMinutes >= openTotalMinutes &&
+    currentTotalMinutes <= closeTotalMinutes;
 
   // if currently closed
   if (!isCurrentlyOpen) {
@@ -269,11 +292,28 @@ router.get("/", async (req, res) => {
     const { zip_code, distance, hours, rating, userLat, userLng, tags } =
       req.query;
 
-    // parse arrays from query strings (frontend sends arrays as comma-separated strings)
-    const distanceFilters = distance ? distance.split(",") : [];
-    const hoursFilters = hours ? hours.split(",") : [];
-    const ratingFilters = rating ? rating.split(",") : [];
-    const tagFilters = tags ? tags.split(",").map(Number) : []; // convert tag ids to numbers
+    // parse arrays from query parameters using repeated query params instead of commas like og (e.g., ?tags=1&tags=2&tags=3)
+
+    // handle array parameters (when using ?param=value1&param=value2 format)
+    // if only one value is provided, it will be a string, so convert it to an array
+    const distanceFilters = Array.isArray(distance)
+      ? distance
+      : distance
+      ? [distance]
+      : [];
+    const hoursFilters = Array.isArray(hours) ? hours : hours ? [hours] : [];
+    const ratingFilters = Array.isArray(rating)
+      ? rating
+      : rating
+      ? [rating]
+      : [];
+
+    // for convert values to numbers
+    const tagFilters = Array.isArray(tags)
+      ? tags.map(Number)
+      : tags
+      ? [Number(tags)]
+      : [];
 
     // parse user location coordinates
     const userLatitude = userLat ? parseFloat(userLat) : null;
@@ -350,7 +390,8 @@ router.get("/", async (req, res) => {
               // check if center matches any of the selected distance filters
               return distanceFilters.some((distanceFilter) => {
                 // check for custom distance format (e.g., "15miles")
-                const customDistanceMatch = distanceFilter.match(/^(\d+)miles$/);
+                const customDistanceMatch =
+                  distanceFilter.match(/^(\d+)miles$/);
 
                 if (customDistanceMatch) {
                   // extract the numeric value from the custom distance
@@ -420,7 +461,8 @@ router.get("/", async (req, res) => {
               );
 
               // if closed today or no hours data, return false
-              if (!todayHours || todayHours.is_closed || !todayHours.close_time) return false;
+              if (!todayHours || todayHours.is_closed || !todayHours.close_time)
+                return false;
 
               // convert 12-hour format (e.g., "9:00 PM") to 24-hour format for comparison
               const closeTime = todayHours.close_time;
