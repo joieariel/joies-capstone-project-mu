@@ -90,8 +90,8 @@ model CenterHours {
  id          Int      @id @default(autoincrement())
  center_id   Int
  day         String
- open_time   String // "e.g 1:00"
- close_time  String
+ open_time   String? // "e.g 1:00" - nullable
+ close_time  String? // nullable for closed days
  is_closed   Boolean @default(false) // if a center is always closed on a given day of the week
  center      CommunityCenter @relation(fields: [center_id], references: [id])
 

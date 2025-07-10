@@ -9,12 +9,14 @@ const CommunityCenter = () => {
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  // state to track search query for advanced search feature
-  const [searchQuery, setSearchQuery] = useState("");
+  // state to track search filters for advanced search feature
+  const [searchFilters, setSearchFilters] = useState({
+    distance: [],
+    hours: [],
+    rating: [],
+  });
 
   const navigate = useNavigate();
-
-
 
   // when user clicks map view button at top of page, show the map view ( navigate to map page and show all community centers on map)
   const handleMapViewClick = () => {
@@ -34,13 +36,12 @@ const CommunityCenter = () => {
     // navigate to /map/[centerId] which creates a url like /map/5 for center ID 5
     // centerId becomes a url param that the Map component can read
     navigate(`/map/${centerId}`);
-  }
-
-  // function to handle search query change
-  const handleSearch = (query) => {
-    setSearchQuery(query); // update searchQuery state
   };
 
+  // function to handle search filters change
+  const handleSearch = (filters) => {
+    setSearchFilters(filters); // update searchFilters state
+  };
 
   useEffect(() => {
     const fetchCenters = async () => {
@@ -50,8 +51,8 @@ const CommunityCenter = () => {
         const data = await communityAPI.getAllCenters();
         setCenters(data); // store fetched data in centers state triggers rerender and displays centers
       } catch (err) {
-        console.error('Error fetching community centers:', err);
-        setError('Failed to load community centers');
+        console.error("Error fetching community centers:", err);
+        setError("Failed to load community centers");
       } finally {
         setLoading(false);
       }
@@ -64,7 +65,9 @@ const CommunityCenter = () => {
     return (
       <div className="community-center-container">
         <div className="community-center-content">
-          <h1 className="community-center-title">Find community centers near you</h1>
+          <h1 className="community-center-title">
+            Find community centers near you
+          </h1>
           <p>Loading community centers...</p>
         </div>
       </div>
@@ -75,7 +78,9 @@ const CommunityCenter = () => {
     return (
       <div className="community-center-container">
         <div className="community-center-content">
-          <h1 className="community-center-title">Find community centers near you</h1>
+          <h1 className="community-center-title">
+            Find community centers near you
+          </h1>
           <p>Error: {error}</p>
         </div>
       </div>
@@ -92,10 +97,15 @@ const CommunityCenter = () => {
           <Search onSearch={handleSearch} />
         </div>
         <div className="community-center-nav">
-        {/* add a nav within the communnity center page to switch from list view to map view */}
-        <button className="mapview-button" onClick={() => handleMapViewClick()}>Map View</button>
-      </div>
-  {/* loop through each communiy center in array and create one card for each center returned from db*/}
+          {/* add a nav within the communnity center page to switch from list view to map view */}
+          <button
+            className="mapview-button"
+            onClick={() => handleMapViewClick()}
+          >
+            Map View
+          </button>
+        </div>
+        {/* loop through each communiy center in array and create one card for each center returned from db*/}
         <div className="centers-grid">
           {centers.map((center) => (
             // each card needs a unique key, center id
@@ -126,8 +136,9 @@ const CommunityCenter = () => {
                   >
                     Reviews
                   </button>
-                  <button className="map-button"
-                  onClick={() => handleMapClick(center.id)}
+                  <button
+                    className="map-button"
+                    onClick={() => handleMapClick(center.id)}
                   >
                     Map
                   </button>
