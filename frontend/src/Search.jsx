@@ -33,7 +33,6 @@ const Search = ({ onSearch }) => {
     { id: "mostReviewed", label: "Most Reviewed" },
     { id: "mostRecentlyReviewed", label: "Most Recently Reviewed" },
     { id: "recommended", label: "Recommended" }, // will combine the highest rated and most reviewed to recommend the best centers
-  ];
 
   // TODO: adding tag options as filters
   const tagOptions = [
@@ -56,6 +55,7 @@ const Search = ({ onSearch }) => {
     { id: "quiet", label: "Quiet" },
     { id: "safe", label: "Safe" },
     { id: "spacious", label: "Spacious" },
+
   ];
 
   // handle filter selection/deselection
