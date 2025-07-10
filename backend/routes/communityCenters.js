@@ -44,8 +44,8 @@ const getDistancesFromGoogle = async (userCoord, centerCoords) => {
   }
 };
 
-// fucntion to check if a center is currently open based on current day/time vs center hours
-// now supports timezone-aware calculations
+// function to check if a center is currently open based on current day/time vs center hours
+// now supports timezone-aware calculations and handles 12-hour time format
 const isOpenNow = (centerHours, centerTimezone) => {
   // get current time in the center's timezone
   const now = new Date();
@@ -55,25 +55,58 @@ const isOpenNow = (centerHours, centerTimezone) => {
       timeZone: centerTimezone,
     })
     .toLowerCase();
-  const currentTime = now.toLocaleTimeString("en-US", {
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: centerTimezone,
-  });
 
+  // get current hour and minute in 24-hour format
+  const currentHour = parseInt(now.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    hour12: false,
+    timeZone: centerTimezone,
+  }));
+
+  const currentMinute = parseInt(now.toLocaleTimeString("en-US", {
+    minute: "numeric",
+    timeZone: centerTimezone,
+  }));
+
+  // find today's hours
   const todayHours = centerHours.find(
     (h) => h.day.toLowerCase() === currentDay
   );
-  if (!todayHours || todayHours.is_closed) return false;
 
-  return (
-    currentTime >= todayHours.open_time && currentTime <= todayHours.close_time
-  );
+  // if closed today or no hours data
+  if (!todayHours || todayHours.is_closed || !todayHours.open_time || !todayHours.close_time) return false;
+
+  // convert open time from 12-hour format to 24-hour
+  const openTime = todayHours.open_time;
+  const [openTimeStr, openPeriod] = openTime.split(" ");
+  const [openHourStr, openMinuteStr] = openTimeStr.split(":");
+  let openHour = parseInt(openHourStr);
+  const openMinute = parseInt(openMinuteStr);
+
+  if (openPeriod === "PM" && openHour < 12) openHour += 12;
+  if (openPeriod === "AM" && openHour === 12) openHour = 0;
+
+  // convert close time from 12-hour format to 24-hour
+  const closeTime = todayHours.close_time;
+  const [closeTimeStr, closePeriod] = closeTime.split(" ");
+  const [closeHourStr, closeMinuteStr] = closeTimeStr.split(":");
+  let closeHour = parseInt(closeHourStr);
+  const closeMinute = parseInt(closeMinuteStr);
+
+  if (closePeriod === "PM" && closeHour < 12) closeHour += 12;
+  if (closePeriod === "AM" && closeHour === 12) closeHour = 0;
+
+  // convert all to minutes for easier comparison
+  const currentTotalMinutes = currentHour * 60 + currentMinute;
+  const openTotalMinutes = openHour * 60 + openMinute;
+  const closeTotalMinutes = closeHour * 60 + closeMinute;
+
+  // check if current time is between open and close times
+  return currentTotalMinutes >= openTotalMinutes && currentTotalMinutes <= closeTotalMinutes;
 };
 
 // enhanced function to get detailed center status including hours until closing
-// now supports timezone-aware calculations
+// now supports timezone-aware calculations and handles 12-hour time format
 const getCenterStatus = (centerHours, centerTimezone) => {
   // get current time in the center's timezone
   const now = new Date();
@@ -83,19 +116,28 @@ const getCenterStatus = (centerHours, centerTimezone) => {
       timeZone: centerTimezone,
     })
     .toLowerCase();
-  const currentTime = now.toLocaleTimeString("en-US", {
+
+  // get current hour and minute in 24-hour format
+  const currentHour = parseInt(now.toLocaleTimeString("en-US", {
+    hour: "numeric",
     hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
     timeZone: centerTimezone,
-  });
+  }));
+
+  const currentMinute = parseInt(now.toLocaleTimeString("en-US", {
+    minute: "numeric",
+    timeZone: centerTimezone,
+  }));
+
+  // current time in minutes since midnight
+  const currentTotalMinutes = currentHour * 60 + currentMinute;
 
   const todayHours = centerHours.find(
     (h) => h.day.toLowerCase() === currentDay
   );
 
   // if closed today or no hours found
-  if (!todayHours || todayHours.is_closed) {
+  if (!todayHours || todayHours.is_closed || !todayHours.open_time || !todayHours.close_time) {
     return {
       isOpen: false,
       hoursUntilClose: null,
@@ -105,9 +147,34 @@ const getCenterStatus = (centerHours, centerTimezone) => {
       message: "Closed today",
     };
   }
+
+  // convert open time from 12-hour format to minutes since midnight
+  const openTime = todayHours.open_time;
+  const [openTimeStr, openPeriod] = openTime.split(" ");
+  const [openHourStr, openMinuteStr] = openTimeStr.split(":");
+  let openHour = parseInt(openHourStr);
+  const openMinute = parseInt(openMinuteStr);
+
+  if (openPeriod === "PM" && openHour < 12) openHour += 12;
+  if (openPeriod === "AM" && openHour === 12) openHour = 0;
+
+  const openTotalMinutes = openHour * 60 + openMinute;
+
+  // convert close time from 12-hour format to minutes since midnight
+  const closeTime = todayHours.close_time;
+  const [closeTimeStr, closePeriod] = closeTime.split(" ");
+  const [closeHourStr, closeMinuteStr] = closeTimeStr.split(":");
+  let closeHour = parseInt(closeHourStr);
+  const closeMinute = parseInt(closeMinuteStr);
+
+  if (closePeriod === "PM" && closeHour < 12) closeHour += 12;
+  if (closePeriod === "AM" && closeHour === 12) closeHour = 0;
+
+  const closeTotalMinutes = closeHour * 60 + closeMinute;
+
   // check if center is currently open
   const isCurrentlyOpen =
-    currentTime >= todayHours.open_time && currentTime <= todayHours.close_time;
+    currentTotalMinutes >= openTotalMinutes && currentTotalMinutes <= closeTotalMinutes;
 
   // if currently closed
   if (!isCurrentlyOpen) {
@@ -122,11 +189,6 @@ const getCenterStatus = (centerHours, centerTimezone) => {
   }
 
   // calculate time until closing
-  const [currentHour, currentMinute] = currentTime.split(":").map(Number);
-  const [closeHour, closeMinute] = todayHours.close_time.split(":").map(Number);
-
-  const currentTotalMinutes = currentHour * 60 + currentMinute;
-  const closeTotalMinutes = closeHour * 60 + closeMinute;
   const minutesUntilClose = closeTotalMinutes - currentTotalMinutes;
   const hoursUntilClose = minutesUntilClose / 60;
 
@@ -206,11 +268,8 @@ router.get("/", async (req, res) => {
         // get all tag ids associated with this center
         const centerTagIds = center.centerTags.map((ct) => ct.tag_id);
 
-        // check if the center has any of the selected tags (this is the or logic)
-        return tagFilters.some((tagId) => centerTagIds.includes(tagId));
-
-        // alternatively, for AND logic (center must have all selected tags):
-       // return tagFilters.every(tagId => centerTagIds.includes(tagId));
+        // check if the center has ALL of the selected tags (AND logic)
+        return tagFilters.every((tagId) => centerTagIds.includes(tagId));
       });
     }
 
@@ -292,24 +351,36 @@ router.get("/", async (req, res) => {
               return centerStatus.isOpen;
 
             case "openLate":
-              // check if center is open until 9pm or later on any day
-              //(may change to 9pm or later on today only in future )
-              return center.hours.some((hour) => {
-                if (hour.is_closed || !hour.close_time) return false;
+              // check if center is open until 9pm or later TODAY only
+              // get current day of the week
+              const now = new Date();
+              const currentDay = now
+                .toLocaleDateString("en-US", {
+                  weekday: "long",
+                  timeZone: center.timezone,
+                })
+                .toLowerCase();
 
-                // convert 12-hour format to 24-hour format for comparison
-                const closeTime = hour.close_time;
-                const [time, period] = closeTime.split(" ");
-                const [hours, minutes] = time.split(":");
+              // find hours for the current day
+              const todayHours = center.hours.find(
+                (h) => h.day.toLowerCase() === currentDay
+              );
 
-                // convert hours to 24-hour format
-                let hour24 = parseInt(hours);
-                if (period === "PM" && hour24 < 12) hour24 += 12;
-                if (period === "AM" && hour24 === 12) hour24 = 0;
+              // if closed today or no hours data, return false
+              if (!todayHours || todayHours.is_closed || !todayHours.close_time) return false;
 
-                // check if closing time is 9 PM (21:00) or later
-                return hour24 >= 21;
-              });
+              // convert 12-hour format (e.g., "9:00 PM") to 24-hour format for comparison
+              const closeTime = todayHours.close_time;
+              const [time, period] = closeTime.split(" ");
+              const [hours, minutes] = time.split(":");
+
+              // convert hours to 24-hour format
+              let hour24 = parseInt(hours);
+              if (period === "PM" && hour24 < 12) hour24 += 12;
+              if (period === "AM" && hour24 === 12) hour24 = 0;
+
+              // check if closing time is 9 PM (21:00) or later
+              return hour24 >= 21;
 
             case "openWeekends":
               // check if center is open on Saturday or Sunday
