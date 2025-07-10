@@ -208,7 +208,7 @@ const Search = ({ onSearch }) => {
           </button>
         )}
       </div>
-      {/* container for all fsections */}
+      {/* container for all filter sections */}
       <div className="advanced-search-container">
         {/* the 3 filter sections using reusable render function */}
         {renderFilterSection("Distance", distanceOptions, "distance")}
