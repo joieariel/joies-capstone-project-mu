@@ -19,7 +19,8 @@ const MapView = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   // state to track geolocation permission status
-  const [locationPermissionDenied, setLocationPermissionDenied] = useState(false);
+  const [locationPermissionDenied, setLocationPermissionDenied] =
+    useState(false);
 
   // load google maps api
   const { isLoaded, loadError } = useLoadScript({
@@ -59,7 +60,8 @@ const MapView = () => {
             setUserLocation(null);
           }
         );
-      } else { // browser doesn't support geolocation
+      } else {
+        // browser doesn't support geolocation
         setLocationPermissionDenied(true);
         // fallback will be handled in mapCenter calculation
         setUserLocation(null);
@@ -155,7 +157,9 @@ const MapView = () => {
         {/* show location permission message if permission was denied */}
         {locationPermissionDenied && (
           <div className="permission-notice">
-            <strong>Location Access Unavailable:</strong> Unable to show your current location on the map as location permission was not granted. You can still view all community center locations below.
+            <strong>Location Access Unavailable:</strong> Unable to show your
+            current location on the map as location permission was not granted.
+            You can still view all community center locations below.
           </div>
         )}
 
