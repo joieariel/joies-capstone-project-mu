@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { tagAPI } from "./api"; // import the tagAPI function from the api.js file
 import "./Search.css";
 
 const Search = ({ onSearch }) => {
@@ -14,6 +15,9 @@ const Search = ({ onSearch }) => {
   const [customDistance, setCustomDistance] = useState("");
   const [showCustomDistance, setShowCustomDistance] = useState(false);
   const [customDistanceSubmitted, setCustomDistanceSubmitted] = useState(false);
+
+  // state for tags
+  const [tagOptions, setTagOptions] = useState([]);
 
   // predefined filter options
   const distanceOptions = [
@@ -37,28 +41,19 @@ const Search = ({ onSearch }) => {
     { id: "recommended", label: "Recommended" }, // will combine the highest rated and most reviewed to recommend the best centers
   ];
 
-  // TODO: adding tag options as filters
-  const tagOptions = [
-    { id: "wheelchair", label: "Wheelchair Accessible" },
-    { id: "24/7", label: "24/7" },
-    { id: "busy", label: "Busy" },
-    { id: "clean", label: "Clean" },
-    { id: "earlyHours", label: "Early Hours" },
-    { id: "familyFriendly", label: "Family Friendly" },
-    { id: "fastWiFi", label: "Fast WiFi" },
-    { id: "freeCoffee", label: "Free Coffee" },
-    { id: "freeWiFi", label: "Free WiFi" },
-    { id: "goodWifiSpeed", label: "Good Wifi Speed" },
-    { id: "lateHours", label: "Late Hours" },
-    { id: "nearTransport", label: "Near Transportation" },
-    { id: "openLate", label: "Open Late" },
-    { id: "openWeekends", label: "Open Weekends" },
-    { id: "petsWelcome", label: "Pet Welcome" },
-    { id: "printerAccess", label: "Printer Access" },
-    { id: "quiet", label: "Quiet" },
-    { id: "safe", label: "Safe" },
-    { id: "spacious", label: "Spacious" },
-  ];
+  // fetch tags from the api when component mounts instead of hard coding them
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const tags = await tagAPI.getAllTags();
+        setTagOptions(tags.map((tag) => ({ id: tag.id, label: tag.name })));
+      } catch (err) {
+        console.error("Error fetching tags:", err);
+      }
+    };
+
+    fetchTags();
+  }, []);
 
   // handle filter selection/deselection
   const handleFilterClick = (filterType, filterId) => {
@@ -152,7 +147,7 @@ const Search = ({ onSearch }) => {
 
   // handle pressing Enter in the custom distance input
   const handleCustomDistanceKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleCustomDistanceSubmit();
     }
