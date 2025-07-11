@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { daysOfWeek, hourPatterns } = require("../utils/constants");
 
 async function main() {
   // create predefined tags that users can choose from when writing reviews
@@ -16,7 +17,7 @@ async function main() {
     { name: " Wheelchair Accessible" },
     { name: "Printer Access" },
     { name: "Open Weekends" },
-    { name: "Busy" }
+    { name: "Busy" },
   ];
 
   // create each tag using upsert to avoid duplicates
@@ -106,55 +107,20 @@ async function main() {
   const createdCenters = [];
   for (const centerData of centers) {
     const center = await prisma.communityCenter.create({
-      data: centerData
+      data: centerData,
     });
     createdCenters.push(center);
   }
 
-  // dreate operating hours for each community center
-  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-  // define different hour patterns
-  const hourPatterns = {
-    // standard business hours
-    standard: {
-      weekday: { open_time: '9:00 AM', close_time: '5:00 PM', is_closed: false },
-      saturday: { open_time: '10:00 AM', close_time: '4:00 PM', is_closed: false },
-      sunday: { open_time: null, close_time: null, is_closed: true }
-    },
-    // extended hours
-    extended: {
-      weekday: { open_time: '8:00 AM', close_time: '9:00 PM', is_closed: false },
-      saturday: { open_time: '9:00 AM', close_time: '8:00 PM', is_closed: false },
-      sunday: { open_time: '10:00 AM', close_time: '6:00 PM', is_closed: false }
-    },
-    // 24/7 operation
-    twentyFourSeven: {
-      weekday: { open_time: '12:00 AM', close_time: '11:59 PM', is_closed: false },
-      saturday: { open_time: '12:00 AM', close_time: '11:59 PM', is_closed: false },
-      sunday: { open_time: '12:00 AM', close_time: '11:59 PM', is_closed: false }
-    },
-    // limited weekend hours
-    limitedWeekend: {
-      weekday: { open_time: '7:00 AM', close_time: '8:00 PM', is_closed: false },
-      saturday: { open_time: '9:00 AM', close_time: '5:00 PM', is_closed: false },
-      sunday: { open_time: null, close_time: null, is_closed: true }
-    },
-    // Late night hours
-    lateNight: {
-      weekday: { open_time: '10:00 AM', close_time: '11:00 PM', is_closed: false },
-      saturday: { open_time: '10:00 AM', close_time: '12:00 AM', is_closed: false },
-      sunday: { open_time: '12:00 PM', close_time: '10:00 PM', is_closed: false }
-    }
-  };
+  // create operating hours for each community center
 
   // assign different patterns to different centers
   const centerHourAssignments = [
-    { center: createdCenters[0], pattern: 'twentyFourSeven' }, // Downtown Digital Hub - 24/7
-    { center: createdCenters[1], pattern: 'standard' },        // Eastside Learning Center
-    { center: createdCenters[2], pattern: 'extended' },        // Westside Tech Commons
-    { center: createdCenters[3], pattern: 'limitedWeekend' },  // Northside Community Hub
-    { center: createdCenters[4], pattern: 'lateNight' }        // Southside Innovation Lab
+    { center: createdCenters[0], pattern: "twentyFourSeven" }, // Downtown Digital Hub - 24/7
+    { center: createdCenters[1], pattern: "standard" }, // Eastside Learning Center
+    { center: createdCenters[2], pattern: "extended" }, // Westside Tech Commons
+    { center: createdCenters[3], pattern: "limitedWeekend" }, // Northside Community Hub
+    { center: createdCenters[4], pattern: "lateNight" }, // Southside Innovation Lab
   ];
 
   // Create hours for each center
@@ -166,9 +132,9 @@ async function main() {
       let dayPattern;
 
       // Determine which pattern to use based on day
-      if (day === 'Saturday') {
+      if (day === "Saturday") {
         dayPattern = hourPattern.saturday;
-      } else if (day === 'Sunday') {
+      } else if (day === "Sunday") {
         dayPattern = hourPattern.sunday;
       } else {
         dayPattern = hourPattern.weekday;
@@ -182,9 +148,9 @@ async function main() {
           close_time: dayPattern.close_time,
           is_closed: dayPattern.is_closed,
           center: {
-            connect: { id: center.id }
-          }
-        }
+            connect: { id: center.id },
+          },
+        },
       });
     }
   }
