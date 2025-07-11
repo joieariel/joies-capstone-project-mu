@@ -598,7 +598,7 @@ router.get("/", async (req, res) => {
           );
           break;
 
-        case "recentlyReviewed":
+        case "mostRecentlyReviewed":
           // sort by most recent review date (most recent first)
           sortedCenters = sortedCenters.sort((a, b) => {
             // get most recent review date for each center

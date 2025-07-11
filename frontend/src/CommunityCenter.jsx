@@ -1,26 +1,35 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react"; // useCallback
 import { useNavigate } from "react-router-dom";
-import { communityAPI } from "./api"; // to get acces to communtiy center functions
+import { communityAPI } from "./api"; // import communityAPI
+import { useGetUserLocation, useGetCentersWithFilter } from "./utils/hooks"; // import custom hooks
 import "./CommunityCenter.css";
 import Search from "./Search";
 
-// TODO: import getUserLocation function from api.js when added
-// import { communityAPI, getUserLocation } from "./api";
-
 const CommunityCenter = () => {
-  // state to store list of centes from db, initialized as empty
+  // state to store list of centers from db, initialized as empty
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  // state to track search filters for advanced search feature
-  const [searchFilters, setSearchFilters] = useState({
-    distance: [],
-    hours: [],
-    rating: [],
-    tags: []
-  });
 
-  // TODO: add new state variables for advanced search functionality
+  // state to track current search filters
+  const [currentFilters, setCurrentFilters] = useState(null);
+
+  // track if a search has been performed
+  const [hasSearched, setHasSearched] = useState(false);
+
+  // use custom hook for user location functionality
+  const {
+    data: userLocation,
+    isLoading: locationLoading,
+    error: locationError,
+  } = useGetUserLocation();
+
+  // use custom hook for filtered search functionality
+  const {
+    data: filteredCenters,
+    isLoading: searchLoading,
+    error: searchError,
+  } = useGetCentersWithFilter(currentFilters, userLocation);
 
   const navigate = useNavigate();
 
@@ -45,15 +54,22 @@ const CommunityCenter = () => {
   };
 
   // function to handle search filters change
-  // TODO: update this function to actually perform the search with filters
-  // instead of just updating state, call the new getCentersWithFilters API function
-  // this should: 1) set loading state, 2) call API with filters and userLocation, 3) update centers state
-  const handleSearch = (filters) => {
-    setSearchFilters(filters); // update searchFilters state
-    // TODO: add actual search logic here
-  };
+  const handleSearch = useCallback((filters) => {
+    // check if any filters are selected
+    const hasActiveFilters = Object.values(filters).some(
+      (filterArray) => filterArray.length > 0
+    );
 
-  // TODO: add new useEffect to get user location on component mount
+    if (!hasActiveFilters) {
+      // no filters selected, show all centers
+      setCurrentFilters(null);
+      setHasSearched(false);
+    } else {
+      // filters selected, trigger search
+      setCurrentFilters(filters);
+      setHasSearched(true);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchCenters = async () => {
@@ -72,6 +88,24 @@ const CommunityCenter = () => {
 
     fetchCenters();
   }, []); // only runs once when component mounts
+
+  // update centers when filtered results are available
+  useEffect(() => {
+    if (hasSearched && filteredCenters) {
+      setCenters(filteredCenters);
+    } else if (!hasSearched && !currentFilters) {
+      // if no search is active, fetch all centers
+      const fetchAllCenters = async () => {
+        try {
+          const data = await communityAPI.getAllCenters();
+          setCenters(data);
+        } catch (err) {
+          console.error("Error fetching all community centers:", err);
+        }
+      };
+      fetchAllCenters();
+    }
+  }, [hasSearched, filteredCenters, currentFilters]);
 
   if (loading) {
     return (
@@ -117,10 +151,56 @@ const CommunityCenter = () => {
             Map View
           </button>
         </div>
-        {/* TODO: add loading and error states for search functionality */}
+        {/* display location status to the user */}
+        {locationLoading && (
+          <div className="location-status">
+            <p>Getting your location for distance-based filtering...</p>
+          </div>
+        )}
 
-        {/* TODO: add search results summary */}
+        {locationError && (
+          <div className="location-error">
+            <p>
+              <strong>Location access issue:</strong> {locationError}
+            </p>
+            <p>Distance-based filtering will not be available.</p>
+          </div>
+        )}
 
+        {userLocation && (
+          <div className="location-success">
+            <p>
+              Location access granted. Distance-based filtering is available.
+            </p>
+          </div>
+        )}
+
+        {/* search results summary */}
+        {hasSearched && (
+          <div className="search-results-summary">
+            <p>
+              {centers.length === 0
+                ? "No community centers match your search criteria."
+                : `Found ${centers.length} community center${
+                    centers.length !== 1 ? "s" : ""
+                  } matching your search criteria.`}
+            </p>
+          </div>
+        )}
+
+        {/* search error message */}
+        {searchError && (
+          <div className="search-error">
+            <p>{searchError}</p>
+          </div>
+        )}
+
+        {/* search loading indicator */}
+        {searchLoading && (
+          <div className="search-loading">
+            <p>Searching for community centers...</p>
+          </div>
+        )}
 
         {/* loop through each communiy center in array and create one card for each center returned from db*/}
         <div className="centers-grid">
@@ -144,8 +224,7 @@ const CommunityCenter = () => {
                   <strong>Zip Code:</strong> {center.zip_code}
                 </p>
 
-                {/* TODO: add new fields from advanced search results */}
-
+                {/* TODO: add new fields from advanced search results like open/close time, ratings, tags, #of reviews etc.*/}
 
                 <div className="center-buttons">
                   <button
