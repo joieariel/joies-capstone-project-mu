@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react"; // useCallback
 import { useNavigate } from "react-router-dom";
 import { communityAPI, getUserLocation } from "./api"; // import getUserLocation and with communityAPI
 import "./CommunityCenter.css";
@@ -55,58 +55,70 @@ const CommunityCenter = () => {
   };
 
   // function to handle search filters change and perform the search
-  const handleSearch = async (filters) => {
-    // update the filters state
-    setSearchFilters(filters);
+  // add useCallback to prevent unnecessary re-renders
+  const handleSearch = useCallback(
+    async (filters) => {
+      // update the filters state
+      setSearchFilters(filters);
 
-    // reset search error
-    setSearchError("");
+      // reset search error
+      setSearchError("");
 
-    // check if any filters are selected
-    const hasActiveFilters = Object.values(filters).some(
-      (filterArray) => filterArray.length > 0
-    );
+      // check if any filters are selected
+      const hasActiveFilters = Object.values(filters).some(
+        (filterArray) => filterArray.length > 0
+      );
 
-    // if no filters are selected show all centers
-    if (!hasActiveFilters) {
+      // if no filters are selected show all centers
+      if (!hasActiveFilters) {
+        try {
+          setSearchLoading(true);
+          const data = await communityAPI.getAllCenters();
+          setCenters(data);
+          setSearchResultCount(data.length);
+          setHasSearched(false); // reset search state since showing all centers
+        } catch (err) {
+          console.error("Error fetching all community centers:", err);
+          setSearchError("Failed to reset search results");
+        } finally {
+          setSearchLoading(false);
+        }
+        return;
+      }
+
+      // ff filters are selected, perform the search
       try {
         setSearchLoading(true);
-        const data = await communityAPI.getAllCenters();
-        setCenters(data);
-        setSearchResultCount(data.length);
-        setHasSearched(false); // reset search state since showing all centers
+
+        // call the api with filters and user location
+        const results = await communityAPI.getCentersWithFilters(
+          filters,
+          userLocation
+        );
+
+        // update centers with search results
+        setCenters(results);
+        setSearchResultCount(results.length);
+        setHasSearched(true); // mark that a search has been performed with true
+
+        console.log(`Search completed: ${results.length} results found`);
       } catch (err) {
-        console.error("Error fetching all community centers:", err);
-        setSearchError("Failed to reset search results");
+        console.error("Error performing search:", err);
+        setSearchError("Failed to perform search. Please try again.");
       } finally {
         setSearchLoading(false);
       }
-      return;
-    }
-
-    // ff filters are selected, perform the search
-    try {
-      setSearchLoading(true);
-
-      // call the api with filters and user location
-      const results = await communityAPI.getCentersWithFilters(
-        filters,
-        userLocation
-      );
-
-      // update centers with search results
-      setCenters(results);
-      setSearchResultCount(results.length);
-      setHasSearched(true); // mark that a search has been performed with true
-
-      console.log(`Search completed: ${results.length} results found`);
-    } catch (err) {
-      console.error("Error performing search:", err);
-      setSearchError("Failed to perform search. Please try again.");
-    } finally {
-      setSearchLoading(false);
-    }
-  };
+    },
+    [
+      userLocation,
+      setCenters,
+      setSearchResultCount,
+      setHasSearched,
+      setSearchLoading,
+      setSearchError,
+      setSearchFilters,
+    ]
+  );
 
   // useEffect to get user location on component mount
   useEffect(() => {
