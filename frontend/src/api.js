@@ -98,18 +98,131 @@ export const communityAPI = {
   getCentersByZipCode: (zipCode) =>
     apiRequest(`/communityCenters?zip_code=${zipCode}`),
 
-  // TODO: add new function here for advanced search filtering
-  // getCentersWithFilters: async (filters, userLocation = null) => { ... }
-  // this function will take the filters object from Search component
-  // and convert it to query parameters to send to the backend
-  // filters object structure: { distance: [], hours: [], rating: [] }
-  // userLocation structure: { latitude: number, longitude: number }
+  // function for advanced search filtering to connect frontend to backend api
+  // takes in a filters object with distance, hours, rating, and tags properties and coords of user
+  // returns a promise that resolves with the filtered community centers
+  getCentersWithFilters: async (filters, userLocation = null) => {
+    try {
+      // start building/encoding the query string using URLSearchParams api
+      const queryParams = new URLSearchParams();
+
+      // process distance filters if they exist and are not empty
+      if (filters.distance && filters.distance.length > 0) {
+        // add each distance filter as a separate query parameter
+        filters.distance.forEach((distance) => {
+          queryParams.append("distance", distance);
+        });
+
+        // if we have distance filters and user location, add coordinates
+        if (userLocation) {
+          queryParams.append("userLat", userLocation.latitude);
+          queryParams.append("userLng", userLocation.longitude);
+        }
+      }
+
+      // process hours filters
+      if (filters.hours && filters.hours.length > 0) {
+        // add each hour filter as a separate query parameter
+        filters.hours.forEach((hour) => {
+          queryParams.append("hours", hour);
+        });
+      }
+
+      // process rating filters
+      if (filters.rating && filters.rating.length > 0) {
+        filters.rating.forEach((rating) => {
+          queryParams.append("rating", rating);
+        });
+      }
+
+      // process tag filters
+      if (filters.tags && filters.tags.length > 0) {
+        // add each tag filter as a separate query parameter
+        filters.tags.forEach((tag) => {
+          queryParams.append("tags", tag);
+        });
+      }
+
+      // make the api request with the constructed query string
+      const queryString = queryParams.toString();
+      const endpoint = queryString
+        ? `/communityCenters?${queryString}`
+        : "/communityCenters";
+
+      return await apiRequest(endpoint);
+    } catch (error) {
+      console.error("Error fetching filtered community centers:", error);
+      throw error;
+    }
+  },
 };
 
-// TODO: add new helper function here for getting user's current location
-// function will use navigator.geolocation.getCurrentPosition()
-// to get the user's current coordinates for distance filtering
-// handle permission denied, unavailable, and timeout errors
+// helper function to get the user's current location using browser geolocation API
+// returns a promise that resolves with users coordinates or rejects with an error
+export const getUserLocation = () => {
+  return new Promise((resolve, reject) => {
+    // first check if geolocation is supported by the browser
+    if (!navigator.geolocation) {
+      reject(new Error("Geolocation is not supported by your browser"));
+      return;
+    }
+
+    // options for getCurrentPosition
+    const options = {
+      enableHighAccuracy: true, // use GPS if available
+      timeout: 10000, // time to wait for a position (10 seconds)
+      maximumAge: 60000, // accept a cached position if it's not older than 1 minute
+    };
+
+    // success callback
+    const success = (position) => {
+      resolve({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+    };
+
+    // error callback
+    const error = (err) => {
+      switch (err.code) {
+        // user denied permission
+        case err.PERMISSION_DENIED:
+          reject(
+            new Error(
+              "Location access was denied. Please enable location services to use distance-based filtering."
+            )
+          );
+          break;
+        // location information cannot be  retrieved
+        case err.POSITION_UNAVAILABLE:
+          reject(
+            new Error(
+              "Location information is unavailable. Please try again later."
+            )
+          );
+          break;
+        case err.TIMEOUT:
+          reject(
+            // location information cannot be retrieved due to timeout
+            new Error(
+              "The request to get your location timed out. Please try again."
+            )
+          );
+          break;
+        default:
+          // unknown error
+          reject(
+            new Error(
+              "An unknown error occurred while trying to get your location."
+            )
+          );
+      }
+    };
+
+    // get the current position
+    navigator.geolocation.getCurrentPosition(success, error, options);
+  });
+};
 
 export const reviewAPI = {
   // get all reviews (for testing purposes)

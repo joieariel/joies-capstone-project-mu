@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { communityAPI } from "./api"; // to get acces to communtiy center functions
+import { communityAPI, getUserLocation } from "./api"; // import getUserLocation and with communityAPI
 import "./CommunityCenter.css";
 import Search from "./Search";
 
-// TODO: import getUserLocation function from api.js when added
-// import { communityAPI, getUserLocation } from "./api";
-
 const CommunityCenter = () => {
-  // state to store list of centes from db, initialized as empty
+  // state to store list of centers from db, initialized as empty
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -17,10 +14,23 @@ const CommunityCenter = () => {
     distance: [],
     hours: [],
     rating: [],
-    tags: []
+    tags: [],
   });
 
-  // TODO: add new state variables for advanced search functionality
+  //  state variables for search functionality
+  const [searchLoading, setSearchLoading] = useState(false);
+  // track search-specific errors
+  const [searchError, setSearchError] = useState("");
+  // track if a search has been performed
+  const [hasSearched, setHasSearched] = useState(false);
+  // track number of results
+  const [searchResultCount, setSearchResultCount] = useState(0);
+
+  // state variables for user location functionality
+  // state to store user's location
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState("");
 
   const navigate = useNavigate();
 
@@ -44,16 +54,91 @@ const CommunityCenter = () => {
     navigate(`/map/${centerId}`);
   };
 
-  // function to handle search filters change
-  // TODO: update this function to actually perform the search with filters
-  // instead of just updating state, call the new getCentersWithFilters API function
-  // this should: 1) set loading state, 2) call API with filters and userLocation, 3) update centers state
-  const handleSearch = (filters) => {
-    setSearchFilters(filters); // update searchFilters state
-    // TODO: add actual search logic here
+  // function to handle search filters change and perform the search
+  const handleSearch = async (filters) => {
+    // update the filters state
+    setSearchFilters(filters);
+
+    // reset search error
+    setSearchError("");
+
+    // check if any filters are selected
+    const hasActiveFilters = Object.values(filters).some(
+      (filterArray) => filterArray.length > 0
+    );
+
+    // if no filters are selected show all centers
+    if (!hasActiveFilters) {
+      try {
+        setSearchLoading(true);
+        const data = await communityAPI.getAllCenters();
+        setCenters(data);
+        setSearchResultCount(data.length);
+        setHasSearched(false); // reset search state since showing all centers
+      } catch (err) {
+        console.error("Error fetching all community centers:", err);
+        setSearchError("Failed to reset search results");
+      } finally {
+        setSearchLoading(false);
+      }
+      return;
+    }
+
+    // ff filters are selected, perform the search
+    try {
+      setSearchLoading(true);
+
+      // call the api with filters and user location
+      const results = await communityAPI.getCentersWithFilters(
+        filters,
+        userLocation
+      );
+
+      // update centers with search results
+      setCenters(results);
+      setSearchResultCount(results.length);
+      setHasSearched(true); // mark that a search has been performed with true
+
+      console.log(`Search completed: ${results.length} results found`);
+    } catch (err) {
+      console.error("Error performing search:", err);
+      setSearchError("Failed to perform search. Please try again.");
+    } finally {
+      setSearchLoading(false);
+    }
   };
 
-  // TODO: add new useEffect to get user location on component mount
+  // useEffect to get user location on component mount
+  useEffect(() => {
+    // function to get the user's location
+    const getLocation = async () => {
+      // only attempt to get location if we don't already have it
+      if (!userLocation) {
+        setLocationLoading(true);
+        setLocationError("");
+
+        try {
+          // call the getUserLocation function from api.js
+          const location = await getUserLocation();
+
+          // ftore the location in state
+          setUserLocation(location);
+          console.log("User location obtained:", location);
+        } catch (err) {
+          // handle errors
+          console.error("Error getting user location:", err);
+          setLocationError(err.message || "Failed to get your location");
+
+          // don't show alert for location errors instead display it in the ui
+        } finally {
+          setLocationLoading(false);
+        }
+      }
+    };
+
+    // call the function to get location
+    getLocation();
+  }, []); // this runs once on component mount
 
   useEffect(() => {
     const fetchCenters = async () => {
@@ -117,10 +202,56 @@ const CommunityCenter = () => {
             Map View
           </button>
         </div>
-        {/* TODO: add loading and error states for search functionality */}
+        {/* display location status to the user */}
+        {locationLoading && (
+          <div className="location-status">
+            <p>Getting your location for distance-based filtering...</p>
+          </div>
+        )}
 
-        {/* TODO: add search results summary */}
+        {locationError && (
+          <div className="location-error">
+            <p>
+              <strong>Location access issue:</strong> {locationError}
+            </p>
+            <p>Distance-based filtering will not be available.</p>
+          </div>
+        )}
 
+        {userLocation && (
+          <div className="location-success">
+            <p>
+              Location access granted. Distance-based filtering is available.
+            </p>
+          </div>
+        )}
+
+        {/* search results summary */}
+        {hasSearched && (
+          <div className="search-results-summary">
+            <p>
+              {searchResultCount === 0
+                ? "No community centers match your search criteria."
+                : `Found ${searchResultCount} community center${
+                    searchResultCount !== 1 ? "s" : ""
+                  } matching your search criteria.`}
+            </p>
+          </div>
+        )}
+
+        {/* search error message */}
+        {searchError && (
+          <div className="search-error">
+            <p>{searchError}</p>
+          </div>
+        )}
+
+        {/* search loading indicator */}
+        {searchLoading && (
+          <div className="search-loading">
+            <p>Searching for community centers...</p>
+          </div>
+        )}
 
         {/* loop through each communiy center in array and create one card for each center returned from db*/}
         <div className="centers-grid">
@@ -144,8 +275,7 @@ const CommunityCenter = () => {
                   <strong>Zip Code:</strong> {center.zip_code}
                 </p>
 
-                {/* TODO: add new fields from advanced search results */}
-
+                {/* TODO: add new fields from advanced search results like open/close time, ratings, tags, #of reviews etc.*/}
 
                 <div className="center-buttons">
                   <button

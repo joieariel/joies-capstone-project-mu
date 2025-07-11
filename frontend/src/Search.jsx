@@ -13,6 +13,7 @@ const Search = ({ onSearch }) => {
   // state for custom distance input
   const [customDistance, setCustomDistance] = useState("");
   const [showCustomDistance, setShowCustomDistance] = useState(false);
+  const [customDistanceSubmitted, setCustomDistanceSubmitted] = useState(false);
 
   // predefined filter options
   const distanceOptions = [
@@ -123,28 +124,53 @@ const Search = ({ onSearch }) => {
   const handleCustomDistanceChange = (e) => {
     const value = e.target.value;
     setCustomDistance(value);
+    // reset the submitted state when the user changes the input
+    setCustomDistanceSubmitted(false);
+  };
 
-    if (value.trim() !== "") {
-      // ddd custom distance to filters
+  // handle custom distance submission
+  const handleCustomDistanceSubmit = () => {
+    if (customDistance.trim() !== "" && !isNaN(customDistance)) {
+      // format the custom distance as "Xmiles" for the backend
+      const formattedDistance = `${customDistance}miles`;
+
       setSelectedFilters((prevFilters) => {
         const updatedFilters = {
           ...prevFilters,
-          distance: ["custom"],
+          distance: [formattedDistance], // send the formatted distance value
         };
         onSearch(updatedFilters);
         return updatedFilters;
       });
+
+      setCustomDistanceSubmitted(true);
     } else {
-      // remove custom distance from filters if input is empty
-      setSelectedFilters((prevFilters) => {
-        const updatedFilters = {
-          ...prevFilters,
-          distance: prevFilters.distance.filter((id) => id !== "custom"),
-        };
-        onSearch(updatedFilters);
-        return updatedFilters;
-      });
+      // handle invalid input
+      alert("Please enter a valid number for distance");
     }
+  };
+
+  // handle pressing Enter in the custom distance input
+  const handleCustomDistanceKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleCustomDistanceSubmit();
+    }
+  };
+
+  // clear custom distance
+  const clearCustomDistance = () => {
+    setCustomDistance("");
+    setCustomDistanceSubmitted(false);
+
+    setSelectedFilters((prevFilters) => {
+      const updatedFilters = {
+        ...prevFilters,
+        distance: [],
+      };
+      onSearch(updatedFilters);
+      return updatedFilters;
+    });
   };
 
   // helper to check if a filter is selected used to style the filter if its toggled or not
@@ -216,19 +242,47 @@ const Search = ({ onSearch }) => {
         {/* Custom distance input */}
         {showCustomDistance && (
           <div className="custom-distance-container">
-            <label htmlFor="customDistance" className="custom-distance-label">
-              Enter distance in miles:
-            </label>
-            <input
-              id="customDistance"
-              type="number"
-              min="1"
-              max="100"
-              value={customDistance}
-              onChange={handleCustomDistanceChange}
-              placeholder="e.g., 15"
-              className="custom-distance-input"
-            />
+            <div className="custom-distance-input-group">
+              <label htmlFor="customDistance" className="custom-distance-label">
+                Enter distance in miles:
+              </label>
+              <div className="custom-distance-controls">
+                <input
+                  id="customDistance"
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={customDistance}
+                  onChange={handleCustomDistanceChange}
+                  onKeyDown={handleCustomDistanceKeyDown}
+                  placeholder="e.g., 15"
+                  className="custom-distance-input"
+                  disabled={customDistanceSubmitted}
+                />
+                {!customDistanceSubmitted ? (
+                  <button
+                    onClick={handleCustomDistanceSubmit}
+                    className="custom-distance-button"
+                    title="Apply this distance filter"
+                  >
+                    Apply
+                  </button>
+                ) : (
+                  <button
+                    onClick={clearCustomDistance}
+                    className="custom-distance-button clear"
+                    title="Clear this distance filter"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+            {customDistanceSubmitted && (
+              <div className="custom-distance-status">
+                <span>✓ Filtering centers within {customDistance} miles</span>
+              </div>
+            )}
           </div>
         )}
 
