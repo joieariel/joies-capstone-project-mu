@@ -59,6 +59,62 @@ const getDistancesFromGoogle = async (userCoord, centerCoords) => {
   }
 };
 
+// helper function to find the next opening day and time
+const findNextOpeningTime = (centerHours, centerTimezone) => {
+  const now = new Date();
+  const daysOfWeek = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+
+  // get current day index in the center's timezone (0 = Sunday, 1 = Monday, etc.)
+  const currentDayName = now
+    .toLocaleDateString("en-US", {
+      weekday: "long",
+      timeZone: centerTimezone,
+    })
+    .toLowerCase();
+  const currentDayIndex = daysOfWeek.indexOf(currentDayName);
+
+  // check the next 7 days to find when the center opens next
+  for (let i = 1; i <= 7; i++) {
+    const nextDayIndex = (currentDayIndex + i) % 7;
+    const nextDayName = daysOfWeek[nextDayIndex];
+
+    const nextDayHours = centerHours.find(
+      (h) => h.day.toLowerCase() === nextDayName
+    );
+
+    // if we find a day that's open and has hours
+    if (nextDayHours && !nextDayHours.is_closed && nextDayHours.open_time) {
+      // determine the day description
+      let dayDescription;
+      if (i === 1) {
+        dayDescription = "tomorrow";
+      } else if (i <= 6) {
+        // capitalize first letter of day name
+        dayDescription =
+          nextDayName.charAt(0).toUpperCase() + nextDayName.slice(1);
+      } else {
+        dayDescription = "next week";
+      }
+
+      return {
+        day: dayDescription,
+        time: nextDayHours.open_time,
+      };
+    }
+  }
+
+  // if no opening time found in the next 7 days
+  return null;
+};
+
 // enhanced function to get detailed center status including hours until closing
 const getCenterStatus = (centerHours, centerTimezone) => {
   // get current time in the center's timezone
@@ -100,13 +156,19 @@ const getCenterStatus = (centerHours, centerTimezone) => {
     !todayHours.open_time ||
     !todayHours.close_time
   ) {
+    // find when the center opens next
+    const nextOpening = findNextOpeningTime(centerHours, centerTimezone);
+    const message = nextOpening
+      ? `Closed • Opens ${nextOpening.day} at ${nextOpening.time}`
+      : "Closed";
+
     return {
       isOpen: false,
       hoursUntilClose: null,
       minutesUntilClose: null,
       closingTime: null,
       status: "closed",
-      message: "Closed today",
+      message: message,
     };
   }
 
@@ -119,16 +181,34 @@ const getCenterStatus = (centerHours, centerTimezone) => {
     currentTotalMinutes >= openTotalMinutes &&
     currentTotalMinutes <= closeTotalMinutes;
 
-  // if currently closed
+  // if currently closed but will open later today
   if (!isCurrentlyOpen) {
-    return {
-      isOpen: false,
-      hoursUntilClose: null,
-      minutesUntilClose: null,
-      closingTime: todayHours.close_time,
-      status: "closed",
-      message: `Closed • Opens at ${todayHours.open_time}`,
-    };
+    // if it's before opening time today, show today's opening time
+    if (currentTotalMinutes < openTotalMinutes) {
+      return {
+        isOpen: false,
+        hoursUntilClose: null,
+        minutesUntilClose: null,
+        closingTime: todayHours.close_time,
+        status: "closed",
+        message: `Closed • Opens at ${todayHours.open_time}`,
+      };
+    } else {
+      // if it's after closing time today, find next opening
+      const nextOpening = findNextOpeningTime(centerHours, centerTimezone);
+      const message = nextOpening
+        ? `Closed • Opens ${nextOpening.day} at ${nextOpening.time}`
+        : "Closed";
+
+      return {
+        isOpen: false,
+        hoursUntilClose: null,
+        minutesUntilClose: null,
+        closingTime: todayHours.close_time,
+        status: "closed",
+        message: message,
+      };
+    }
   }
 
   // calculate time until closing
