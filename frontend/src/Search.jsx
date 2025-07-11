@@ -16,9 +16,10 @@ const Search = ({ onSearch }) => {
 
   // predefined filter options
   const distanceOptions = [
-    { id: "5miles", label: "Within 5 miles" },
-    { id: "10miles", label: "Within 10 miles" },
-    { id: "25miles", label: "Within 25+ miles" },
+    { id: "5miles", label: "Within 0-5 miles" },
+    { id: "10miles", label: "Within 6-10 miles" },
+    { id: "25miles", label: "Within 11-25 miles" },
+    { id: "25+miles", label: "Over 25+ miles" },
     { id: "custom", label: "Custom Distance" },
   ];
 
@@ -207,7 +208,7 @@ const Search = ({ onSearch }) => {
           </button>
         )}
       </div>
-      {/* container for all fsections */}
+      {/* container for all filter sections */}
       <div className="advanced-search-container">
         {/* the 3 filter sections using reusable render function */}
         {renderFilterSection("Distance", distanceOptions, "distance")}
