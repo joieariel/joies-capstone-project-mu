@@ -285,16 +285,97 @@ const Search = ({ onSearch }) => {
         {renderFilterSection("Rating & Reviews", ratingOptions, "rating")}
         {renderFilterSection("Tags", tagOptions, "tags")}
       </div>
-      {/* summary section to show the number of active filters */}
+      {/* summary section to show active filters */}
       {hasActiveFilters() && (
         <div className="active-filters-summary">
           <div className="summary-label">Active Filters:</div>
-          <div className="summary-count">
-            {Object.values(selectedFilters).reduce(
-              (total, filters) => total + filters.length,
-              0
-            )}{" "}
-            filters selected
+          <div className="summary-content">
+            <div className="summary-count">
+              {Object.values(selectedFilters).reduce(
+                (total, filters) => total + filters.length,
+                0
+              )}{" "}
+              filters selected
+            </div>
+            <div className="active-filters-list">
+              {/* distance filters */}
+              {selectedFilters.distance.length > 0 && (
+                <div className="filter-category">
+                  <span className="filter-category-name">Distance:</span>
+                  {selectedFilters.distance.map((filterId) => {
+                    // handle custom distance format
+                    const customDistanceMatch = filterId.match(/^(\d+)miles$/);
+                    if (customDistanceMatch) {
+                      return (
+                        <span key={filterId} className="active-filter-item">
+                          {customDistanceMatch[1]} miles
+                        </span>
+                      );
+                    }
+                    // handle predefined distances
+                    const option = distanceOptions.find(
+                      (opt) => opt.id === filterId
+                    );
+                    return option ? (
+                      <span key={filterId} className="active-filter-item">
+                        {option.label}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              )}
+
+              {/* hours filters */}
+              {selectedFilters.hours.length > 0 && (
+                <div className="filter-category">
+                  <span className="filter-category-name">Hours:</span>
+                  {selectedFilters.hours.map((filterId) => {
+                    const option = hoursOptions.find(
+                      (opt) => opt.id === filterId
+                    );
+                    return option ? (
+                      <span key={filterId} className="active-filter-item">
+                        {option.label}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              )}
+
+              {/* rating filters */}
+              {selectedFilters.rating.length > 0 && (
+                <div className="filter-category">
+                  <span className="filter-category-name">Rating:</span>
+                  {selectedFilters.rating.map((filterId) => {
+                    const option = ratingOptions.find(
+                      (opt) => opt.id === filterId
+                    );
+                    return option ? (
+                      <span key={filterId} className="active-filter-item">
+                        {option.label}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              )}
+
+              {/* tags filters */}
+              {selectedFilters.tags.length > 0 && (
+                <div className="filter-category">
+                  <span className="filter-category-name">Tags:</span>
+                  {selectedFilters.tags.map((filterId) => {
+                    const option = tagOptions.find(
+                      (opt) => opt.id === filterId
+                    );
+                    return option ? (
+                      <span key={filterId} className="active-filter-item">
+                        {option.label}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
