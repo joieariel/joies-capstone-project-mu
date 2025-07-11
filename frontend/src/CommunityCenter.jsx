@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react"; // useCallback
 import { useNavigate } from "react-router-dom";
-import { communityAPI, getUserLocation } from "./api"; // import getUserLocation and with communityAPI
+import { communityAPI } from "./api"; // import communityAPI
+import { useGetUserLocation, useGetCentersWithFilter } from "./utils/hooks"; // import custom hooks
 import "./CommunityCenter.css";
 import Search from "./Search";
 
@@ -9,28 +10,26 @@ const CommunityCenter = () => {
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  // state to track search filters for advanced search feature
-  const [searchFilters, setSearchFilters] = useState({
-    distance: [],
-    hours: [],
-    rating: [],
-    tags: [],
-  });
 
-  //  state variables for search functionality
-  const [searchLoading, setSearchLoading] = useState(false);
-  // track search-specific errors
-  const [searchError, setSearchError] = useState("");
+  // state to track current search filters
+  const [currentFilters, setCurrentFilters] = useState(null);
+
   // track if a search has been performed
   const [hasSearched, setHasSearched] = useState(false);
-  // track number of results
-  const [searchResultCount, setSearchResultCount] = useState(0);
 
-  // state variables for user location functionality
-  // state to store user's location
-  const [userLocation, setUserLocation] = useState(null);
-  const [locationLoading, setLocationLoading] = useState(false);
-  const [locationError, setLocationError] = useState("");
+  // use custom hook for user location functionality
+  const {
+    data: userLocation,
+    isLoading: locationLoading,
+    error: locationError,
+  } = useGetUserLocation();
+
+  // use custom hook for filtered search functionality
+  const {
+    data: filteredCenters,
+    isLoading: searchLoading,
+    error: searchError,
+  } = useGetCentersWithFilter(currentFilters, userLocation);
 
   const navigate = useNavigate();
 
@@ -54,91 +53,23 @@ const CommunityCenter = () => {
     navigate(`/map/${centerId}`);
   };
 
-  // function to handle search filters change and perform the search
-  const handleSearch = async (filters) => {
-    // update the filters state
-    setSearchFilters(filters);
-
-    // reset search error
-    setSearchError("");
-
+  // function to handle search filters change
+  const handleSearch = useCallback((filters) => {
     // check if any filters are selected
     const hasActiveFilters = Object.values(filters).some(
       (filterArray) => filterArray.length > 0
     );
 
-    // if no filters are selected show all centers
     if (!hasActiveFilters) {
-      try {
-        setSearchLoading(true);
-        const data = await communityAPI.getAllCenters();
-        setCenters(data);
-        setSearchResultCount(data.length);
-        setHasSearched(false); // reset search state since showing all centers
-      } catch (err) {
-        console.error("Error fetching all community centers:", err);
-        setSearchError("Failed to reset search results");
-      } finally {
-        setSearchLoading(false);
-      }
-      return;
+      // no filters selected, show all centers
+      setCurrentFilters(null);
+      setHasSearched(false);
+    } else {
+      // filters selected, trigger search
+      setCurrentFilters(filters);
+      setHasSearched(true);
     }
-
-    // ff filters are selected, perform the search
-    try {
-      setSearchLoading(true);
-
-      // call the api with filters and user location
-      const results = await communityAPI.getCentersWithFilters(
-        filters,
-        userLocation
-      );
-
-      // update centers with search results
-      setCenters(results);
-      setSearchResultCount(results.length);
-      setHasSearched(true); // mark that a search has been performed with true
-
-      console.log(`Search completed: ${results.length} results found`);
-    } catch (err) {
-      console.error("Error performing search:", err);
-      setSearchError("Failed to perform search. Please try again.");
-    } finally {
-      setSearchLoading(false);
-    }
-  };
-
-  // useEffect to get user location on component mount
-  useEffect(() => {
-    // function to get the user's location
-    const getLocation = async () => {
-      // only attempt to get location if we don't already have it
-      if (!userLocation) {
-        setLocationLoading(true);
-        setLocationError("");
-
-        try {
-          // call the getUserLocation function from api.js
-          const location = await getUserLocation();
-
-          // ftore the location in state
-          setUserLocation(location);
-          console.log("User location obtained:", location);
-        } catch (err) {
-          // handle errors
-          console.error("Error getting user location:", err);
-          setLocationError(err.message || "Failed to get your location");
-
-          // don't show alert for location errors instead display it in the ui
-        } finally {
-          setLocationLoading(false);
-        }
-      }
-    };
-
-    // call the function to get location
-    getLocation();
-  }, []); // this runs once on component mount
+  }, []);
 
   useEffect(() => {
     const fetchCenters = async () => {
@@ -157,6 +88,24 @@ const CommunityCenter = () => {
 
     fetchCenters();
   }, []); // only runs once when component mounts
+
+  // update centers when filtered results are available
+  useEffect(() => {
+    if (hasSearched && filteredCenters) {
+      setCenters(filteredCenters);
+    } else if (!hasSearched && !currentFilters) {
+      // if no search is active, fetch all centers
+      const fetchAllCenters = async () => {
+        try {
+          const data = await communityAPI.getAllCenters();
+          setCenters(data);
+        } catch (err) {
+          console.error("Error fetching all community centers:", err);
+        }
+      };
+      fetchAllCenters();
+    }
+  }, [hasSearched, filteredCenters, currentFilters]);
 
   if (loading) {
     return (
@@ -231,10 +180,10 @@ const CommunityCenter = () => {
         {hasSearched && (
           <div className="search-results-summary">
             <p>
-              {searchResultCount === 0
+              {centers.length === 0
                 ? "No community centers match your search criteria."
-                : `Found ${searchResultCount} community center${
-                    searchResultCount !== 1 ? "s" : ""
+                : `Found ${centers.length} community center${
+                    centers.length !== 1 ? "s" : ""
                   } matching your search criteria.`}
             </p>
           </div>

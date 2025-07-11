@@ -39,7 +39,6 @@ const Search = ({ onSearch }) => {
     { id: "mostReviewed", label: "Most Reviewed" },
     { id: "mostRecentlyReviewed", label: "Most Recently Reviewed" },
     { id: "recommended", label: "Recommended" }, // will combine the highest rated and most reviewed to recommend the best centers
-  ];
 
   // fetch tags from the api when component mounts instead of hard coding them
   useEffect(() => {
@@ -54,6 +53,7 @@ const Search = ({ onSearch }) => {
 
     fetchTags();
   }, []);
+
 
   // handle filter selection/deselection
   const handleFilterClick = (filterType, filterId) => {
