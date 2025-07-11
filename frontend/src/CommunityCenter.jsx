@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react"; // useCallback
+import React, { useState, useEffect, useCallback } from "react"; // useCallback
 import { useNavigate } from "react-router-dom";
 import { communityAPI } from "./api"; // import communityAPI
 import { useGetUserLocation, useGetCentersWithFilter } from "./utils/hooks"; // import custom hooks
