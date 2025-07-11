@@ -417,7 +417,7 @@ router.get("/", async (req, res) => {
                   case "25+miles":
                     return center.calculatedDistance > 25; // 25+ miles
                   default:
-                    return false; // fallback case for invalid/unexpected distance filter
+                    return center.calculatedDistance <= 5; // fallback to 5miles for invalid/unexpected distance filter
                 }
               });
             });
