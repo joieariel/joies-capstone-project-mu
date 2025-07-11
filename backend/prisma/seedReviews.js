@@ -2,25 +2,17 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Starting to seed users and reviews...");
-
   // First, delete all existing reviews and related data
-  console.log("Deleting all existing review data...");
 
   // Delete in the correct order to respect foreign key constraints
-  console.log("Deleting review tags...");
   await prisma.reviewTag.deleteMany({});
 
-  console.log("Deleting review images...");
   await prisma.reviewImage.deleteMany({});
 
-  console.log("Deleting reviews...");
   await prisma.review.deleteMany({});
 
-  console.log("Deleting center tags...");
   await prisma.centerTag.deleteMany({});
 
-  console.log("All existing review data deleted successfully!");
 
   // create test users with different profiles
   const users = [
@@ -95,7 +87,6 @@ async function main() {
       create: userData
     });
     createdUsers.push(user);
-    console.log(`Created/updated user: ${user.first_name} ${user.last_name}`);
   }
 
   // helper function to create a date in the past
@@ -169,7 +160,6 @@ async function main() {
 
   // Get the IDs of our test users to target only test data
   const testUserIds = createdUsers.map(user => user.id);
-  console.log(`Test user IDs: ${testUserIds.join(', ')}`);
 
   // Find reviews created by our test users
   const testReviews = await prisma.review.findMany({
@@ -183,10 +173,8 @@ async function main() {
     }
   });
   const testReviewIds = testReviews.map(review => review.id);
-  console.log(`Found ${testReviewIds.length} existing test reviews`);
 
   // Delete review images associated with test reviews
-  console.log("Deleting review images for test reviews...");
   await prisma.reviewImage.deleteMany({
     where: {
       review_id: {
@@ -196,7 +184,6 @@ async function main() {
   });
 
   // Delete review tags associated with test reviews
-  console.log("Deleting review tags for test reviews...");
   await prisma.reviewTag.deleteMany({
     where: {
       review_id: {
@@ -206,7 +193,6 @@ async function main() {
   });
 
   // Delete only the reviews created by test users
-  console.log("Deleting test reviews...");
   await prisma.review.deleteMany({
     where: {
       user_id: {
@@ -214,7 +200,6 @@ async function main() {
       }
     }
   });
-  console.log("Deleted test reviews only");
 
   // Create tags first to ensure they exist
   const tagNames = [
@@ -232,9 +217,7 @@ async function main() {
         update: {},
         create: { name: tagName }
       });
-      console.log(`Created/updated tag: ${tagName}`);
     } catch (error) {
-      console.error(`Error creating tag "${tagName}":`, error);
     }
   }
 
@@ -255,7 +238,6 @@ async function main() {
       }
     });
     createdReviews.push(review);
-    console.log(`Created review for center ${reviewData.centerId} with rating ${reviewData.rating}`);
   }
 
   // Define tag assignments based on center IDs and review indices
@@ -312,9 +294,7 @@ async function main() {
                 tag_id: tag.id
               }
             });
-            console.log(`Added tag "${tagName}" to center ${assignment.centerIndex}`);
           } catch (error) {
-            console.error(`Error adding tag "${tagName}" to center ${assignment.centerIndex}:`, error);
           }
 
           // Add this tag to selected reviews for this center
@@ -331,26 +311,20 @@ async function main() {
                     }
                   }
                 });
-                console.log(`Added tag "${tagName}" to review ${centerReviews[reviewIndex].id}`);
               } catch (error) {
                 if (error.code === 'P2002') {
-                  console.log(`Tag "${tagName}" already exists for review ${centerReviews[reviewIndex].id}`);
                 } else {
-                  console.error(`Error adding tag "${tagName}" to review ${centerReviews[reviewIndex].id}:`, error);
                 }
               }
             }
           }
         } else {
-          console.log(`Tag "${tagName}" not found`);
         }
       } catch (error) {
-        console.error(`Error processing tag "${tagName}":`, error);
       }
     }
   }
 
-  console.log("Seeding users and reviews completed successfully!");
 }
 
 main()
