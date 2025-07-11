@@ -8,6 +8,19 @@ const googleMapsClient = new Client({}); // create Google Maps client
 // helper functions  for advanced search functionality (distance, operating hours checks, rating)
 // maybe add to utils.js file later
 
+// helper function to convert 12-hour time format to minutes since midnight per PR code review
+const convertTimeToMinutes = (timeString) => {
+  const [timeStr, period] = timeString.split(" ");
+  const [hourStr, minuteStr] = timeStr.split(":");
+  let hour = parseInt(hourStr);
+  const minute = parseInt(minuteStr);
+
+  if (period === "PM" && hour < 12) hour += 12;
+  if (period === "AM" && hour === 12) hour = 0;
+
+  return hour * 60 + minute;
+};
+
 // coordinate class to encapsulate latitude and longitude
 class Coordinate {
   constructor(latitude, longitude) {
@@ -86,80 +99,6 @@ const getDistancesFromGoogle = async (userCoord, centerCoords) => {
   }
 };
 
-// function to check if a center is currently open based on current day/time vs center hours
-// now supports timezone-aware calculations and handles 12-hour time format
-const isOpenNow = (centerHours, centerTimezone) => {
-  // get current time in the center's timezone
-  const now = new Date();
-  const currentDay = now
-    .toLocaleDateString("en-US", {
-      weekday: "long",
-      timeZone: centerTimezone,
-    })
-    .toLowerCase();
-
-  // get current hour and minute in 24-hour format
-  const currentHour = parseInt(
-    now.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      hour12: false,
-      timeZone: centerTimezone,
-    })
-  );
-
-  const currentMinute = parseInt(
-    now.toLocaleTimeString("en-US", {
-      minute: "numeric",
-      timeZone: centerTimezone,
-    })
-  );
-
-  // find today's hours
-  const todayHours = centerHours.find(
-    (h) => h.day.toLowerCase() === currentDay
-  );
-
-  // if closed today or no hours data
-  if (
-    !todayHours ||
-    todayHours.is_closed ||
-    !todayHours.open_time ||
-    !todayHours.close_time
-  )
-    return false;
-
-  // convert open time from 12-hour format to 24-hour
-  const openTime = todayHours.open_time;
-  const [openTimeStr, openPeriod] = openTime.split(" ");
-  const [openHourStr, openMinuteStr] = openTimeStr.split(":");
-  let openHour = parseInt(openHourStr);
-  const openMinute = parseInt(openMinuteStr);
-
-  if (openPeriod === "PM" && openHour < 12) openHour += 12;
-  if (openPeriod === "AM" && openHour === 12) openHour = 0;
-
-  // convert close time from 12-hour format to 24-hour
-  const closeTime = todayHours.close_time;
-  const [closeTimeStr, closePeriod] = closeTime.split(" ");
-  const [closeHourStr, closeMinuteStr] = closeTimeStr.split(":");
-  let closeHour = parseInt(closeHourStr);
-  const closeMinute = parseInt(closeMinuteStr);
-
-  if (closePeriod === "PM" && closeHour < 12) closeHour += 12;
-  if (closePeriod === "AM" && closeHour === 12) closeHour = 0;
-
-  // convert all to minutes for easier comparison
-  const currentTotalMinutes = currentHour * 60 + currentMinute;
-  const openTotalMinutes = openHour * 60 + openMinute;
-  const closeTotalMinutes = closeHour * 60 + closeMinute;
-
-  // check if current time is between open and close times
-  return (
-    currentTotalMinutes >= openTotalMinutes &&
-    currentTotalMinutes <= closeTotalMinutes
-  );
-};
-
 // enhanced function to get detailed center status including hours until closing
 // now supports timezone-aware calculations and handles 12-hour time format
 const getCenterStatus = (centerHours, centerTimezone) => {
@@ -212,29 +151,9 @@ const getCenterStatus = (centerHours, centerTimezone) => {
     };
   }
 
-  // convert open time from 12-hour format to minutes since midnight
-  const openTime = todayHours.open_time;
-  const [openTimeStr, openPeriod] = openTime.split(" ");
-  const [openHourStr, openMinuteStr] = openTimeStr.split(":");
-  let openHour = parseInt(openHourStr);
-  const openMinute = parseInt(openMinuteStr);
-
-  if (openPeriod === "PM" && openHour < 12) openHour += 12;
-  if (openPeriod === "AM" && openHour === 12) openHour = 0;
-
-  const openTotalMinutes = openHour * 60 + openMinute;
-
-  // convert close time from 12-hour format to minutes since midnight
-  const closeTime = todayHours.close_time;
-  const [closeTimeStr, closePeriod] = closeTime.split(" ");
-  const [closeHourStr, closeMinuteStr] = closeTimeStr.split(":");
-  let closeHour = parseInt(closeHourStr);
-  const closeMinute = parseInt(closeMinuteStr);
-
-  if (closePeriod === "PM" && closeHour < 12) closeHour += 12;
-  if (closePeriod === "AM" && closeHour === 12) closeHour = 0;
-
-  const closeTotalMinutes = closeHour * 60 + closeMinute;
+  // convert times to minutes since midnight for easier comparison
+  const openTotalMinutes = convertTimeToMinutes(todayHours.open_time);
+  const closeTotalMinutes = convertTimeToMinutes(todayHours.close_time);
 
   // check if center is currently open
   const isCurrentlyOpen =

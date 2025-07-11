@@ -168,7 +168,8 @@ const CommunityCenter = () => {
         )}
 
         {userLocation &&
-          searchFilters.distance.length > 0 && ( // added search filter check
+          currentFilters &&
+          currentFilters.distance.length > 0 && ( // added search filter check
             <div className="location-success">
               <p>
                 Location access granted. Distance-based filtering is available.
