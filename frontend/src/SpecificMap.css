@@ -1,41 +1,82 @@
 .map-container {
-    min-height: calc(100vh - 80px); /* Full height minus header */
-    background-color: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    font-family: "Plus Jakarta Sans", sans-serif;
-  }
+  min-height: calc(100vh - 80px); /* Full height minus header */
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
 
-  .map-content {
-    text-align: center;
-    max-width: 800px;
-    width: 100%;
+.map-content {
+  text-align: center;
+  max-width: 800px;
+  width: 100%;
+}
+
+.back-container {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: #486284;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.back-button:hover {
+  background-color: #3a4f68;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.back-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.back-button::before {
+  content: "←";
+  margin-right: 8px;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.map-title {
+  font-size: 2.5rem;
+  color: #486284;
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .map-container {
+    padding: 1rem;
+    min-height: calc(100vh - 70px); /* Adjust for smaller header on mobile */
   }
 
   .map-title {
-    font-size: 2.5rem;
-    color: #486284;
-    margin: 0;
-    font-weight: 700;
-    line-height: 1.2;
+    font-size: 2rem;
   }
+}
 
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .map-container {
-      padding: 1rem;
-      min-height: calc(100vh - 70px); /* Adjust for smaller header on mobile */
-    }
-
-    .map-title {
-      font-size: 2rem;
-    }
+@media (max-width: 480px) {
+  .map-title {
+    font-size: 1.6rem;
   }
-
-  @media (max-width: 480px) {
-    .map-title {
-      font-size: 1.6rem;
-    }
-  }
+}
