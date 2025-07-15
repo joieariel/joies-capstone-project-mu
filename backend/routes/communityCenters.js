@@ -119,4 +119,7 @@ router.get("/:communityCenterId", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch community center" });
   }
 });
+
+// TODO: eventually, add new api endpoint for recommendations
+
 module.exports = router;
