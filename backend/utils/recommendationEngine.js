@@ -124,82 +124,10 @@ const calculateRatingSimilarity = (rating1, rating2) => {
 // 4. review sentiment similarity score (average sentiment of both centers)
 const calculateReviewSimilarity = () => {};
 
-// 5. description similarity score (jaccard similarity between descriptions)
-const calculateDescriptionSimilarity = (desc1, desc2) => {
-  // define common english stop words
-  const stopWords = new Set([
-    "a",
-    "an",
-    "the",
-    "and",
-    "or",
-    "but",
-    "is",
-    "are",
-    "was",
-    "were",
-    "in",
-    "on",
-    "at",
-    "to",
-    "for",
-    "with",
-    "by",
-    "about",
-    "of",
-    "from",
-    "as",
-    "this",
-    "that",
-    "these",
-    "those",
-    "it",
-    "its",
-    "they",
-    "them",
-    "their",
-    "we",
-    "our",
-    "you",
-    "your",
-    "he",
-    "she",
-    "his",
-    "her",
-  ]);
+// (5). description similarity score (jaccard similarity between descriptions)
+// maybe implement later remove for now per PR comment
 
-  // helper to normalize text - convert to lowercase and remove punctuation
-  const normalizeText = (text) => {
-    return text
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "") // remove punctuation
-      .replace(/\s+/g, " ") // replace multiple spaces with a single space
-      .trim();
-  };
-
-  // helper to process descriptions: normalize, remove stop words, and create word sets
-  const processDescription = (description) => {
-    const normalized = normalizeText(description);
-    const words = normalized.split(" ");
-    // filter out the stop words and empty strings
-    return new Set(words.filter((word) => word && !stopWords.has(word)));
-  };
-
-  // create word sets for each description
-  const wordSet1 = processDescription(desc1);
-  const wordSet2 = processDescription(desc2);
-
-  // calculate the overlap/intersection (shared words in both sets)
-  const overlap = new Set([...wordSet1].filter((word) => wordSet2.has(word)));
-
-  // calculate the union (all unique words in both sets)
-  const uniqueWords = new Set([...wordSet1, ...wordSet2]);
-
-  // return the jaccard similarity score
-  return overlap.size / uniqueWords.size;
-};
-
-// 6. operating hours similarity score
+// 5. operating hours similarity score
 const calculateHoursSimilarity = (hours1, hours2) => {
   // initialize variables to track total similarity across all days
   let totalSimilarity = 0;
@@ -269,7 +197,7 @@ const calculateHoursSimilarity = (hours1, hours2) => {
   return daysCount > 0 ? totalSimilarity / daysCount : 0;
 };
 
-// calculate the final similarity score between two centers
+// 6. calculate the final similarity score between two centers
 const calculateCenterSimliarity = (center1, center2) => {
   // extract tags from centers
   const tag1 = center1.centerTags.map((ct) => ct.tag);
@@ -290,10 +218,7 @@ const calculateCenterSimliarity = (center1, center2) => {
 
   // 4. call the review similarity function
 
-  // 5. call the description similarity function
-  calculateDescriptionSimilarity(center1.description, center2.description);
-
-  // 6. call the hours similarity function
+  // 5. call the hours similarity function
   calculateHoursSimilarity(center1.hours, center2.hours);
 
   // return weighted similarity score based on all factors
@@ -303,7 +228,6 @@ module.exports = {
   calculateTagSimilarity,
   calculateDistanceSimilarity,
   calculateRatingSimilarity,
-  calculateDescriptionSimilarity,
   calculateHoursSimilarity,
   calculateCenterSimliarity,
 };
