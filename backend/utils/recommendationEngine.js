@@ -1,3 +1,9 @@
+// import the convertTimeToMinutes function from centerFilters
+const { convertTimeToMinutes } = require("./centerFilters");
+
+// import days of the week from constants
+const { daysOfWeek } = require("./constants");
+
 // file for all recommendation logic (similarity scores)
 // 1 is perfect match, 0 is no match
 
@@ -141,7 +147,74 @@ const calculateDescriptionSimilarity = (desc1, desc2) => {
 };
 
 // 6. operating hours similarity score
-const calculateHoursSimilarity = () => {};
+const calculateHoursSimilarity = (hours1, hours2) => {
+  // initialize variables to track total similarity across all days
+  let totalSimilarity = 0;
+  let daysCount = 0;
+
+  // process each day of the week
+  for (const day of daysOfWeek) {
+    // find hours for this day for both centers
+    const dayHours1 = hours1.find((h) => h.day === day);
+    const dayHours2 = hours2.find((h) => h.day === day);
+
+    // skip if hours data is missing for either center
+    if (!dayHours1 || !dayHours2) continue;
+
+    // if both centers are closed on this day, they have perfect similarity for the day
+    if (dayHours1.is_closed && dayHours2.is_closed) {
+      totalSimilarity += 1;
+      daysCount++;
+      continue;
+    }
+
+    // if one center is closed and the other is open, they have 0 similarity for the day
+    if (dayHours1.is_closed || dayHours2.is_closed) {
+      totalSimilarity += 0;
+      daysCount++;
+      continue;
+    }
+
+    // both centers are open, calculate overlap
+
+    // check for null open/close times (should not happen if is_closed is false, but just in case)
+    if (
+      !dayHours1.open_time ||
+      !dayHours1.close_time ||
+      !dayHours2.open_time ||
+      !dayHours2.close_time
+    ) {
+      continue;
+    }
+
+    // convert opening and closing times to minutes since midnight
+    const open1 = convertTimeToMinutes(dayHours1.open_time);
+    const close1 = convertTimeToMinutes(dayHours1.close_time);
+    const open2 = convertTimeToMinutes(dayHours2.open_time);
+    const close2 = convertTimeToMinutes(dayHours2.close_time);
+
+    // calculate overlap start and end
+    const overlapStart = Math.max(open1, open2);
+    const overlapEnd = Math.min(close1, close2);
+
+    // calculate overlap in minutes (if centers' hours don't overlap, this will be negative)
+    const overlap = Math.max(0, overlapEnd - overlapStart);
+
+    // calculate total coverage (from earliest open to latest close)
+    const totalCoverage = Math.max(close1, close2) - Math.min(open1, open2);
+
+    // calculate day similarity as overlap / total coverage
+    const daySimilarity = overlap / totalCoverage;
+
+    // add to total and increment days count
+    totalSimilarity += daySimilarity;
+    daysCount++;
+  }
+
+  // calculate average similarity across all days
+  // if no valid days were processed, return 0
+  return daysCount > 0 ? totalSimilarity / daysCount : 0;
+};
 
 // calculate the final similarity score between two centers
 const calculateCenterSimliarity = (center1, center2) => {
@@ -157,13 +230,17 @@ const calculateCenterSimliarity = (center1, center2) => {
   calculateTagSimilarity(tag1, tag2);
 
   // 2. call the distance similarity function
-  calculateDistanceSimilarity(center1, center2);
-
 
   // 3. call the rating similarity function
   calculateRatingSimilarity(rating1, rating2);
 
+  // 4. call the review similarity function
 
+  // 5. call the description similarity function
+  calculateDescriptionSimilarity(center1.description, center2.description);
+
+  // 6. call the hours similarity function
+  calculateHoursSimilarity(center1.hours, center2.hours);
 
   // return weighted similarity score based on all factors
 };
@@ -172,5 +249,6 @@ module.exports = {
   calculateTagSimilarity,
   calculateRatingSimilarity,
   calculateDescriptionSimilarity,
+  calculateHoursSimilarity,
   calculateCenterSimliarity,
 };
