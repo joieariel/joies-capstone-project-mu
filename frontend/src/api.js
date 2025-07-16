@@ -98,6 +98,10 @@ export const communityAPI = {
   getCentersByZipCode: (zipCode) =>
     apiRequest(`/communityCenters?zip_code=${zipCode}`),
 
+  // get recommendations for a specific community center
+  getRecommendationsForCenter: (centerId, limit = 5) =>
+    apiRequest(`/communityCenters/${parseInt(centerId)}/recommendations?limit=${limit}`),
+
   // function for advanced search filtering to connect frontend to backend api
   // takes in a filters object with distance, hours, rating, and tags properties and coords of user
   // returns a promise that resolves with the filtered community centers

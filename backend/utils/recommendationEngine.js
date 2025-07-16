@@ -198,18 +198,33 @@ const calculateHoursSimilarity = (hours1, hours2) => {
 
 // 6. calculate the final similarity score between two centers
 const calculateCenterSimliarity = (center1, center2) => {
-  // extract tags from centers
-  const tag1 = center1.centerTags.map((ct) => ct.tag);
-  const tag2 = center2.centerTags.map((ct) => ct.tag);
+  // extract tags from centers - handle both original and enriched data structures
+  let tag1 = [];
+  let tag2 = [];
+
+  // check if we have tags property (enriched centers) or centerTags property (original centers)
+  if (center1.tags) {
+    tag1 = center1.tags;
+  } else if (center1.centerTags) {
+    tag1 = center1.centerTags.map((ct) => ct.tag);
+  }
+
+  if (center2.tags) {
+    tag2 = center2.tags;
+  } else if (center2.centerTags) {
+    tag2 = center2.centerTags.map((ct) => ct.tag);
+  }
 
   // use avgRating if it exists to prevent having to recalculate it, otherwise calculate it
-  const avgRating1 = center1.avgRating !== undefined ? center1.avgRating :
-    (center1.reviews.length > 0 ?
+  const avgRating1 = center1.avgRating !== undefined && center1.avgRating !== null ?
+    center1.avgRating :
+    (center1.reviews && center1.reviews.length > 0 ?
       center1.reviews.reduce((sum, r) => sum + r.rating, 0) / center1.reviews.length :
       null);
 
-  const avgRating2 = center2.avgRating !== undefined ? center2.avgRating :
-    (center2.reviews.length > 0 ?
+  const avgRating2 = center2.avgRating !== undefined && center2.avgRating !== null ?
+    center2.avgRating :
+    (center2.reviews && center2.reviews.length > 0 ?
       center2.reviews.reduce((sum, r) => sum + r.rating, 0) / center2.reviews.length :
       null);
 
