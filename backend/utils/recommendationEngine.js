@@ -96,14 +96,23 @@ const calculateDistanceSimilarity = (center1, center2) => {
 
 // 3.  rating similarity score (normalized absolute difference)
 const calculateRatingSimilarity = (rating1, rating2) => {
-  // handle edge cases - if either rating is null/undefined
+  // handle edge cases - if both ratings are null/undefined
+  if (
+    (rating1 === null || rating1 === undefined) &&
+    (rating2 === null || rating2 === undefined)
+  ) {
+    return 1; // both centers have no ratings, so they're similar
+  }
+
+  // if only one rating is null/undefined, return a neutral value
+  //  prevents penalizing new centers without reviews
   if (
     rating1 === null ||
     rating1 === undefined ||
     rating2 === null ||
     rating2 === undefined
   ) {
-    return 0; // bc not similar if one rating is null/undefined and the other is not
+    return 0.5; // return a neutral similarity score instead of 0
   }
 
   // edge case 2 - if ratings are identical they are 1 (highest similarity)
