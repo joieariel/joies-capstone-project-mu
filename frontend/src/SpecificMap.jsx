@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api"; // import the necessary components from @react-google-maps/api
+import { useLoadScript, GoogleMap, MarkerF } from "@react-google-maps/api"; // import the necessary components from @react-google-maps/api
 import "./SpecificMap.css";
 
 // define map container style
@@ -123,7 +123,7 @@ const SpecificMap = () => {
               }}
             >
               {/* add a marker for the center */}
-              <Marker
+              <MarkerF
                 position={{ // position the marker on the community center location (same coordinates)
                   lat: center.latitude, // same latitude as center from db
                   lng: center.longitude // same longitude as center

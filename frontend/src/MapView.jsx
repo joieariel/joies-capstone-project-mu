@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
+import { useLoadScript, GoogleMap, MarkerF } from "@react-google-maps/api";
 import "./MapView.css";
 
 // define map container style
@@ -179,7 +179,7 @@ const MapView = () => {
           >
             {/* User location marker */}
             {userLocation && (
-              <Marker
+              <MarkerF
                 position={userLocation}
                 title="Your Location"
                 icon={{
@@ -191,7 +191,7 @@ const MapView = () => {
 
             {/* Community center markers */}
             {centers.map((center) => (
-              <Marker
+              <MarkerF
                 key={center.id}
                 position={{
                   lat: center.latitude,
