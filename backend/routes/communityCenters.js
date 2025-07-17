@@ -8,6 +8,7 @@ const {
   enrichCentersWithData,
 } = require("../utils/centerFilters");
 const { calculateCenterSimliarity } = require("../utils/recommendationEngine");
+const simpleCache = require("../utils/simpleCache"); // import cache file so we can use cache functions
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -135,6 +136,17 @@ router.get("/:communityCenterId/recommendations", async (req, res) => {
       return res.status(400).json({ error: "Invalid community center ID" });
     }
 
+    // create a cache key based on the community center ID and limit
+    const cacheKey = `recommendations_${communityCenterId}_${limit}`;
+    // this ensures diff recommendation requests get their own cache entries
+
+    // check if we have cached recommendations
+    const cachedRecommendations = simpleCache.get(cacheKey);
+    if (cachedRecommendations) {
+      return res.json(cachedRecommendations);
+    }
+
+
     // fetch the target community center with all necessary related data for similarity calculations
     const targetCenter = await prisma.CommunityCenter.findUnique({
       where: { id: communityCenterId },
@@ -206,6 +218,9 @@ router.get("/:communityCenterId/recommendations", async (req, res) => {
 
     // now enrich the centers with calculated fields for the response
     const enrichedRecommendations = enrichCentersWithData(sortedCenters);
+
+    // store the results in cache w a TTL of  1 hour
+    simpleCache.set(cacheKey, enrichedRecommendations, 3600);
 
     res.json(enrichedRecommendations);
   } catch (error) {
