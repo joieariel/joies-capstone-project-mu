@@ -96,14 +96,23 @@ const calculateDistanceSimilarity = (center1, center2) => {
 
 // 3.  rating similarity score (normalized absolute difference)
 const calculateRatingSimilarity = (rating1, rating2) => {
-  // handle edge cases - if either rating is null/undefined
+  // handle edge cases - if both ratings are null/undefined
+  if (
+    (rating1 === null || rating1 === undefined) &&
+    (rating2 === null || rating2 === undefined)
+  ) {
+    return 1; // both centers have no ratings, so they're similar
+  }
+
+  // if only one rating is null/undefined, return a neutral value
+  //  prevents penalizing new centers without reviews
   if (
     rating1 === null ||
     rating1 === undefined ||
     rating2 === null ||
     rating2 === undefined
   ) {
-    return 0; // bc not similar if one rating is null/undefined and the other is not
+    return 0.5; // return a neutral similarity score instead of 0
   }
 
   // edge case 2 - if ratings are identical they are 1 (highest similarity)
@@ -121,13 +130,12 @@ const calculateRatingSimilarity = (rating1, rating2) => {
   return 1 - absDiff / MAX_DIFFERENCE;
 };
 
-// 4. review sentiment similarity score (average sentiment of both centers)
-const calculateReviewSimilarity = () => {};
+// (4). review sentiment similarity score (average sentiment of both centers) - maybe implement later remove for now per PR comment
 
 // (5). description similarity score (jaccard similarity between descriptions)
 // maybe implement later remove for now per PR comment
 
-// 5. operating hours similarity score
+// 4. operating hours similarity score
 const calculateHoursSimilarity = (hours1, hours2) => {
   // initialize variables to track total similarity across all days
   let totalSimilarity = 0;
@@ -203,25 +211,51 @@ const calculateCenterSimliarity = (center1, center2) => {
   const tag1 = center1.centerTags.map((ct) => ct.tag);
   const tag2 = center2.centerTags.map((ct) => ct.tag);
 
-  // extract ratings from reviews of a center
-  const rating1 = center1.reviews.map((r) => r.rating);
-  const rating2 = center2.reviews.map((r) => r.rating);
+  // use avgRating if it exists to prevent having to recalculate it, otherwise calculate it
+  const avgRating1 = center1.avgRating !== undefined ? center1.avgRating :
+    (center1.reviews.length > 0 ?
+      center1.reviews.reduce((sum, r) => sum + r.rating, 0) / center1.reviews.length :
+      null);
 
-  // 1. call the tag similarity function
-  calculateTagSimilarity(tag1, tag2);
+  const avgRating2 = center2.avgRating !== undefined ? center2.avgRating :
+    (center2.reviews.length > 0 ?
+      center2.reviews.reduce((sum, r) => sum + r.rating, 0) / center2.reviews.length :
+      null);
 
-  // 2. call the distance similarity function
-  calculateDistanceSimilarity(center1, center2);
+  // 1. calculate tag similarity (30% weight)
+  const tagSimilarityScore = calculateTagSimilarity(tag1, tag2);
 
-  // 3. call the rating similarity function
-  calculateRatingSimilarity(rating1, rating2);
+  // 2. calculate distance similarity (30% weight)
+  const distanceSimilarityScore = calculateDistanceSimilarity(center1, center2);
 
-  // 4. call the review similarity function
+  // 3. calculate rating similarity (20% weight)
+  const ratingSimilarityScore = calculateRatingSimilarity(
+    avgRating1,
+    avgRating2
+  );
 
-  // 5. call the hours similarity function
-  calculateHoursSimilarity(center1.hours, center2.hours);
+  // 4. calculate hours similarity (20% weight)
+  const hoursSimilarityScore = calculateHoursSimilarity(
+    center1.hours,
+    center2.hours
+  );
 
-  // return weighted similarity score based on all factors
+  // define weights for each factor
+  const weights = {
+    tag: 0.3,
+    distance: 0.3,
+    rating: 0.2,
+    hours: 0.2,
+  };
+
+  // calculate weighted similarity score
+  const weightedScore =
+    tagSimilarityScore * weights.tag +
+    distanceSimilarityScore * weights.distance +
+    ratingSimilarityScore * weights.rating +
+    hoursSimilarityScore * weights.hours;
+
+  return weightedScore;
 };
 
 module.exports = {

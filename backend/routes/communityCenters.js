@@ -7,6 +7,7 @@ const {
   applyRatingFilters,
   enrichCentersWithData,
 } = require("../utils/centerFilters");
+const { calculateCenterSimliarity } = require("../utils/recommendationEngine");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -120,6 +121,91 @@ router.get("/:communityCenterId", async (req, res) => {
   }
 });
 
-// TODO: eventually, add new api endpoint for recommendations
+// (GET) fetch recommendations for a specific community center
+router.get("/:communityCenterId/recommendations", async (req, res) => {
+  try {
+    // extract community center id from url params convert to int
+    const communityCenterId = parseInt(req.params.communityCenterId);
+
+    // get the limit of recommendations from query params, default to 5 if not provided
+    const limit = req.query.limit ? parseInt(req.query.limit) : 5;
+
+    // check if community center id is a number using isNaN
+    if (isNaN(communityCenterId)) {
+      return res.status(400).json({ error: "Invalid community center ID" });
+    }
+
+    // fetch the target community center with all necessary related data for similarity calculations
+    const targetCenter = await prisma.CommunityCenter.findUnique({
+      where: { id: communityCenterId },
+      include: {
+        hours: true,
+        reviews: {
+          select: {
+            rating: true,
+            created_at: true,
+          },
+        },
+        centerTags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
+    });
+
+    // check if the target center exists
+    if (!targetCenter) {
+      return res.status(404).json({ error: "Community center not found" });
+    }
+
+    // fetch all other community centers with the same related data to create comparison pool
+    const allOtherCenters = await prisma.CommunityCenter.findMany({
+      where: {
+        id: { not: communityCenterId }, // exclude the target center
+      },
+      include: {
+        hours: true,
+        reviews: {
+          select: {
+            rating: true,
+            created_at: true,
+          },
+        },
+        centerTags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
+    });
+
+    // enrich all centers with calculated fields like avgRating
+    const enrichedTargetCenter = enrichCentersWithData([targetCenter])[0];
+    const enrichedOtherCenters = enrichCentersWithData(allOtherCenters);
+
+    // calculate similarity scores between the target center and all other centers
+    // map through each center and calculate its similarity score to the target center
+    const centersWithSimilarityScores = enrichedOtherCenters.map(center => {
+      const similarityScore = calculateCenterSimliarity(enrichedTargetCenter, center);
+      // return new array where each center has a similarity score property as well as its original properties
+      return {
+        ...center,
+        similarityScore
+      };
+    });
+
+    // sort centers by similarity score (highest first - descending order)
+    const recommendations = centersWithSimilarityScores
+      .sort((a, b) => b.similarityScore - a.similarityScore)
+      // take only the top 5 (or limit) recommendations
+      .slice(0, limit);
+
+    res.json(recommendations);
+  } catch (error) {
+    console.error("Error fetching recommendations:", error);
+    res.status(500).json({ error: "Failed to fetch recommendations" });
+  }
+});
 
 module.exports = router;
