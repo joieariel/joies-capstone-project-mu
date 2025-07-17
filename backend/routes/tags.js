@@ -1,5 +1,6 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
+const { clearCenterCache } = require("../utils/cacheUtils"); // import cache utility function
 const router = express.Router();
 const prisma = new PrismaClient();
 
@@ -169,6 +170,9 @@ router.post("/center/:center_id", async (req, res) => {
     });
 
     res.status(201).json(centerTag);
+
+    // clear cache for this community center when adding a tag
+    clearCenterCache(parseInt(center_id));
   } catch (error) {
     console.error("Error adding tag to center:", error);
     // if the error is a P2002 (unique constraint violation), return a 409 (conflict)
@@ -202,6 +206,9 @@ router.delete("/center/:center_id/tag/:tag_id", async (req, res) => {
     await prisma.centerTag.delete({
       where: { id: centerTag.id },
     });
+
+    // clear cache for this community center when removing a tag
+    clearCenterCache(parseInt(center_id));
 
     res.status(204).send();
   } catch (error) {

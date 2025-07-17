@@ -1,6 +1,7 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const { authenticateUser } = require("../middleware/auth"); // imports middleware function that verifies jwt tokens to verify user identity before allowing operations
+const { clearCenterCache } = require("../utils/cacheUtils"); // import cache utility function
 const router = express.Router();
 const prisma = new PrismaClient();
 
@@ -185,6 +186,9 @@ router.post("/", authenticateUser, async (req, res) => {
       // if no images provide, return review as is
       res.status(201).json(newReview);
     }
+
+    // clear cache for this community center when a new review is created
+    clearCenterCache(parseInt(center_id));
   } catch (error) {
     console.error("Error creating review:", error);
     res
@@ -224,7 +228,7 @@ router.put("/:id", authenticateUser, async (req, res) => {
     }
 
     // Update the review data
-    const updatedReview = await prisma.review.update({
+    await prisma.review.update({
       where: { id: parseInt(id) },
       data: {
         rating,
@@ -316,6 +320,9 @@ router.put("/:id", authenticateUser, async (req, res) => {
     });
 
     res.json(reviewWithImages);
+
+    // clear cache for this community center when a review is updated
+    clearCenterCache(existingReview.center_id);
   } catch (error) {
     console.error("Error updating review:", error);
     res
@@ -357,11 +364,16 @@ router.delete("/:id", authenticateUser, async (req, res) => {
       where: { review_id: parseInt(id) },
     });
 
+    // get the center_id before deleting the review
+    const centerId = existingReview.center_id;
 
     // now delete the review
     await prisma.review.delete({
       where: { id: parseInt(id) },
     });
+
+    // clear cache for this community center when a review is deleted
+    clearCenterCache(centerId);
 
     res.status(204).send();
   } catch (error) {
