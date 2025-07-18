@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 // Import useParams hook to read URL parameters so we can extract centerId from url path
 import { useParams, useNavigate } from "react-router-dom";
 // import api functions to fetch reviews and community center info from backend
@@ -12,6 +12,7 @@ import {
 import { useAuth } from "./AuthContext"; //. get auth state and current user
 import WriteReview from "./WriteReview";
 import EditReviewForm from "./EditReviewForm"; // for inline editing of reviews
+import RecommendedCenters from "./RecommendedCenters"; // import the new RecommendedCenters component
 import "./Reviews.css";
 
 const Reviews = () => {
@@ -235,6 +236,9 @@ const Reviews = () => {
             </div>
           </div>
         )}
+
+        {/* recommended centers section */}
+        {center && <RecommendedCenters centerId={centerId} />}
 
         <div className="reviews-section-header">
           <h2 className="reviews-section-title">Reviews</h2>
