@@ -1,0 +1,106 @@
+.recommended-centers-container {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recommended-centers-title {
+  font-size: 1.5rem;
+  color: #486284;
+  margin: 0 0 1.5rem 0;
+  font-weight: 600;
+  text-align: left;
+}
+
+.recommended-centers-scroll {
+  display: flex;
+  overflow-x: auto; /* horizontal scrolling */
+  gap: 1.5rem;
+  padding: 0.5rem 0.25rem;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #486284 #f0f0f0;
+}
+
+
+.recommended-centers-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.recommended-centers-scroll::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.recommended-centers-scroll::-webkit-scrollbar-thumb {
+  background-color: #486284;
+  border-radius: 4px;
+}
+
+.recommended-centers-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #3a4f6a;
+}
+
+.recommended-center-item {
+  flex: 0 0 auto;
+  width: 350px;
+  min-width: 350px;
+}
+
+
+.recommended-center-item .center-card {
+  height: 100%;
+  transform: scale(0.95);
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+
+.recommended-center-item .center-card:hover {
+  transform: scale(0.98);
+}
+
+
+.recommended-centers-container .loading-message,
+.recommended-centers-container .error-message {
+  padding: 1rem;
+  text-align: center;
+  color: #6c757d;
+}
+
+.recommended-centers-container .error-message {
+  color: #dc3545;
+}
+
+/* responsive design */
+@media (max-width: 768px) {
+  .recommended-centers-container {
+    padding: 1rem;
+  }
+
+  .recommended-centers-title {
+    font-size: 1.3rem;
+  }
+
+  .recommended-center-item {
+    width: 300px;
+    min-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .recommended-centers-container {
+    padding: 0.75rem;
+  }
+
+  .recommended-centers-title {
+    font-size: 1.2rem;
+  }
+
+  .recommended-center-item {
+    width: 280px;
+    min-width: 280px;
+  }
+}
