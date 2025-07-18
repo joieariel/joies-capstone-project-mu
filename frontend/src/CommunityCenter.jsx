@@ -4,6 +4,8 @@ import { communityAPI } from "./api"; // import communityAPI
 import { useGetUserLocation, useGetCentersWithFilter } from "./utils/hooks"; // import custom hooks
 import "./CommunityCenter.css";
 import Search from "./Search";
+import SimilarCentersModal from "./SimilarCentersModal";
+import CenterCard from "./CenterCard";
 
 const CommunityCenter = () => {
   // state to store list of centers from db, initialized as empty
@@ -16,6 +18,9 @@ const CommunityCenter = () => {
 
   // track if a search has been performed
   const [hasSearched, setHasSearched] = useState(false);
+
+  // state to track which center's similar centers modal is open (if any)
+  const [modalCenterId, setModalCenterId] = useState(null);
 
   // use custom hook for user location functionality
   const {
@@ -38,19 +43,16 @@ const CommunityCenter = () => {
     navigate("/mapview"); // navigate to /map which will show all community centers on map
   };
 
-  // when user clicks reviews button, show the reviews for that specific center
-  // modified to accept centerId paramer so that centers reviews are displayed
-  const handleReviewsClick = (centerId) => {
-    // navigate to /reviews/[centerId] which creates a url like /reviews/5 for center ID 5
-    // centerId becomes a url param that the Reviews component can read
-    navigate(`/reviews/${centerId}`);
+  // Note: handleReviewsClick and handleMapClick functions have been moved to CenterCard component
+
+  // when user clicks similar centers button, open the modal for that center
+  const handleSimilarCentersClick = (centerId) => {
+    setModalCenterId(centerId);
   };
 
-  // when user clicks map button, show the map view for that specific center
-  const handleMapClick = (centerId) => {
-    // navigate to /map/[centerId] which creates a url like /map/5 for center ID 5
-    // centerId becomes a url param that the Map component can read
-    navigate(`/map/${centerId}`);
+  // close the similar centers modal
+  const handleCloseModal = () => {
+    setModalCenterId(null);
   };
 
   // function to handle search filters change
@@ -204,117 +206,24 @@ const CommunityCenter = () => {
           </div>
         )}
 
-        {/* loop through each communiy center in array and create one card for each center returned from db*/}
+        {/* loop through each community center in array and use the CenterCard component */}
         <div className="centers-grid">
           {centers.map((center) => (
-            // each card needs a unique key, center id
-            <div key={center.id} className="center-card">
-              <img
-                src={center.image_url}
-                alt={center.name}
-                className="center-image"
-              />
-              <div className="center-info">
-                <h3 className="center-name">{center.name}</h3>
-                <p className="center-address">{center.address}</p>
-                <p className="center-phone">{center.phone_number}</p>
-                <p className="center-description">{center.description}</p>
-                <p className="center-email">
-                  <strong>Email:</strong> {center.email}
-                </p>
-                <p className="center-zip">
-                  <strong>Zip Code:</strong> {center.zip_code}
-                </p>
-
-                {/* enhanced information display */}
-                <div className="center-enhanced-info">
-                  {/* distance (if available) */}
-                  {center.distance !== null && (
-                    <p className="center-distance">
-                      <span className="info-label">Distance:</span>{" "}
-                      {center.distance} miles
-                    </p>
-                  )}
-
-                  {/* rating and review count */}
-                  <div className="center-rating-container">
-                    {center.avgRating !== null ? (
-                      <>
-                        <div className="center-rating">
-                          <span className="info-label">Rating:</span>{" "}
-                          {center.avgRating.toFixed(1)}
-                          <span className="rating-stars">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <span
-                                key={star}
-                                className={`star ${
-                                  star <= Math.round(center.avgRating)
-                                    ? "filled"
-                                    : "empty"
-                                }`}
-                              >
-                                ★
-                              </span>
-                            ))}
-                          </span>
-                        </div>
-                        <span className="review-count">
-                          ({center.reviewCount}{" "}
-                          {center.reviewCount === 1 ? "review" : "reviews"})
-                        </span>
-                      </>
-                    ) : (
-                      <span className="no-ratings">No ratings yet</span>
-                    )}
-                  </div>
-
-                  {/* hours (open/closed status) */}
-                  <p
-                    className={`center-hours ${
-                      center.isOpen ? "open" : "closed"
-                    }`}
-                  >
-                    <span className="status-indicator"></span>
-                    {center.hoursMessage}
-                  </p>
-
-                  {/* Tags */}
-                  {center.tags && center.tags.length > 0 && (
-                    <div className="center-tags">
-                      <span className="info-label">Tags:</span>
-                      <div className="tags-container">
-                        {center.tags.map((tag) => (
-                          <span key={tag.id} className="center-tag">
-                            {tag.name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="center-buttons">
-                  <button
-                    className="reviews-button"
-                    // Pass the center.id to the click handler - this is crucial because each card
-                    // represents a different community center, and we need to know which one's reviews to show
-                    // We use an arrow function to pass the center.id as an argument
-                    onClick={() => handleReviewsClick(center.id)}
-                  >
-                    Reviews
-                  </button>
-                  <button
-                    className="map-button"
-                    onClick={() => handleMapClick(center.id)}
-                  >
-                    Map
-                  </button>
-                </div>
-              </div>
-            </div>
+            <CenterCard
+              key={center.id}
+              center={center}
+              onSimilarCentersClick={handleSimilarCentersClick}
+            />
           ))}
         </div>
       </div>
+
+      {/* similar centers modal */}
+      <SimilarCentersModal
+        centerId={modalCenterId}
+        isOpen={modalCenterId !== null}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 };

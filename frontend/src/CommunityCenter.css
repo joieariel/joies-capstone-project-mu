@@ -228,7 +228,8 @@
 
 /* button styles */
 .reviews-button,
-.map-button {
+.map-button,
+.similar-centers-button {
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 6px;
@@ -258,6 +259,18 @@
 
 .map-button:hover,
 .mapview-button:hover {
+  background-color: #486284;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.similar-centers-button {
+  background-color: #e9ecef;
+  color: #486284;
+  border: 1px solid #486284;
+}
+
+.similar-centers-button:hover {
   background-color: #486284;
   color: white;
   transform: translateY(-1px);
