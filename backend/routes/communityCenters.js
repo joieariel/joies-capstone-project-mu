@@ -180,28 +180,34 @@ router.get("/:communityCenterId/recommendations", async (req, res) => {
       },
     });
 
-    // enrich all centers with calculated fields like avgRating
-    const enrichedTargetCenter = enrichCentersWithData([targetCenter])[0];
-    const enrichedOtherCenters = enrichCentersWithData(allOtherCenters);
-
     // calculate similarity scores between the target center and all other centers
-    // map through each center and calculate its similarity score to the target center
-    const centersWithSimilarityScores = enrichedOtherCenters.map(center => {
-      const similarityScore = calculateCenterSimliarity(enrichedTargetCenter, center);
-      // return new array where each center has a similarity score property as well as its original properties
-      return {
-        ...center,
-        similarityScore
-      };
+    // use the original centers for similarity calculation to ensure all properties are available
+    const centersWithSimilarityScores = allOtherCenters.map(center => {
+      try {
+        const similarityScore = calculateCenterSimliarity(targetCenter, center);
+        return {
+          ...center,
+          similarityScore
+        };
+      } catch (error) {
+        console.error(`Error calculating similarity for center ${center.id}:`, error);
+        return {
+          ...center,
+          similarityScore: 0 // default to 0 similarity if calculation fails
+        };
+      }
     });
 
     // sort centers by similarity score (highest first - descending order)
-    const recommendations = centersWithSimilarityScores
+    const sortedCenters = centersWithSimilarityScores
       .sort((a, b) => b.similarityScore - a.similarityScore)
-      // take only the top 5 (or limit) recommendations
+      // take only the top N (limit) recommendations
       .slice(0, limit);
 
-    res.json(recommendations);
+    // now enrich the centers with calculated fields for the response
+    const enrichedRecommendations = enrichCentersWithData(sortedCenters);
+
+    res.json(enrichedRecommendations);
   } catch (error) {
     console.error("Error fetching recommendations:", error);
     res.status(500).json({ error: "Failed to fetch recommendations" });
