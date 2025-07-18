@@ -97,21 +97,15 @@ const calculateDistanceSimilarity = (center1, center2) => {
 // 3.  rating similarity score (normalized absolute difference)
 const calculateRatingSimilarity = (rating1, rating2) => {
   // handle edge cases - if both ratings are null/undefined
-  if (
-    (rating1 === null || rating1 === undefined) &&
-    (rating2 === null || rating2 === undefined)
-  ) {
+  // using == null checks for both null and undefined in one operation per PR comment
+  if (rating1 == null && rating2 == null) {
     return 1; // both centers have no ratings, so they're similar
   }
 
   // if only one rating is null/undefined, return a neutral value
   //  prevents penalizing new centers without reviews
-  if (
-    rating1 === null ||
-    rating1 === undefined ||
-    rating2 === null ||
-    rating2 === undefined
-  ) {
+  // using == null checks for both null and undefined in one operation per PR comment
+  if (rating1 == null || rating2 == null) {
     return 0.5; // return a neutral similarity score instead of 0
   }
 
@@ -225,17 +219,23 @@ const calculateCenterSimliarity = (center1, center2) => {
   }
 
   // use avgRating if it exists to prevent having to recalculate it, otherwise calculate it
-  const avgRating1 = center1.avgRating !== undefined && center1.avgRating !== null ?
-    center1.avgRating :
-    (center1.reviews && center1.reviews.length > 0 ?
-      center1.reviews.reduce((sum, r) => sum + r.rating, 0) / center1.reviews.length :
-      null);
+  // using != null checks for both null and undefined in one operation per PR comment
+  const avgRating1 =
+    center1.avgRating != null
+      ? center1.avgRating
+      : center1.reviews && center1.reviews.length > 0
+      ? center1.reviews.reduce((sum, r) => sum + r.rating, 0) /
+        center1.reviews.length
+      : null;
 
-  const avgRating2 = center2.avgRating !== undefined && center2.avgRating !== null ?
-    center2.avgRating :
-    (center2.reviews && center2.reviews.length > 0 ?
-      center2.reviews.reduce((sum, r) => sum + r.rating, 0) / center2.reviews.length :
-      null);
+  // using != null checks for both null and undefined in one operation per PR comment
+  const avgRating2 =
+    center2.avgRating != null
+      ? center2.avgRating
+      : center2.reviews && center2.reviews.length > 0
+      ? center2.reviews.reduce((sum, r) => sum + r.rating, 0) /
+        center2.reviews.length
+      : null;
 
   // 1. calculate tag similarity (30% weight)
   const tagSimilarityScore = calculateTagSimilarity(tag1, tag2);
