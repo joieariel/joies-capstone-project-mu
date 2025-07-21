@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 // reusable component for displaying a community center card
 // accepts center data and optional props for customization
@@ -9,6 +10,13 @@ const CenterCard = ({
   onModalClose = null,
 }) => {
   const navigate = useNavigate();
+  const [isLiked, setIsLiked] = useState(false);
+
+  // toggle like status when heart is clicked
+  const handleLikeClick = (e) => {
+    e.stopPropagation();
+    setIsLiked(!isLiked);
+  };
 
   // when user clicks reviews button, show the reviews for that specific center
   const handleReviewsClick = (centerId) => {
@@ -34,7 +42,16 @@ const CenterCard = ({
     <div className="center-card">
       <img src={center.image_url} alt={center.name} className="center-image" />
       <div className="center-info">
-        <h3 className="center-name">{center.name}</h3>
+        <div className="center-name-container">
+          <h3 className="center-name">{center.name}</h3>
+          <span
+          // like button
+            className={`heart-icon ${isLiked ? 'liked' : ''}`}
+            onClick={handleLikeClick}
+          >
+            ❤︎
+          </span>
+        </div>
         <p className="center-address">{center.address}</p>
         <p className="center-phone">{center.phone_number}</p>
         <p className="center-description">{center.description}</p>

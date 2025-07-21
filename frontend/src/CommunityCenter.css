@@ -60,12 +60,39 @@
   text-align: left;
 }
 
+/* center name container with like button */
+.center-name-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 0.75rem 0;
+}
+
 .center-name {
   font-size: 1.25rem;
   font-weight: 600;
   color: #486284;
-  margin: 0 0 0.75rem 0;
+  margin: 0;
   line-height: 1.3;
+  flex: 1;
+}
+
+/* heart icon styling */
+.heart-icon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #d1d1d1;
+  margin-left: 10px;
+  user-select: none;
+}
+
+.heart-icon:hover {
+  transform: scale(1.1);
+}
+
+.heart-icon.liked {
+  color: #dc3545;
 }
 
 .center-address {
