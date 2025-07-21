@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { likesAPI } from "./api";
+import { useAuth } from "./AuthContext";
 
 // reusable component for displaying a community center card
 // accepts center data and optional props for customization
@@ -11,11 +13,50 @@ const CenterCard = ({
 }) => {
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { user, isAuthenticated } = useAuth();
 
-  // toggle like status when heart is clicked
-  const handleLikeClick = (e) => {
+  // check if the center is liked when component mounts
+  useEffect(() => {
+    const checkLikeStatus = async () => {
+      if (!isAuthenticated) return;
+
+      try {
+        const response = await likesAPI.checkLikeStatus(center.id);
+        setIsLiked(response.liked);
+      } catch (error) {
+        console.error("Error checking like status:", error);
+      }
+    };
+
+    checkLikeStatus();
+  }, [center.id, isAuthenticated]);
+
+  // handle like/unlike with api connection
+  const handleLikeClick = async (e) => {
     e.stopPropagation();
-    setIsLiked(!isLiked);
+
+    if (!isAuthenticated) {
+      // redirect to login if not authenticated
+      navigate("/login", { state: { from: window.location.pathname } });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      if (isLiked) {
+        await likesAPI.removeLike(center.id);
+      } else {
+        await likesAPI.addLike(center.id);
+      }
+
+      setIsLiked(!isLiked);
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // when user clicks reviews button, show the reviews for that specific center
@@ -46,10 +87,11 @@ const CenterCard = ({
           <h3 className="center-name">{center.name}</h3>
           <span
           // like button
-            className={`heart-icon ${isLiked ? 'liked' : ''}`}
+            className={`heart-icon ${isLiked ? 'liked' : ''} ${isLoading ? 'loading' : ''}`}
             onClick={handleLikeClick}
+            title={isAuthenticated ? (isLiked ? "Unlike" : "Like") : "Login to like"}
           >
-            ❤︎
+            {isLoading ? "..." : "❤︎"}
           </span>
         </div>
         <p className="center-address">{center.address}</p>

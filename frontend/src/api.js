@@ -311,5 +311,30 @@ export const tagAPI = {
     }),
 };
 
+// functions for likes operations
+
+export const likesAPI = {
+  // add a like to a community center
+  addLike: (centerId) =>
+    apiRequest("/likes", {
+      method: "POST",
+      body: JSON.stringify({ center_id: centerId }),
+    }),
+
+  // (unlike)remove a like from a community center
+  removeLike: (centerId) =>
+    apiRequest(`/likes/${centerId}`, {
+      method: "DELETE",
+    }),
+
+  // get all liked centers for the current user
+  getUserLikes: () =>
+    apiRequest("/likes/user"),
+
+  // check if the current user has liked a specific center
+  checkLikeStatus: (centerId) =>
+    apiRequest(`/likes/check/${centerId}`),
+};
+
 // export the base apiRequest function for custom requests
 export { apiRequest };

@@ -95,6 +95,11 @@
   color: #dc3545;
 }
 
+.heart-icon.loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .center-address {
   color: #6c757d;
   font-size: 0.9rem;
