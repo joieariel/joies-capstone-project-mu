@@ -18,8 +18,6 @@ const CenterCard = ({
   // check if the center is liked when component mounts
   useEffect(() => {
     const checkLikeStatus = async () => {
-      if (!isAuthenticated) return;
-
       try {
         const response = await likesAPI.checkLikeStatus(center.id);
         setIsLiked(response.liked);
@@ -29,18 +27,11 @@ const CenterCard = ({
     };
 
     checkLikeStatus();
-  }, [center.id, isAuthenticated]);
+  }, [center.id]);
 
   // handle like/unlike with api connection
   const handleLikeClick = async (e) => {
     e.stopPropagation();
-
-    if (!isAuthenticated) {
-      // redirect to login if not authenticated
-      navigate("/login", { state: { from: window.location.pathname } });
-      return;
-    }
-
 
     setIsLiked(!isLiked);
 
