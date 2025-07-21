@@ -1,0 +1,48 @@
+.liked-centers-container {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.liked-centers-title {
+  color: #486284;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  text-align: left;
+}
+
+.liked-centers-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: flex-start;
+}
+
+/* adjust card size for dashboard view */
+.liked-centers-grid .center-card {
+  flex: 1 1 calc(50% - 1rem);
+  max-width: calc(50% - 1rem);
+}
+
+.liked-centers-loading,
+.liked-centers-error,
+.liked-centers-empty {
+  text-align: left;
+  padding: 1rem 0;
+  color: #6c757d;
+}
+
+.liked-centers-error {
+  color: #dc3545;
+}
+
+.liked-centers-empty {
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .liked-centers-grid .center-card {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
