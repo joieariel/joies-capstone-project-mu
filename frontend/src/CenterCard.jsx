@@ -13,7 +13,6 @@ const CenterCard = ({
 }) => {
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const { user, isAuthenticated } = useAuth();
 
   // check if the center is liked when component mounts
@@ -42,20 +41,20 @@ const CenterCard = ({
       return;
     }
 
+
+    setIsLiked(!isLiked);
+
     try {
-      setIsLoading(true);
-
-      if (isLiked) {
-        await likesAPI.removeLike(center.id);
-      } else {
+      // make api call in the background
+      if (!isLiked) {
         await likesAPI.addLike(center.id);
+      } else {
+        await likesAPI.removeLike(center.id);
       }
-
-      setIsLiked(!isLiked);
     } catch (error) {
+      // if api call fails, revert the UI change
       console.error("Error toggling like:", error);
-    } finally {
-      setIsLoading(false);
+      setIsLiked(!isLiked); // revert back if there was an error
     }
   };
 
@@ -87,11 +86,11 @@ const CenterCard = ({
           <h3 className="center-name">{center.name}</h3>
           <span
           // like button
-            className={`heart-icon ${isLiked ? 'liked' : ''} ${isLoading ? 'loading' : ''}`}
+            className={`heart-icon ${isLiked ? 'liked' : ''}`}
             onClick={handleLikeClick}
             title={isAuthenticated ? (isLiked ? "Unlike" : "Like") : "Login to like"}
           >
-            {isLoading ? "..." : "❤︎"}
+            ❤︎
           </span>
         </div>
         <p className="center-address">{center.address}</p>
