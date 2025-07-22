@@ -338,7 +338,7 @@ const Dashboard = () => {
         <LikedCenters />
 
         {/* add the DislikedCenters component for testing */}
-        <DislikedCenters />
+        {/* <DislikedCenters /> */}
       </div>
     </div>
   );
