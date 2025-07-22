@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 import { userAPI } from "./api"; // to make calls to backend
 import { validateEditForm } from "./utils/validation"; // import new validate function from utils
+import LikedCenters from "./LikedCenters";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -331,6 +332,9 @@ const Dashboard = () => {
             </form>
           )}
         </div>
+
+        {/* add the LikedCenters component */}
+        <LikedCenters />
       </div>
     </div>
   );

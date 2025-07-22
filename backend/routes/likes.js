@@ -3,6 +3,7 @@ const { PrismaClient } = require("@prisma/client");
 const { authenticateUser } = require("../middleware/auth");
 const { clearCenterCache } = require("../utils/cacheUtils");
 const { getUserIdFromSupabase } = require("../utils/userUtils");
+const { enrichCentersWithData } = require("../utils/centerFilters");
 const router = express.Router();
 const prisma = new PrismaClient();
 
@@ -115,14 +116,39 @@ router.get("/user", authenticateUser, async (req, res) => {
         user_id: userId,
       },
       include: {
-        center: true, // to include  community center details
+        center: {
+          include: {
+            hours: true,
+            reviews: {
+              select: {
+                rating: true,
+                created_at: true,
+              },
+            },
+            centerTags: {
+              include: {
+                tag: true,
+              },
+            },
+          }
+        },
       },
       orderBy: {
         created_at: "desc", // most recent likes first
       },
     });
 
-    res.json(likes);
+    // extract centers from likes and enrich them with calculated fields
+    const centers = likes.map(like => like.center);
+    const enrichedCenters = enrichCentersWithData(centers);
+
+    // reconstruct the likes with enriched centers
+    const enrichedLikes = likes.map((like, index) => ({
+      ...like,
+      center: enrichedCenters[index]
+    }));
+
+    res.json(enrichedLikes);
   } catch (error) {
     console.error("Error fetching user likes:", error);
     res.status(500).json({

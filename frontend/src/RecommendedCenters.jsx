@@ -65,7 +65,7 @@ const RecommendedCenters = ({ centerId }) => {
   // render the recommended centers in a horizontal scrollable container
   return (
     <div className="recommended-centers-container">
-      <h2 className="recommended-centers-title">Recommended Centers</h2>
+      <h2 className="recommended-centers-title"> Similar Recommended Centers</h2>
       {/* horizontal scrollable container for center cards */}
       <div className="recommended-centers-scroll">
         {/* M,p through each recommended center and render a CenterCard */}
