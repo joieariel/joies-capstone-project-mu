@@ -35,6 +35,8 @@ model User {
  reviews    Review[]
  likes      Likes[] // relation to liked centers
  dislikes   Dislikes[] // relation to disliked centers
+ filterInteractions FilterInteraction[] // relation to filter interactions
+ pageInteractions PageInteraction[] // relation to page interactions
 }
 
 
@@ -87,6 +89,7 @@ model CommunityCenter {
  centerTags   CenterTag[] // relationship to junction table allows commmunity centet to access their tags
  likedBy      Likes[] // relation to users who liked this center
  dislikedBy   Dislikes[] // relation to users who disliked this center
+ pageInteractions PageInteraction[] // relation to page interactions
 }
 
 
@@ -108,6 +111,7 @@ model Tag {
 
  centerTags  CenterTag[] // relatinoship to junction table
  reviewTags  ReviewTag[] // relationship to junction table for review-specific tags
+ filterInteractions FilterInteraction[] // relation to filter interactions
 }
 
 // new junction table for many-to-many relationship between CommunityCenter and Tag
@@ -158,4 +162,38 @@ model Dislikes {
  center      CommunityCenter @relation(fields: [center_id], references: [id], onDelete: Cascade)
 
  @@unique([user_id, center_id]) // to prevent duplicate dislikes for the same center by the same user
+}
+
+// model to track filter interactions (which search filters from advanced search users click on most frequently)
+model FilterInteraction {
+ id          Int      @id @default(autoincrement())
+ user_id     Int
+ tag_id      Int
+ filter_count       Int      @default(1) // number of times user has clicked this filter
+ last_used   DateTime @default(now()) // timestamp of most recent interaction to prioritize order
+ created_at  DateTime @default(now()) // timestamp of first interaction
+
+ user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+ tag         Tag      @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+
+ @@unique([user_id, tag_id]) // to prevent duplicate entries for the same user and tag
+}
+
+// model to track on-page interactions (scroll depth, clicks on map/reviews/etc.)
+model PageInteraction {
+ id                Int      @id @default(autoincrement())
+ user_id           Int
+ center_id         Int
+ scroll_depth      Int      @default(0) // percentage of reviews page scrolled (0-100)
+ map_clicks        Int      @default(0) // number of times user clicked on the map button on the center card
+ review_clicks     Int      @default(0) // number of times user clicked on reviews button
+ similar_clicks    Int      @default(0) // number of times user explored similar centers button
+ visit_count       Int      @default(1) // number of times user visited this center's page
+ last_visited      DateTime @default(now()) // timestamp of most recent visit to prioritize order
+ created_at        DateTime @default(now()) // timestamp of first visit
+
+ user              User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+ center            CommunityCenter @relation(fields: [center_id], references: [id], onDelete: Cascade)
+
+ @@unique([user_id, center_id]) // to ensure one record per user-center combination
 }
