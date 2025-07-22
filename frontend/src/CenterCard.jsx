@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { likesAPI } from "./api";
+import { likesAPI, dislikesAPI } from "./api";
 
 // reusable component for displaying a community center card
 // accepts center data and optional props for customization
@@ -14,18 +14,23 @@ const CenterCard = ({
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
 
-  // check if the center is liked when component mounts
+  // check if the center is liked/disliked when component mounts
   useEffect(() => {
-    const checkLikeStatus = async () => {
+    const checkInteractionStatus = async () => {
       try {
-        const response = await likesAPI.checkLikeStatus(center.id);
-        setIsLiked(response.liked);
+        // check like status
+        const likeResponse = await likesAPI.checkLikeStatus(center.id);
+        setIsLiked(likeResponse.liked);
+
+        // check dislike status
+        const dislikeResponse = await dislikesAPI.checkDislikeStatus(center.id);
+        setIsDisliked(dislikeResponse.disliked);
       } catch (error) {
-        console.error("Error checking like status:", error);
+        console.error("Error checking interaction status:", error);
       }
     };
 
-    checkLikeStatus();
+    checkInteractionStatus();
   }, [center.id]);
 
   // handle like/unlike with api connection
@@ -33,20 +38,56 @@ const CenterCard = ({
     e.stopPropagation();
 
     setIsLiked(!isLiked);
+
     // if disliked and user clicks like, remove dislike
     if (isDisliked) {
       setIsDisliked(false);
+      try {
+        await dislikesAPI.removeDislike(center.id);
+      } catch (error) {
+        console.error("Error removing dislike:", error);
+      }
+    }
+
+    try {
+      // make api call in the background
+      if (!isLiked) {
+        await likesAPI.addLike(center.id);
+      } else {
+        await likesAPI.removeLike(center.id);
+      }
+    } catch (error) {
+      // if API call fails, revert the UI change
+      console.error("Error toggling like:", error);
+      setIsLiked(!isLiked);
     }
   };
 
-  // handle dislike UI toggle
-  const handleDislikeClick = (e) => {
+  // handle dislike with api connection
+  const handleDislikeClick = async (e) => {
     e.stopPropagation();
 
     setIsDisliked(!isDisliked);
+
     // if liked and user clicks dislike, remove like
     if (isLiked) {
       setIsLiked(false);
+      try {
+        await likesAPI.removeLike(center.id);
+      } catch (error) {
+        console.error("Error removing like:", error);
+      }
+    }
+
+    try {
+      if (!isDisliked) {
+        await dislikesAPI.addDislike(center.id);
+      } else {
+        await dislikesAPI.removeDislike(center.id);
+      }
+    } catch (error) {
+      console.error("Error toggling dislike:", error);
+      setIsDisliked(!isDisliked);
     }
   };
 

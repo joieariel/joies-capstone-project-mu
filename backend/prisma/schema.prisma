@@ -34,6 +34,7 @@ model User {
 
  reviews    Review[]
  likes      Likes[] // relation to liked centers
+ dislikes   Dislikes[] // relation to disliked centers
 }
 
 
@@ -85,6 +86,7 @@ model CommunityCenter {
  hours        CenterHours[]
  centerTags   CenterTag[] // relationship to junction table allows commmunity centet to access their tags
  likedBy      Likes[] // relation to users who liked this center
+ dislikedBy   Dislikes[] // relation to users who disliked this center
 }
 
 
@@ -143,4 +145,17 @@ model Likes {
  center      CommunityCenter @relation(fields: [center_id], references: [id], onDelete: Cascade)
 
  @@unique([user_id, center_id]) // to prevent duplicate likes for the same center by the same user
+}
+
+// model to track which centers users have disliked
+model Dislikes {
+ id          Int      @id @default(autoincrement())
+ user_id     Int
+ center_id   Int
+ created_at  DateTime @default(now())
+
+ user        User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+ center      CommunityCenter @relation(fields: [center_id], references: [id], onDelete: Cascade)
+
+ @@unique([user_id, center_id]) // to prevent duplicate dislikes for the same center by the same user
 }
