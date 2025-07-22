@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { likesAPI } from "./api";
-import { useAuth } from "./AuthContext";
+import { likesAPI, dislikesAPI } from "./api";
 
 // reusable component for displaying a community center card
 // accepts center data and optional props for customization
@@ -13,20 +12,25 @@ const CenterCard = ({
 }) => {
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
-  const { user, isAuthenticated } = useAuth();
+  const [isDisliked, setIsDisliked] = useState(false);
 
-  // check if the center is liked when component mounts
+  // check if the center is liked/disliked when component mounts
   useEffect(() => {
-    const checkLikeStatus = async () => {
+    const checkInteractionStatus = async () => {
       try {
-        const response = await likesAPI.checkLikeStatus(center.id);
-        setIsLiked(response.liked);
+        // check like status
+        const likeResponse = await likesAPI.checkLikeStatus(center.id);
+        setIsLiked(likeResponse.liked);
+
+        // check dislike status
+        const dislikeResponse = await dislikesAPI.checkDislikeStatus(center.id);
+        setIsDisliked(dislikeResponse.disliked);
       } catch (error) {
-        console.error("Error checking like status:", error);
+        console.error("Error checking interaction status:", error);
       }
     };
 
-    checkLikeStatus();
+    checkInteractionStatus();
   }, [center.id]);
 
   // handle like/unlike with api connection
@@ -34,6 +38,16 @@ const CenterCard = ({
     e.stopPropagation();
 
     setIsLiked(!isLiked);
+
+    // if disliked and user clicks like, remove dislike
+    if (isDisliked) {
+      setIsDisliked(false);
+      try {
+        await dislikesAPI.removeDislike(center.id);
+      } catch (error) {
+        console.error("Error removing dislike:", error);
+      }
+    }
 
     try {
       // make api call in the background
@@ -43,9 +57,37 @@ const CenterCard = ({
         await likesAPI.removeLike(center.id);
       }
     } catch (error) {
-      // if api call fails, revert the UI change
+      // if API call fails, revert the UI change
       console.error("Error toggling like:", error);
-      setIsLiked(!isLiked); // revert back if there was an error
+      setIsLiked(!isLiked);
+    }
+  };
+
+  // handle dislike with api connection
+  const handleDislikeClick = async (e) => {
+    e.stopPropagation();
+
+    setIsDisliked(!isDisliked);
+
+    // if liked and user clicks dislike, remove like
+    if (isLiked) {
+      setIsLiked(false);
+      try {
+        await likesAPI.removeLike(center.id);
+      } catch (error) {
+        console.error("Error removing like:", error);
+      }
+    }
+
+    try {
+      if (!isDisliked) {
+        await dislikesAPI.addDislike(center.id);
+      } else {
+        await dislikesAPI.removeDislike(center.id);
+      }
+    } catch (error) {
+      console.error("Error toggling dislike:", error);
+      setIsDisliked(!isDisliked);
     }
   };
 
@@ -75,14 +117,36 @@ const CenterCard = ({
       <div className="center-info">
         <div className="center-name-container">
           <h3 className="center-name">{center.name}</h3>
-          <span
-          // like button
-            className={`heart-icon ${isLiked ? 'liked' : ''}`}
-            onClick={handleLikeClick}
-            title={isAuthenticated ? (isLiked ? "Unlike" : "Like") : "Login to like"}
-          >
-            ❤︎
-          </span>
+          <div className="reaction-buttons">
+            <span
+              // like button
+              className={`heart-icon ${isLiked ? "liked" : ""}`}
+              onClick={handleLikeClick}
+              title={isLiked ? "Unlike" : "Like"}
+            >
+              ❤︎
+            </span>
+            <span
+              // dislike button
+              className={`thumbs-down-icon ${isDisliked ? "disliked" : ""}`}
+              onClick={handleDislikeClick}
+              title={isDisliked ? "Remove dislike" : "Dislike"}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill={isDisliked ? "currentColor" : "none"}
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M17 14V2M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z" />
+              </svg>
+            </span>
+          </div>
         </div>
         <p className="center-address">{center.address}</p>
         <p className="center-phone">{center.phone_number}</p>
@@ -109,7 +173,6 @@ const CenterCard = ({
               miles
             </p>
           )}
-
 
           {/* rating and review count */}
           <div className="center-rating-container">

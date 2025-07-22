@@ -100,7 +100,9 @@ export const communityAPI = {
 
   // get recommendations for a specific community center
   getRecommendationsForCenter: (centerId, limit = 5) =>
-    apiRequest(`/communityCenters/${parseInt(centerId)}/recommendations?limit=${limit}`),
+    apiRequest(
+      `/communityCenters/${parseInt(centerId)}/recommendations?limit=${limit}`
+    ),
 
   // function for advanced search filtering to connect frontend to backend api
   // takes in a filters object with distance, hours, rating, and tags properties and coords of user
@@ -328,12 +330,32 @@ export const likesAPI = {
     }),
 
   // get all liked centers for the current user
-  getUserLikes: () =>
-    apiRequest("/likes/user"),
+  getUserLikes: () => apiRequest("/likes/user"),
 
   // check if the current user has liked a specific center
-  checkLikeStatus: (centerId) =>
-    apiRequest(`/likes/check/${centerId}`),
+  checkLikeStatus: (centerId) => apiRequest(`/likes/check/${centerId}`),
+};
+
+// functions for dislike operations
+export const dislikesAPI = {
+  // add a dislike to a community center
+  addDislike: (centerId) =>
+    apiRequest("/dislikes", {
+      method: "POST",
+      body: JSON.stringify({ center_id: centerId }),
+    }),
+
+  // remove a dislike from a community center
+  removeDislike: (centerId) =>
+    apiRequest(`/dislikes/${centerId}`, {
+      method: "DELETE",
+    }),
+
+  // get all disliked centers for the current user
+  getUserDislikes: () => apiRequest("/dislikes/user"),
+
+  // check if the current user has disliked a specific center
+  checkDislikeStatus: (centerId) => apiRequest(`/dislikes/check/${centerId}`),
 };
 
 // export the base apiRequest function for custom requests
