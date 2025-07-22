@@ -2,18 +2,9 @@ const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const { authenticateUser } = require("../middleware/auth"); // imports middleware function that verifies jwt tokens to verify user identity before allowing operations
 const { clearCenterCache } = require("../utils/cacheUtils"); // import cache utility function
+const { getUserIdFromSupabase } = require("../utils/userUtils");
 const router = express.Router();
 const prisma = new PrismaClient();
-
-// helper function to get user id from supabase user
-const getUserIdFromSupabase = async (supabaseUserId) => {
-  const user = await prisma.user.findUnique({
-    // find user record by supabase id field and return id
-    where: { supabase_user_id: supabaseUserId },
-    select: { id: true },
-  });
-  return user?.id;
-};
 
 // (GET) fetch all reviews (for testing)
 router.get("/", async (req, res) => {

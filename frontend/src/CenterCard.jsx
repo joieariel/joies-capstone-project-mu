@@ -1,4 +1,7 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { likesAPI } from "./api";
+import { useAuth } from "./AuthContext";
 
 // reusable component for displaying a community center card
 // accepts center data and optional props for customization
@@ -9,6 +12,42 @@ const CenterCard = ({
   onModalClose = null,
 }) => {
   const navigate = useNavigate();
+  const [isLiked, setIsLiked] = useState(false);
+  const { user, isAuthenticated } = useAuth();
+
+  // check if the center is liked when component mounts
+  useEffect(() => {
+    const checkLikeStatus = async () => {
+      try {
+        const response = await likesAPI.checkLikeStatus(center.id);
+        setIsLiked(response.liked);
+      } catch (error) {
+        console.error("Error checking like status:", error);
+      }
+    };
+
+    checkLikeStatus();
+  }, [center.id]);
+
+  // handle like/unlike with api connection
+  const handleLikeClick = async (e) => {
+    e.stopPropagation();
+
+    setIsLiked(!isLiked);
+
+    try {
+      // make api call in the background
+      if (!isLiked) {
+        await likesAPI.addLike(center.id);
+      } else {
+        await likesAPI.removeLike(center.id);
+      }
+    } catch (error) {
+      // if api call fails, revert the UI change
+      console.error("Error toggling like:", error);
+      setIsLiked(!isLiked); // revert back if there was an error
+    }
+  };
 
   // when user clicks reviews button, show the reviews for that specific center
   const handleReviewsClick = (centerId) => {
@@ -34,7 +73,17 @@ const CenterCard = ({
     <div className="center-card">
       <img src={center.image_url} alt={center.name} className="center-image" />
       <div className="center-info">
-        <h3 className="center-name">{center.name}</h3>
+        <div className="center-name-container">
+          <h3 className="center-name">{center.name}</h3>
+          <span
+          // like button
+            className={`heart-icon ${isLiked ? 'liked' : ''}`}
+            onClick={handleLikeClick}
+            title={isAuthenticated ? (isLiked ? "Unlike" : "Like") : "Login to like"}
+          >
+            ❤︎
+          </span>
+        </div>
         <p className="center-address">{center.address}</p>
         <p className="center-phone">{center.phone_number}</p>
         <p className="center-description">{center.description}</p>
