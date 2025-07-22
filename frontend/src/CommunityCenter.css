@@ -60,12 +60,18 @@
   text-align: left;
 }
 
-/* center name container with like button */
+/* center name container with like/dislike buttons */
 .center-name-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin: 0 0 0.75rem 0;
+}
+
+/* container for like/dislike buttons */
+.reaction-buttons {
+  display: flex;
+  gap: 8px;
 }
 
 .center-name {
@@ -83,7 +89,6 @@
   cursor: pointer;
   transition: all 0.2s ease;
   color: #d1d1d1;
-  margin-left: 10px;
   user-select: none;
 }
 
@@ -96,6 +101,28 @@
 }
 
 .heart-icon.loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* thumbs down icon styling */
+.thumbs-down-icon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #d1d1d1;
+  user-select: none;
+}
+
+.thumbs-down-icon:hover {
+  transform: scale(1.1);
+}
+
+.thumbs-down-icon.disliked {
+  color: #000000;
+}
+
+.thumbs-down-icon.loading {
   opacity: 0.5;
   pointer-events: none;
 }
