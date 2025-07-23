@@ -13,10 +13,22 @@ const simpleCache = require("../utils/simpleCache");
 
 // (GET) fetch personalized recommendations for the current user based on their preferences and behavior
 // requires authentication to identify the user
-router.get("/personalized-recommendations", authenticateUser, async (req, res) => {
+router.get("/user-recommendations", authenticateUser, async (req, res) => {
   try {
-    // get user id from auth middleware
-    const userId = req.user.id;
+    // get supabase user id from auth middleware
+    const supabaseUserId = req.user.id;
+
+    // first, get the prisma user ID that corresponds to the supabased user ID
+    const user = await prisma.user.findUnique({
+      where: { supabase_user_id: supabaseUserId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found in database" });
+    }
+
+    // now we have the numeric user ID from db
+    const userId = user.id;
 
     // get limit parameter from query (default to 5)
     const limit = req.query.limit ? parseInt(req.query.limit) : 5;
