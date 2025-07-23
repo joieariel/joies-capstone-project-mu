@@ -358,5 +358,13 @@ export const dislikesAPI = {
   checkDislikeStatus: (centerId) => apiRequest(`/dislikes/check/${centerId}`),
 };
 
+// api functions for user personalized recommendations
+export const recommendationsAPI = {
+  // get personalized recommendations for the current user
+  // returns an  array of community centers recommended for the user based on their preferences and behavior
+  getUserRecommendations: (limit = 5) =>
+    apiRequest(`/user-recommendations?limit=${limit}`),
+};
+
 // export the base apiRequest function for custom requests
 export { apiRequest };
