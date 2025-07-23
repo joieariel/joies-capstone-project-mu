@@ -13,7 +13,7 @@ const simpleCache = require("../utils/simpleCache");
 
 // (GET) fetch personalized recommendations for the current user based on their preferences and behavior
 // requires authentication to identify the user
-router.get("/user-recommendations", authenticateUser, async (req, res) => {
+router.get("/", authenticateUser, async (req, res) => {
   try {
     // get supabase user id from auth middleware
     const supabaseUserId = req.user.id;
@@ -155,6 +155,5 @@ router.get("/user-recommendations", authenticateUser, async (req, res) => {
     res.status(500).json({ error: "Failed to generate recommendations" });
   }
 });
-
 
 module.exports = router;

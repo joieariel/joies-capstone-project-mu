@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { dislikesAPI } from "./api"; // import API functions for dislikes
 import CenterCard from "./CenterCard"; // reuse the CenterCard component
 import "./LikedCenters.css"; // reuse the same CSS for now
@@ -57,16 +57,18 @@ const DislikedCenters = () => {
         </div>
       )}
 
-      {/* display grid of disliked centers when available */}
+      {/* display horizontally scrollable list of disliked centers when available */}
       {!loading && !error && dislikedCenters.length > 0 && (
-        <div className="liked-centers-grid">
+        <div className="liked-centers-scroll">
           {/* map through each center and render a CenterCard component */}
           {dislikedCenters.map((center) => (
-            <CenterCard
-              key={center.id}
-              center={center}
-              showSimilarButton={false} // hide similar centers button in dashboard view
-            />
+            <div key={center.id} className="liked-center-item">
+              <CenterCard
+                key={center.id}
+                center={center}
+                showSimilarButton={false} // hide similar centers button in dashboard view
+              />
+            </div>
           ))}
         </div>
       )}

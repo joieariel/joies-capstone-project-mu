@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { likesAPI } from "./api"; // import API functions for likes
 import CenterCard from "./CenterCard"; // reuse the CenterCard component
 import "./LikedCenters.css";
@@ -20,7 +20,7 @@ const LikedCenters = () => {
         // extract center data from the api response
 
         // backend returns enriched center data with all required properties (ratings, hours, tags)
-        const centers = data.map(like => like.center);
+        const centers = data.map((like) => like.center);
         setLikedCenters(centers); // store fetched data in state
       } catch (err) {
         console.error("Error fetching liked centers:", err);
@@ -59,16 +59,18 @@ const LikedCenters = () => {
         </div>
       )}
 
-      {/* display grid of liked centers when available */}
+      {/* display horizontally scrollable list of liked centers when available */}
       {!loading && !error && likedCenters.length > 0 && (
-        <div className="liked-centers-grid">
+        <div className="liked-centers-scroll">
           {/* map through each center and render a CenterCard component */}
           {likedCenters.map((center) => (
-            <CenterCard
-              key={center.id}
-              center={center}
-              showSimilarButton={false} // hide similar centers button in dashboard view
-            />
+            <div key={center.id} className="liked-center-item">
+              <CenterCard
+                key={center.id}
+                center={center}
+                showSimilarButton={false} // hide similar centers button in dashboard view
+              />
+            </div>
           ))}
         </div>
       )}

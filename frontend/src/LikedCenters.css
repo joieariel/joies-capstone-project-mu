@@ -11,17 +11,56 @@
   text-align: left;
 }
 
-.liked-centers-grid {
+/* horizontal scrolling container */
+.liked-centers-scroll {
   display: flex;
-  flex-wrap: wrap;
+  overflow-x: auto; /* for horizontal scrolling */
   gap: 1.5rem;
-  justify-content: flex-start;
+  padding: 0.5rem 0.25rem;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #486284 #f0f0f0;
+  margin-bottom: 10px;
 }
 
-/* adjust card size for dashboard view */
-.liked-centers-grid .center-card {
-  flex: 1 1 calc(50% - 1rem);
-  max-width: calc(50% - 1rem);
+/* scrollbar styling */
+.liked-centers-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.liked-centers-scroll::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.liked-centers-scroll::-webkit-scrollbar-thumb {
+  background-color: #486284;
+  border-radius: 4px;
+}
+
+.liked-centers-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #3a4f6a;
+}
+
+/* individual card container */
+.liked-center-item {
+  flex: 0 0 auto;
+  width: 350px;
+  min-width: 350px;
+}
+
+/* card styling */
+.liked-center-item .center-card {
+  height: 100%;
+  border-left: 4px solid #486284;
+  background-color: #fff;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.liked-center-item .center-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .liked-centers-loading,

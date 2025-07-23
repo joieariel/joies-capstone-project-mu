@@ -3,7 +3,8 @@ import { useAuth } from "./AuthContext";
 import { userAPI } from "./api"; // to make calls to backend
 import { validateEditForm } from "./utils/validation"; // import new validate function from utils
 import LikedCenters from "./LikedCenters";
-import DislikedCenters from "./DislikedCenters"; // Import the DislikedCenters component
+import DislikedCenters from "./DislikedCenters";
+import UserRecommendations from "./UserRecommendations";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -333,6 +334,9 @@ const Dashboard = () => {
             </form>
           )}
         </div>
+
+        {/* Add the UserRecommendations component at the top */}
+        <UserRecommendations />
 
         {/* add the LikedCenters component */}
         <LikedCenters />
