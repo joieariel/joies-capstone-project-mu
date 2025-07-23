@@ -1,1 +1,1 @@
-// test user personalized recommendation endpoints
+// user personalized recommendation endpoints
