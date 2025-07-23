@@ -415,6 +415,63 @@ const getUserCenterEngagement = async (userId, centerId, prisma) => {
   }
 };
 
+// 5. final function to calculate the final personalized recommendation score for a center
+// combines all factors (liked similarity, filter alignment, engagement) with weights
+const calculatePersonalizedScore = async (
+  userId,
+  center,
+  likedCenters,
+  dislikedCenters,
+  userPreferredFilters,
+  prisma
+) => {
+  try {
+    // handle edge cases - if no userId or center provided
+    if (!userId || !center) {
+      return 0;
+    }
+
+    // 1. calculate similarity to liked/disliked centers (50% weight)
+    const likeSimilarityScore = calculateLikedSimilarity(
+      center,
+      likedCenters || [],
+      dislikedCenters || []
+    );
+
+    // 2. calculate filter alignment score (30% weight)
+    const filterAlignmentScore = calculateFilterAlignmentScore(
+      userPreferredFilters || [],
+      center.centerTags || []
+    );
+
+    // 3. calculate engagement score (20% weight)
+    const engagementScore = await calculateEngagementScore(
+      userId,
+      center.id,
+      prisma
+    );
+
+    // define weights for each factor
+    const weights = {
+      likeSimilarity: 0.5, // 50% weight - most important factor
+      filterAlignment: 0.3, // 30% weight - medium importance
+      engagement: 0.2, // 20% weight - least important but still significant
+    };
+
+    // calculate weighted score
+    const weightedScore =
+      likeSimilarityScore * weights.likeSimilarity +
+      filterAlignmentScore * weights.filterAlignment +
+      engagementScore * weights.engagement;
+
+    // return the final score (between 0 and 1)
+    return weightedScore;
+  } catch (error) {
+    console.error("Error calculating personalized score:", error);
+    return 0; // return zero score on error
+  }
+};
+
 module.exports = {
   calculateLikedSimilarity,
   findMostClickedFilters,
@@ -423,4 +480,5 @@ module.exports = {
   recordPageInteraction,
   calculateEngagementScore,
   getUserCenterEngagement,
+  calculatePersonalizedScore,
 };
