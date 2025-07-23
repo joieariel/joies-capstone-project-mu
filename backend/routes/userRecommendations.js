@@ -8,12 +8,12 @@ const {
   calculatePersonalizedScore,
   findMostClickedFilters,
 } = require("../utils/userRecommendationEngine");
-const { authMiddleware } = require("../middleware/auth");
+const { authenticateUser } = require("../middleware/auth");
 const simpleCache = require("../utils/simpleCache");
 
 // (GET) fetch personalized recommendations for the current user based on their preferences and behavior
 // requires authentication to identify the user
-router.get("/personalized-recommendations", authMiddleware, async (req, res) => {
+router.get("/personalized-recommendations", authenticateUser, async (req, res) => {
   try {
     // get user id from auth middleware
     const userId = req.user.id;
