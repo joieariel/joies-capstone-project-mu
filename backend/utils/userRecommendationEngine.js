@@ -183,10 +183,244 @@ const recordFilterInteraction = async (userId, tagId, prisma) => {
 };
 
 // 3. function to track on-page interaction behavior (clicks, scrolls, etc.)
+// this function updates or creates a record of user interactions with a center's detail page
+const recordPageInteraction = async (
+  userId,
+  centerId,
+  interactionData,
+  prisma
+) => {
+  try {
+    // handle edge cases - if no userId or centerId provided
+    if (!userId || !centerId) {
+      console.error(
+        "Missing required parameters for recording page interaction"
+      );
+      return null;
+    }
+
+    // validate interactionData to ensure it contains at least one valid interaction type
+    const validInteraction =
+      interactionData &&
+      (typeof interactionData.scroll_depth === "number" ||
+        typeof interactionData.map_clicks === "number" ||
+        typeof interactionData.review_clicks === "number" ||
+        typeof interactionData.similar_clicks === "number");
+
+    if (!validInteraction) {
+      console.error("No valid interaction data provided");
+      return null;
+    }
+
+    // prepare update data - only include fields that are provided in interactionData
+    const updateData = {};
+
+    if (typeof interactionData.scroll_depth === "number") {
+      // for scroll depth, store the max depth reached
+      updateData.scroll_depth = {
+        // use set to store highest value theyve reached, not add up all
+        set: Math.max(interactionData.scroll_depth, 0), // ensure non-negative
+      };
+    }
+    // for other interactions, increment the count
+
+    if (typeof interactionData.map_clicks === "number") {
+      updateData.map_clicks = {
+        increment: Math.max(interactionData.map_clicks, 0), // ensure non-negative
+      };
+    }
+
+    if (typeof interactionData.review_clicks === "number") {
+      updateData.review_clicks = {
+        increment: Math.max(interactionData.review_clicks, 0), // ensure non-negative
+      };
+    }
+
+    if (typeof interactionData.similar_clicks === "number") {
+      updateData.similar_clicks = {
+        increment: Math.max(interactionData.similar_clicks, 0), // ensure non-negative
+      };
+    }
+
+    // always update the last_visited timestamp and increment visit_count
+    updateData.last_visited = new Date();
+    updateData.visit_count = {
+      increment: 1,
+    };
+
+    // use upsert to either update an existing record or create a new one
+    const result = await prisma.pageInteraction.upsert({
+      where: {
+        user_id_center_id: {
+          user_id: userId,
+          center_id: centerId,
+        },
+      },
+      // if record exists, update the interaction data and timestamp
+      update: updateData,
+      // if record doesn't exist, create a new one with the provided interaction data
+      create: {
+        user_id: userId,
+        center_id: centerId,
+        scroll_depth:
+          typeof interactionData.scroll_depth === "number"
+            ? Math.max(interactionData.scroll_depth, 0)
+            : 0,
+        map_clicks:
+          typeof interactionData.map_clicks === "number"
+            ? Math.max(interactionData.map_clicks, 0)
+            : 0,
+        review_clicks:
+          typeof interactionData.review_clicks === "number"
+            ? Math.max(interactionData.review_clicks, 0)
+            : 0,
+        similar_clicks:
+          typeof interactionData.similar_clicks === "number"
+            ? Math.max(interactionData.similar_clicks, 0)
+            : 0,
+        visit_count: 1,
+        last_visited: new Date(),
+      },
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Error recording page interaction:", error);
+    return null;
+  }
+};
+
+// 3a. function to calculate engagement score based on user's interactions with centers
+// this function normalizes interaction data to produce a score between 0 and 1
+const calculateEngagementScore = async (userId, centerId, prisma) => {
+  try {
+    // handle edge cases - if no userId or centerId provided
+    if (!userId || !centerId) {
+      return 0; // return zero score if missing required parameters
+    }
+
+    // get all page interactions for this user
+    const userInteractions = await prisma.pageInteraction.findMany({
+      where: {
+        user_id: userId,
+      },
+    });
+
+    // if user has no interactions at all, return 0
+    if (!userInteractions || userInteractions.length === 0) {
+      return 0;
+    }
+
+    // find the specific center's interaction data
+    const centerInteraction = userInteractions.find(
+      (interaction) => interaction.center_id === centerId
+    );
+
+    // if no interaction data for this specific center, return 0
+    if (!centerInteraction) {
+      return 0;
+    }
+
+    // calculate total interactions for this center
+    const totalInteractions =
+      centerInteraction.scroll_depth / 100 + // normalize scroll depth to 0-1 range
+      centerInteraction.map_clicks +
+      centerInteraction.review_clicks +
+      centerInteraction.similar_clicks +
+      Math.min(centerInteraction.visit_count, 5) / 5; // cap visit count contribution at 5 visits
+
+    // find maximum interactions across all centers for this user
+    let maxInteractions = 0;
+
+    // loop through all user interactions
+    userInteractions.forEach((interaction) => {
+      const interactionSum =
+        interaction.scroll_depth / 100 +
+        interaction.map_clicks +
+        interaction.review_clicks +
+        interaction.similar_clicks +
+        Math.min(interaction.visit_count, 5) / 5;
+
+      // update maxInteractions (if necessary)
+      maxInteractions = Math.max(maxInteractions, interactionSum);
+    });
+
+    // normalize the score 0-1 (interactions on this center / max interactions on any center)
+
+    return maxInteractions > 0
+      ? Math.min(totalInteractions / maxInteractions, 1)
+      : 0;
+  } catch (error) {
+    console.error("Error calculating engagement score:", error);
+    return 0; // return zero score on error
+  }
+};
+
+// 4. function to get all user engagement data for a specific center
+// helper function that combines all interaction data for analysis
+const getUserCenterEngagement = async (userId, centerId, prisma) => {
+  try {
+    // handle edge cases - if no userId or centerId provided
+    if (!userId || !centerId) {
+      return null;
+    }
+
+    // get page interaction data
+    const pageInteraction = await prisma.pageInteraction.findUnique({
+      where: {
+        user_id_center_id: {
+          user_id: userId,
+          center_id: centerId,
+        },
+      },
+    });
+
+    // check if user has liked this center
+    const likeRecord = await prisma.likes.findUnique({
+      where: {
+        user_id_center_id: {
+          user_id: userId,
+          center_id: centerId,
+        },
+      },
+    });
+
+    // check if user has disliked this center
+    const dislikeRecord = await prisma.dislikes.findUnique({
+      where: {
+        user_id_center_id: {
+          user_id: userId,
+          center_id: centerId,
+        },
+      },
+    });
+
+    // calculate engagement score
+    const engagementScore = await calculateEngagementScore(
+      userId,
+      centerId,
+      prisma
+    );
+
+    // return comprehensive engagement data
+    return {
+      pageInteraction: pageInteraction || null,
+      liked: !!likeRecord,
+      disliked: !!dislikeRecord,
+      engagementScore,
+    };
+  } catch (error) {
+    console.error("Error getting user center engagement:", error);
+    return null;
+  }
+};
 
 module.exports = {
   calculateLikedSimilarity,
   findMostClickedFilters,
   calculateFilterAlignmentScore,
   recordFilterInteraction,
+  recordPageInteraction,
+  calculateEngagementScore,
+  getUserCenterEngagement,
 };
