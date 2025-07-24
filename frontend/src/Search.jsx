@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { tagAPI } from "./api"; // import the tagAPI function from the api.js file
+import { tagAPI, filterInteractionsAPI } from "./api"; // import the tagAPI and filterInteractionsAPI functions
 import "./Search.css";
 
 const Search = ({ onSearch }) => {
@@ -55,9 +55,20 @@ const Search = ({ onSearch }) => {
     fetchTags();
   }, []);
 
-
   // handle filter selection/deselection
   const handleFilterClick = (filterType, filterId) => {
+    // track tag filter interactions
+    if (filterType === "tags") {
+      try {
+        // record the filter interaction asynchronously
+        //  don't need to await this since it's just tracking
+        filterInteractionsAPI.recordFilterInteraction(filterId);
+      } catch (err) {
+        // log the error, don't block the UI
+        console.error("Error recording filter interaction:", err);
+      }
+    }
+
     // handle custom distance selection
     if (filterId === "custom") {
       setShowCustomDistance(!showCustomDistance);

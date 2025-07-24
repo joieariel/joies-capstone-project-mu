@@ -366,5 +366,15 @@ export const recommendationsAPI = {
     apiRequest(`/user-recommendations?limit=${limit}`),
 };
 
+// api function for filter interaction operations
+export const filterInteractionsAPI = {
+  // record a filter interaction when a user clicks on a tag filter
+  recordFilterInteraction: (tagId) =>
+    apiRequest("/filterInteractions", {
+      method: "POST",
+      body: JSON.stringify({ tag_id: tagId }),
+    }),
+};
+
 // export the base apiRequest function for custom requests
 export { apiRequest };

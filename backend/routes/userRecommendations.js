@@ -146,8 +146,8 @@ router.get("/", authenticateUser, async (req, res) => {
     // 7. enrich centers with calculated fields
     const enrichedRecommendations = enrichCentersWithData(recommendations);
 
-    // store the results in cache with a TTL of 30 minutes
-    simpleCache.set(cacheKey, enrichedRecommendations, 1800);
+    // store the results in cache with a TTL of 30 minutes (1800) (changed to 5 seconds for testing)
+    simpleCache.set(cacheKey, enrichedRecommendations, 5);
 
     res.json(enrichedRecommendations);
   } catch (error) {
