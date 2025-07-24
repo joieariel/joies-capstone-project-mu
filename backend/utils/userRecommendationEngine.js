@@ -128,14 +128,20 @@ const calculateFilterAlignmentScore = (userPreferredFilters, centerTags) => {
       const positionWeight = 1 - index / userPreferredFilters.length;
 
       // use the filter count as a multiplier for the weight
-      weightedScore += positionWeight * (filter.count / 10); // normalize count impact
+      // less aggressive normalization (divide by 3 instead of 10)
+      weightedScore += positionWeight * (filter.count / 3);
     }
   });
 
+  // sdd a minimum score for any match (0.2 per match) to ensure even a single interaction has meaningful impact
+  const minimumMatchScore = matchCount * 0.2;
+
+  // use the higher of the calculated weighted score or the minimum match score
+  const finalScore = Math.max(weightedScore, minimumMatchScore);
 
   // normalize the final score to be between 0 and 1
   // higher scores indicate better alignment with the user's filter preferences
-  return Math.min(1, weightedScore);
+  return Math.min(1, finalScore);
 };
 
 // 2b. function to record filter interactions when a user clicks on a filter
