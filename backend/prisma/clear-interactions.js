@@ -15,34 +15,17 @@ const prisma = new PrismaClient();
 
 async function main() {
   try {
-    console.log("Starting to clear all interaction data...");
-
     // Clear all interaction data
-    console.log("Clearing page interactions...");
-    const deletedPageInteractions = await prisma.pageInteraction.deleteMany({});
-    console.log(`Deleted ${deletedPageInteractions.count} page interactions.`);
-
-    console.log("Clearing filter interactions...");
-    const deletedFilterInteractions = await prisma.filterInteraction.deleteMany({});
-    console.log(`Deleted ${deletedFilterInteractions.count} filter interactions.`);
-
-    console.log("Clearing likes...");
-    const deletedLikes = await prisma.likes.deleteMany({});
-    console.log(`Deleted ${deletedLikes.count} likes.`);
-
-    console.log("Clearing dislikes...");
-    const deletedDislikes = await prisma.dislikes.deleteMany({});
-    console.log(`Deleted ${deletedDislikes.count} dislikes.`);
-
-    console.log("All interaction data has been cleared successfully!");
+    await prisma.pageInteraction.deleteMany({});
+    await prisma.filterInteraction.deleteMany({});
+    await prisma.likes.deleteMany({});
+    await prisma.dislikes.deleteMany({});
   } catch (error) {
     console.error("Error clearing interaction data:", error);
+    process.exit(1);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+main();
