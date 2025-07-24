@@ -10,7 +10,7 @@
 
 .dashboard-content {
   text-align: center;
-  max-width: 600px;
+  max-width: 1200px;
   width: 100%;
 }
 
@@ -31,14 +31,14 @@
 }
 
 /* form input */
-#first_name, 
+#first_name,
 #last_name,
-#username, 
-#email, 
-#status, 
-#birthdate, 
-#city, 
-#state, 
+#username,
+#email,
+#status,
+#birthdate,
+#city,
+#state,
 #zip_code {
   font-family: "Plus Jakarta Sans", sans-serif;
   font-size: larger;

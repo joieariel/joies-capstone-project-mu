@@ -33,7 +33,6 @@ const prisma = new PrismaClient();
 
 async function main() {
   try {
-    console.log("Starting to seed interaction data...");
 
     // Define specific users to use for seeding with their assigned roles
     const specificUsers = [
@@ -60,9 +59,7 @@ async function main() {
           });
 
           if (user) {
-            console.log(`Found user with username ${userInfo.username} (ID: ${user.id}, Role: ${userInfo.description})`);
           } else {
-            console.warn(`Warning: User with username ${userInfo.username} not found`);
           }
         } else if (userInfo.id) {
           // Find by ID
@@ -72,9 +69,7 @@ async function main() {
           });
 
           if (user) {
-            console.log(`Found user with ID ${user.id} (Role: ${userInfo.description})`);
           } else {
-            console.warn(`Warning: User with ID ${userInfo.id} not found`);
           }
         }
 
@@ -86,7 +81,6 @@ async function main() {
 
     // If no specific users were found, get the first 5 users
     if (users.length === 0) {
-      console.log("No specific users found or specified, using the first 5 users from the database");
       users = await prisma.user.findMany({
         select: { id: true, username: true },
         take: 5,
@@ -106,13 +100,9 @@ async function main() {
     }
 
     if (users.length === 0) {
-      console.error(
-        "No users found in the database. Please create users first."
-      );
       return;
     }
 
-    console.log(`Found ${users.length} users to work with.`);
 
     // Get all community centers
     const centers = await prisma.communityCenter.findMany({
@@ -126,17 +116,12 @@ async function main() {
     });
 
     if (centers.length === 0) {
-      console.error(
-        "No community centers found in the database. Please create centers first."
-      );
       return;
     }
 
-    console.log(`Found ${centers.length} community centers to work with.`);
 
     // Get all tags
     const tags = await prisma.tag.findMany();
-    console.log(`Found ${tags.length} tags to work with.`);
 
     // Helper function to find centers with specific tag IDs
     const findCentersWithTagIds = (tagIds) => {
@@ -158,26 +143,21 @@ async function main() {
     };
 
     // Clear existing interaction data
-    console.log("Clearing existing interaction data...");
     await prisma.pageInteraction.deleteMany({});
     await prisma.filterInteraction.deleteMany({});
     await prisma.likes.deleteMany({});
     await prisma.dislikes.deleteMany({});
-    console.log("Existing interaction data cleared.");
 
     // =============================================
     // USER 1: TECH ENTHUSIAST
     // =============================================
     const user1 = users[0];
-    console.log(`Setting up User 1 (ID: ${user1.id}) as a Tech Enthusiast...`);
 
     // Find tech-related centers using tag IDs
     const techCenters = findCentersWithTagIds([3, 10, 17, 20]); // good Wi-Fi speed, fast Wi-Fi, printer access, free Wi-Fi
-    console.log(`Found ${techCenters.length} tech-related centers.`);
 
     // Tech-related tag IDs
     const techTagIds = getTagIdsByIds([3, 10, 17, 20]); // good Wi-Fi speed, fast Wi-Fi, printer access, free Wi-Fi
-    console.log(`Using ${techTagIds.length} tech-related tags.`);
 
     // 1. Create likes for tech centers
     for (let i = 0; i < Math.min(3, techCenters.length); i++) {
@@ -188,10 +168,8 @@ async function main() {
             center_id: techCenters[i].id,
           },
         });
-        console.log(`User 1 liked tech center: ${techCenters[i].name}`);
       } catch (error) {
         if (error.code === 'P2002') {
-          console.log(`User 1 already liked tech center: ${techCenters[i].name} - skipping`);
         } else {
           throw error;
         }
@@ -211,10 +189,8 @@ async function main() {
             center_id: seniorCenters[i].id,
           },
         });
-        console.log(`User 1 disliked senior center: ${seniorCenters[i].name}`);
       } catch (error) {
         if (error.code === 'P2002') {
-          console.log(`User 1 already disliked senior center: ${seniorCenters[i].name} - skipping`);
         } else {
           throw error;
         }
@@ -239,12 +215,8 @@ async function main() {
             ), // 0-7 days ago
           },
         });
-        console.log(
-          `Created page interaction for User 1 with center: ${techCenters[i].name}`
-        );
       } catch (error) {
         if (error.code === 'P2002') {
-          console.log(`User 1 already has page interaction with center: ${techCenters[i].name} - skipping`);
         } else {
           throw error;
         }
@@ -263,26 +235,19 @@ async function main() {
           ), // 0-7 days ago
         },
       });
-      console.log(
-        `Created filter interaction for User 1 with tag ID: ${tagId}`
-      );
     }
 
     // =============================================
     // USER 2: STUDENT
     // =============================================
     const user2 = users[1];
-    console.log(
-      `Setting up User 2 (ID: ${user2.id}) as an Education Seeker...`
-    );
+
 
     // Find education-related centers using tag IDs
     const educationCenters = findCentersWithTagIds([21, 25, 18]); // educational resources, SAT/ACT prep, internship opportunities
-    console.log(`Found ${educationCenters.length} education-related centers.`);
 
     // Education-related tag IDs
     const educationTagIds = getTagIdsByIds([21, 25, 18]); // educational resources, SAT/ACT prep, internship opportunities
-    console.log(`Using ${educationTagIds.length} education-related tags.`);
 
     // 1. Create likes for education centers
     for (let i = 0; i < Math.min(3, educationCenters.length); i++) {
@@ -293,10 +258,8 @@ async function main() {
             center_id: educationCenters[i].id,
           },
         });
-        console.log(`User 2 liked education center: ${educationCenters[i].name}`);
       } catch (error) {
         if (error.code === 'P2002') {
-          console.log(`User 2 already liked education center: ${educationCenters[i].name} - skipping`);
         } else {
           throw error;
         }
@@ -313,10 +276,10 @@ async function main() {
             center_id: careerCenters[i].id,
           },
         });
-        console.log(`User 2 disliked career center: ${careerCenters[i].name}`);
+
       } catch (error) {
         if (error.code === 'P2002') {
-          console.log(`User 2 already disliked career center: ${careerCenters[i].name} - skipping`);
+
         } else {
           throw error;
         }
@@ -341,12 +304,9 @@ async function main() {
             ), // 0-10 days ago
           },
         });
-        console.log(
-          `Created page interaction for User 2 with center: ${educationCenters[i].name}`
-        );
+
       } catch (error) {
         if (error.code === 'P2002') {
-          console.log(`User 2 already has page interaction with center: ${educationCenters[i].name} - skipping`);
         } else {
           throw error;
         }
@@ -365,26 +325,22 @@ async function main() {
           ), // 0-10 days ago
         },
       });
-      console.log(
-        `Created filter interaction for User 2 with tag ID: ${tagId}`
-      );
+
     }
 
     // =============================================
     // USER 3: JOB-SEEKER
     // =============================================
     const user3 = users[2];
-    console.log(`Setting up User 3 (ID: ${user3.id}) as Career-Focused...`);
+
 
     // Find career-related centers using tag IDs
     const careerCentersForUser3 = findCentersWithTagIds([22, 7, 8]); // career resources, virtual interview prep, digital resume help
-    console.log(
-      `Found ${careerCentersForUser3.length} career-related centers.`
-    );
+
 
     // Career-related tag IDs
     const careerTagIds = getTagIdsByIds([22, 7, 8]); // career resources, virtual interview prep, digital resume help
-    console.log(`Using ${careerTagIds.length} career-related tags.`);
+
 
     // 1. Create likes for career centers
     for (let i = 0; i < Math.min(4, careerCentersForUser3.length); i++) {
@@ -395,12 +351,9 @@ async function main() {
             center_id: careerCentersForUser3[i].id,
           },
         });
-        console.log(
-          `User 3 liked career center: ${careerCentersForUser3[i].name}`
-        );
+
       } catch (error) {
         if (error.code === 'P2002') {
-          console.log(`User 3 already liked career center: ${careerCentersForUser3[i].name} - skipping`);
         } else {
           throw error;
         }
@@ -420,12 +373,9 @@ async function main() {
             center_id: nonCareerCenters[i].id,
           },
         });
-        console.log(
-          `User 3 disliked non-career center: ${nonCareerCenters[i].name}`
-        );
+
       } catch (error) {
         if (error.code === 'P2002') {
-          console.log(`User 3 already disliked non-career center: ${nonCareerCenters[i].name} - skipping`);
         } else {
           throw error;
         }
@@ -450,12 +400,9 @@ async function main() {
             ), // 0-5 days ago
           },
         });
-        console.log(
-          `Created page interaction for User 3 with center: ${careerCentersForUser3[i].name}`
-        );
+
       } catch (error) {
         if (error.code === 'P2002') {
-          console.log(`User 3 already has page interaction with center: ${careerCentersForUser3[i].name} - skipping`);
         } else {
           throw error;
         }
@@ -474,16 +421,13 @@ async function main() {
           ), // 0-5 days ago
         },
       });
-      console.log(
-        `Created filter interaction for User 3 with tag ID: ${tagId}`
-      );
+
     }
 
     // =============================================
     // USER 4: MIXED INTERESTS
     // =============================================
     const user4 = users[3];
-    console.log(`Setting up User 4 (ID: ${user4.id}) with Mixed Interests...`);
 
     // 1. Create likes for various centers
     const mixedLikeCenters = [
@@ -500,10 +444,8 @@ async function main() {
             center_id: center.id,
           },
         });
-        console.log(`User 4 liked mixed center: ${center.name}`);
       } catch (error) {
         if (error.code === 'P2002') {
-          console.log(`User 4 already liked center: ${center.name} - skipping`);
         } else {
           throw error;
         }
@@ -524,10 +466,8 @@ async function main() {
             center_id: center.id,
           },
         });
-        console.log(`User 4 disliked random center: ${center.name}`);
       } catch (error) {
         if (error.code === 'P2002') {
-          console.log(`User 4 already disliked center: ${center.name} - skipping`);
         } else {
           throw error;
         }
@@ -563,12 +503,9 @@ async function main() {
             ), // 0-14 days ago
           },
         });
-        console.log(
-          `Created page interaction for User 4 with center: ${center.name}`
-        );
+
       } catch (error) {
         if (error.code === 'P2002') {
-          console.log(`User 4 already has page interaction with center: ${center.name} - skipping`);
         } else {
           throw error;
         }
@@ -593,16 +530,13 @@ async function main() {
           ), // 0-14 days ago
         },
       });
-      console.log(
-        `Created filter interaction for User 4 with tag ID: ${tagId}`
-      );
+
     }
 
     // =============================================
     // USER 5: NEW USER (MINIMAL INTERACTIONS)
     // =============================================
     const user5 = users[4];
-    console.log(`Setting up User 5 (ID: ${user5.id}) as a New User...`);
 
     // 1. Create just one like
     const randomCenter = centers[Math.floor(Math.random() * centers.length)];
@@ -612,7 +546,6 @@ async function main() {
         center_id: randomCenter.id,
       },
     });
-    console.log(`User 5 liked random center: ${randomCenter.name}`);
 
     // 2. Create minimal page interactions
     await prisma.pageInteraction.create({
@@ -627,9 +560,7 @@ async function main() {
         last_visited: new Date(),
       },
     });
-    console.log(
-      `Created minimal page interaction for User 5 with center: ${randomCenter.name}`
-    );
+
 
     // 3. Create one filter interaction
     const randomTag = tags[Math.floor(Math.random() * tags.length)];
@@ -641,11 +572,8 @@ async function main() {
         last_used: new Date(),
       },
     });
-    console.log(
-      `Created minimal filter interaction for User 5 with tag ID: ${randomTag.id}`
-    );
 
-    console.log("Interaction data seeding completed successfully!");
+
   } catch (error) {
     console.error("Error seeding interaction data:", error);
   } finally {
