@@ -181,13 +181,21 @@ async function main() {
 
     // 1. Create likes for tech centers
     for (let i = 0; i < Math.min(3, techCenters.length); i++) {
-      await prisma.likes.create({
-        data: {
-          user_id: user1.id,
-          center_id: techCenters[i].id,
-        },
-      });
-      console.log(`User 1 liked tech center: ${techCenters[i].name}`);
+      try {
+        await prisma.likes.create({
+          data: {
+            user_id: user1.id,
+            center_id: techCenters[i].id,
+          },
+        });
+        console.log(`User 1 liked tech center: ${techCenters[i].name}`);
+      } catch (error) {
+        if (error.code === 'P2002') {
+          console.log(`User 1 already liked tech center: ${techCenters[i].name} - skipping`);
+        } else {
+          throw error;
+        }
+      }
     }
 
     // 2. Create dislikes for non-tech centers (e.g., senior-focused)
@@ -196,35 +204,51 @@ async function main() {
       center.centerTags.some(ct => ct.tag_id === 24)
     );
     for (let i = 0; i < Math.min(2, seniorCenters.length); i++) {
-      await prisma.dislikes.create({
-        data: {
-          user_id: user1.id,
-          center_id: seniorCenters[i].id,
-        },
-      });
-      console.log(`User 1 disliked senior center: ${seniorCenters[i].name}`);
+      try {
+        await prisma.dislikes.create({
+          data: {
+            user_id: user1.id,
+            center_id: seniorCenters[i].id,
+          },
+        });
+        console.log(`User 1 disliked senior center: ${seniorCenters[i].name}`);
+      } catch (error) {
+        if (error.code === 'P2002') {
+          console.log(`User 1 already disliked senior center: ${seniorCenters[i].name} - skipping`);
+        } else {
+          throw error;
+        }
+      }
     }
 
     // 3. Create page interactions (high engagement with tech centers)
     for (let i = 0; i < techCenters.length; i++) {
       const visitCount = Math.floor(Math.random() * 5) + 1; // 1-5 visits
-      await prisma.pageInteraction.create({
-        data: {
-          user_id: user1.id,
-          center_id: techCenters[i].id,
-          scroll_depth: Math.floor(Math.random() * 40) + 60, // 60-100% scroll depth
-          map_clicks: Math.floor(Math.random() * 3), // 0-2 map clicks
-          review_clicks: Math.floor(Math.random() * 3), // 0-2 review clicks
-          similar_clicks: Math.floor(Math.random() * 2), // 0-1 similar clicks
-          visit_count: visitCount,
-          last_visited: new Date(
-            Date.now() - Math.floor(Math.random() * 7) * 86400000
-          ), // 0-7 days ago
-        },
-      });
-      console.log(
-        `Created page interaction for User 1 with center: ${techCenters[i].name}`
-      );
+      try {
+        await prisma.pageInteraction.create({
+          data: {
+            user_id: user1.id,
+            center_id: techCenters[i].id,
+            scroll_depth: Math.floor(Math.random() * 40) + 60, // 60-100% scroll depth
+            map_clicks: Math.floor(Math.random() * 3), // 0-2 map clicks
+            review_clicks: Math.floor(Math.random() * 3), // 0-2 review clicks
+            similar_clicks: Math.floor(Math.random() * 2), // 0-1 similar clicks
+            visit_count: visitCount,
+            last_visited: new Date(
+              Date.now() - Math.floor(Math.random() * 7) * 86400000
+            ), // 0-7 days ago
+          },
+        });
+        console.log(
+          `Created page interaction for User 1 with center: ${techCenters[i].name}`
+        );
+      } catch (error) {
+        if (error.code === 'P2002') {
+          console.log(`User 1 already has page interaction with center: ${techCenters[i].name} - skipping`);
+        } else {
+          throw error;
+        }
+      }
     }
 
     // 4. Create filter interactions (tech-focused filters)
@@ -262,47 +286,71 @@ async function main() {
 
     // 1. Create likes for education centers
     for (let i = 0; i < Math.min(3, educationCenters.length); i++) {
-      await prisma.likes.create({
-        data: {
-          user_id: user2.id,
-          center_id: educationCenters[i].id,
-        },
-      });
-      console.log(`User 2 liked education center: ${educationCenters[i].name}`);
+      try {
+        await prisma.likes.create({
+          data: {
+            user_id: user2.id,
+            center_id: educationCenters[i].id,
+          },
+        });
+        console.log(`User 2 liked education center: ${educationCenters[i].name}`);
+      } catch (error) {
+        if (error.code === 'P2002') {
+          console.log(`User 2 already liked education center: ${educationCenters[i].name} - skipping`);
+        } else {
+          throw error;
+        }
+      }
     }
 
     // 2. Create dislikes for non-education centers (e.g., career-focused)
     const careerCenters = findCentersWithTagIds([22]); // career resources
     for (let i = 0; i < Math.min(1, careerCenters.length); i++) {
-      await prisma.dislikes.create({
-        data: {
-          user_id: user2.id,
-          center_id: careerCenters[i].id,
-        },
-      });
-      console.log(`User 2 disliked career center: ${careerCenters[i].name}`);
+      try {
+        await prisma.dislikes.create({
+          data: {
+            user_id: user2.id,
+            center_id: careerCenters[i].id,
+          },
+        });
+        console.log(`User 2 disliked career center: ${careerCenters[i].name}`);
+      } catch (error) {
+        if (error.code === 'P2002') {
+          console.log(`User 2 already disliked career center: ${careerCenters[i].name} - skipping`);
+        } else {
+          throw error;
+        }
+      }
     }
 
     // 3. Create page interactions (high engagement with education centers)
     for (let i = 0; i < educationCenters.length; i++) {
       const visitCount = Math.floor(Math.random() * 4) + 2; // 2-5 visits
-      await prisma.pageInteraction.create({
-        data: {
-          user_id: user2.id,
-          center_id: educationCenters[i].id,
-          scroll_depth: Math.floor(Math.random() * 30) + 70, // 70-100% scroll depth
-          map_clicks: Math.floor(Math.random() * 2), // 0-1 map clicks
-          review_clicks: Math.floor(Math.random() * 4), // 0-3 review clicks
-          similar_clicks: Math.floor(Math.random() * 3), // 0-2 similar clicks
-          visit_count: visitCount,
-          last_visited: new Date(
-            Date.now() - Math.floor(Math.random() * 10) * 86400000
-          ), // 0-10 days ago
-        },
-      });
-      console.log(
-        `Created page interaction for User 2 with center: ${educationCenters[i].name}`
-      );
+      try {
+        await prisma.pageInteraction.create({
+          data: {
+            user_id: user2.id,
+            center_id: educationCenters[i].id,
+            scroll_depth: Math.floor(Math.random() * 30) + 70, // 70-100% scroll depth
+            map_clicks: Math.floor(Math.random() * 2), // 0-1 map clicks
+            review_clicks: Math.floor(Math.random() * 4), // 0-3 review clicks
+            similar_clicks: Math.floor(Math.random() * 3), // 0-2 similar clicks
+            visit_count: visitCount,
+            last_visited: new Date(
+              Date.now() - Math.floor(Math.random() * 10) * 86400000
+            ), // 0-10 days ago
+          },
+        });
+        console.log(
+          `Created page interaction for User 2 with center: ${educationCenters[i].name}`
+        );
+      } catch (error) {
+        if (error.code === 'P2002') {
+          console.log(`User 2 already has page interaction with center: ${educationCenters[i].name} - skipping`);
+        } else {
+          throw error;
+        }
+      }
     }
 
     // 4. Create filter interactions (education-focused filters)
@@ -340,15 +388,23 @@ async function main() {
 
     // 1. Create likes for career centers
     for (let i = 0; i < Math.min(4, careerCentersForUser3.length); i++) {
-      await prisma.likes.create({
-        data: {
-          user_id: user3.id,
-          center_id: careerCentersForUser3[i].id,
-        },
-      });
-      console.log(
-        `User 3 liked career center: ${careerCentersForUser3[i].name}`
-      );
+      try {
+        await prisma.likes.create({
+          data: {
+            user_id: user3.id,
+            center_id: careerCentersForUser3[i].id,
+          },
+        });
+        console.log(
+          `User 3 liked career center: ${careerCentersForUser3[i].name}`
+        );
+      } catch (error) {
+        if (error.code === 'P2002') {
+          console.log(`User 3 already liked career center: ${careerCentersForUser3[i].name} - skipping`);
+        } else {
+          throw error;
+        }
+      }
     }
 
     // 2. Create dislikes for non-career centers
@@ -357,37 +413,53 @@ async function main() {
     );
 
     for (let i = 0; i < Math.min(2, nonCareerCenters.length); i++) {
-      await prisma.dislikes.create({
-        data: {
-          user_id: user3.id,
-          center_id: nonCareerCenters[i].id,
-        },
-      });
-      console.log(
-        `User 3 disliked non-career center: ${nonCareerCenters[i].name}`
-      );
+      try {
+        await prisma.dislikes.create({
+          data: {
+            user_id: user3.id,
+            center_id: nonCareerCenters[i].id,
+          },
+        });
+        console.log(
+          `User 3 disliked non-career center: ${nonCareerCenters[i].name}`
+        );
+      } catch (error) {
+        if (error.code === 'P2002') {
+          console.log(`User 3 already disliked non-career center: ${nonCareerCenters[i].name} - skipping`);
+        } else {
+          throw error;
+        }
+      }
     }
 
     // 3. Create page interactions (very high engagement with career centers)
     for (let i = 0; i < careerCentersForUser3.length; i++) {
       const visitCount = Math.floor(Math.random() * 5) + 3; // 3-7 visits
-      await prisma.pageInteraction.create({
-        data: {
-          user_id: user3.id,
-          center_id: careerCentersForUser3[i].id,
-          scroll_depth: Math.floor(Math.random() * 20) + 80, // 80-100% scroll depth
-          map_clicks: Math.floor(Math.random() * 4), // 0-3 map clicks
-          review_clicks: Math.floor(Math.random() * 5), // 0-4 review clicks
-          similar_clicks: Math.floor(Math.random() * 3), // 0-2 similar clicks
-          visit_count: visitCount,
-          last_visited: new Date(
-            Date.now() - Math.floor(Math.random() * 5) * 86400000
-          ), // 0-5 days ago
-        },
-      });
-      console.log(
-        `Created page interaction for User 3 with center: ${careerCentersForUser3[i].name}`
-      );
+      try {
+        await prisma.pageInteraction.create({
+          data: {
+            user_id: user3.id,
+            center_id: careerCentersForUser3[i].id,
+            scroll_depth: Math.floor(Math.random() * 20) + 80, // 80-100% scroll depth
+            map_clicks: Math.floor(Math.random() * 4), // 0-3 map clicks
+            review_clicks: Math.floor(Math.random() * 5), // 0-4 review clicks
+            similar_clicks: Math.floor(Math.random() * 3), // 0-2 similar clicks
+            visit_count: visitCount,
+            last_visited: new Date(
+              Date.now() - Math.floor(Math.random() * 5) * 86400000
+            ), // 0-5 days ago
+          },
+        });
+        console.log(
+          `Created page interaction for User 3 with center: ${careerCentersForUser3[i].name}`
+        );
+      } catch (error) {
+        if (error.code === 'P2002') {
+          console.log(`User 3 already has page interaction with center: ${careerCentersForUser3[i].name} - skipping`);
+        } else {
+          throw error;
+        }
+      }
     }
 
     // 4. Create filter interactions (career-focused filters)
@@ -421,13 +493,21 @@ async function main() {
     ].filter(Boolean);
 
     for (const center of mixedLikeCenters) {
-      await prisma.likes.create({
-        data: {
-          user_id: user4.id,
-          center_id: center.id,
-        },
-      });
-      console.log(`User 4 liked mixed center: ${center.name}`);
+      try {
+        await prisma.likes.create({
+          data: {
+            user_id: user4.id,
+            center_id: center.id,
+          },
+        });
+        console.log(`User 4 liked mixed center: ${center.name}`);
+      } catch (error) {
+        if (error.code === 'P2002') {
+          console.log(`User 4 already liked center: ${center.name} - skipping`);
+        } else {
+          throw error;
+        }
+      }
     }
 
     // 2. Create dislikes for random centers
@@ -437,13 +517,21 @@ async function main() {
       .slice(0, 2);
 
     for (const center of randomCenters) {
-      await prisma.dislikes.create({
-        data: {
-          user_id: user4.id,
-          center_id: center.id,
-        },
-      });
-      console.log(`User 4 disliked random center: ${center.name}`);
+      try {
+        await prisma.dislikes.create({
+          data: {
+            user_id: user4.id,
+            center_id: center.id,
+          },
+        });
+        console.log(`User 4 disliked random center: ${center.name}`);
+      } catch (error) {
+        if (error.code === 'P2002') {
+          console.log(`User 4 already disliked center: ${center.name} - skipping`);
+        } else {
+          throw error;
+        }
+      }
     }
 
     // 3. Create page interactions (moderate engagement with various centers)
@@ -460,23 +548,31 @@ async function main() {
 
     for (const center of mixedInteractionCenters) {
       const visitCount = Math.floor(Math.random() * 3) + 1; // 1-3 visits
-      await prisma.pageInteraction.create({
-        data: {
-          user_id: user4.id,
-          center_id: center.id,
-          scroll_depth: Math.floor(Math.random() * 60) + 40, // 40-100% scroll depth
-          map_clicks: Math.floor(Math.random() * 2), // 0-1 map clicks
-          review_clicks: Math.floor(Math.random() * 2), // 0-1 review clicks
-          similar_clicks: Math.floor(Math.random() * 2), // 0-1 similar clicks
-          visit_count: visitCount,
-          last_visited: new Date(
-            Date.now() - Math.floor(Math.random() * 14) * 86400000
-          ), // 0-14 days ago
-        },
-      });
-      console.log(
-        `Created page interaction for User 4 with center: ${center.name}`
-      );
+      try {
+        await prisma.pageInteraction.create({
+          data: {
+            user_id: user4.id,
+            center_id: center.id,
+            scroll_depth: Math.floor(Math.random() * 60) + 40, // 40-100% scroll depth
+            map_clicks: Math.floor(Math.random() * 2), // 0-1 map clicks
+            review_clicks: Math.floor(Math.random() * 2), // 0-1 review clicks
+            similar_clicks: Math.floor(Math.random() * 2), // 0-1 similar clicks
+            visit_count: visitCount,
+            last_visited: new Date(
+              Date.now() - Math.floor(Math.random() * 14) * 86400000
+            ), // 0-14 days ago
+          },
+        });
+        console.log(
+          `Created page interaction for User 4 with center: ${center.name}`
+        );
+      } catch (error) {
+        if (error.code === 'P2002') {
+          console.log(`User 4 already has page interaction with center: ${center.name} - skipping`);
+        } else {
+          throw error;
+        }
+      }
     }
 
     // 4. Create filter interactions (mixed filters)
