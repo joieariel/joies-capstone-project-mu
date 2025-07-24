@@ -2,7 +2,13 @@ import { useState, useEffect } from "react";
 // Import useParams hook to read URL parameters so we can extract centerId from url path
 import { useParams, useNavigate } from "react-router-dom";
 // import api functions to fetch reviews and community center info from backend
-import { reviewAPI, communityAPI, userAPI, tagAPI } from "./api"; // added import userAPI to fetch current user data from db
+import {
+  reviewAPI,
+  communityAPI,
+  userAPI,
+  tagAPI,
+  pageInteractionsAPI,
+} from "./api"; // added pageInteractionsAPI
 // added tagAPI to fetch popular tags
 import {
   renderStars,
@@ -57,7 +63,64 @@ const Reviews = () => {
     fetchCurrentUser();
   }, [isAuthenticated]); // rerun when auth state changes
 
-  // useEffect to fetch both center info and reviews when component mounts or centerId changes
+  // track the scroll depth of the reviews page for personalized recommendations
+  useEffect(() => {
+    if (!isAuthenticated || !center) {
+      return;
+    }
+
+    // function to track scroll depth
+    const handleScroll = () => {
+      // calculate scroll depth as a percentage
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight;
+      const winHeight = window.innerHeight;
+      const scrollPercent = Math.round(
+        (scrollTop / (docHeight - winHeight)) * 100
+      );
+
+      // only record if scroll depth is significant (> 10%)
+      if (scrollPercent > 10) {
+        try {
+          // record the scroll depth - ensure centerId is a number
+          pageInteractionsAPI.recordPageInteraction(parseInt(centerId, 10), {
+            scroll_depth: scrollPercent,
+          });
+        } catch (err) {
+          console.error("Error recording scroll interaction:", err);
+        }
+      }
+    };
+
+    // debounce function to limit api calls (debounce =  limits how often a function can be called in a given time period)
+    let timeoutId;
+    const debouncedHandleScroll = () => {
+      // clear any existing timeout
+      clearTimeout(timeoutId);
+      // set a new timeout to call handleScroll after 500ms
+      // so the actual tracking function is only ran after a 500ms delay
+
+      timeoutId = setTimeout(handleScroll, 500);
+    };
+    // without the timeout, handleScroll would be called on every scroll event, which could be very frequent and lead to performance issues
+
+    // add scroll event listener
+    window.addEventListener("scroll", debouncedHandleScroll);
+
+    // clean up function to remove event listener and clear any pending timeouts when component unmounts
+    return () => {
+      window.removeEventListener("scroll", debouncedHandleScroll);
+      clearTimeout(timeoutId);
+    };
+  }, [isAuthenticated, centerId, center]);
+
+  // scroll to top when component mounts or when navigating to a different center
+  useEffect(() => {
+    // scroll to top of page
+    window.scrollTo(0, 0);
+  }, [centerId]);
+
+  // useEffect to fetch center info, reviews, and popular tags when component mounts or centerId changes
   useEffect(() => {
     const fetchData = async () => {
       try {
