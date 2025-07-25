@@ -17,8 +17,7 @@ const prisma = new PrismaClient();
 router.get("/", async (req, res) => {
   try {
     // extract all query parameters including new advanced search params
-    const { distance, hours, rating, userLat, userLng, tags } =
-      req.query;
+    const { distance, hours, rating, userLat, userLng, tags } = req.query;
 
     // parse arrays from query parameters using repeated query params instead of commas like og (e.g., ?tags=1&tags=2&tags=3)
 
@@ -49,7 +48,6 @@ router.get("/", async (req, res) => {
 
     // fetch community centers with related data needed for filtering
     const communityCenters = await prisma.CommunityCenter.findMany({
-      where: filter,
       include: {
         hours: true,
         reviews: {
@@ -143,7 +141,6 @@ router.get("/:communityCenterId/recommendations", async (req, res) => {
       return res.json(cachedRecommendations);
     }
 
-
     // fetch the target community center with all necessary related data for similarity calculations
     const targetCenter = await prisma.CommunityCenter.findUnique({
       where: { id: communityCenterId },
@@ -191,18 +188,21 @@ router.get("/:communityCenterId/recommendations", async (req, res) => {
 
     // calculate similarity scores between the target center and all other centers
     // use the original centers for similarity calculation to ensure all properties are available
-    const centersWithSimilarityScores = allOtherCenters.map(center => {
+    const centersWithSimilarityScores = allOtherCenters.map((center) => {
       try {
         const similarityScore = calculateCenterSimliarity(targetCenter, center);
         return {
           ...center,
-          similarityScore
+          similarityScore,
         };
       } catch (error) {
-        console.error(`Error calculating similarity for center ${center.id}:`, error);
+        console.error(
+          `Error calculating similarity for center ${center.id}:`,
+          error
+        );
         return {
           ...center,
-          similarityScore: 0 // default to 0 similarity if calculation fails
+          similarityScore: 0, // default to 0 similarity if calculation fails
         };
       }
     });

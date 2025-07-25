@@ -95,8 +95,6 @@ export const userAPI = {
 export const communityAPI = {
   getAllCenters: () => apiRequest("/communityCenters"),
   getCenterById: (centerId) => apiRequest(`/communityCenters/${centerId}`),
-  getCentersByZipCode: (zipCode) =>
-    apiRequest(`/communityCenters?zip_code=${zipCode}`),
 
   // get recommendations for a specific community center
   getRecommendationsForCenter: (centerId, limit = 5) =>
