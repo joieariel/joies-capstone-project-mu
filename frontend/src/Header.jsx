@@ -38,13 +38,8 @@ const Header = () => {
     navigate("/community-centers");
   };
 
-
   const handleResourcesClick = () => {
     navigate("/resources");
-  };
-
-  const handleDeviceDonationClick = () => {
-    navigate("/device-donation");
   };
 
   return (
@@ -96,17 +91,6 @@ const Header = () => {
                     }}
                   >
                     Resources
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#device-donation"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleDeviceDonationClick();
-                    }}
-                  >
-                    Device Donation
                   </a>
                 </li>
               </ul>

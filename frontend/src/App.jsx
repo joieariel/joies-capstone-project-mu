@@ -7,11 +7,9 @@ import Dashboard from "./Dashboard";
 import CommunityCenter from "./CommunityCenter";
 import Reviews from "./Reviews";
 import Resources from "./Resources";
-import DeviceDonation from "./DeviceDonation";
 import MapView from "./MapView";
 import SpecificMap from "./SpecificMap";
 import {
-
   BrowserRouter as Router,
   Routes,
   Route,
@@ -122,14 +120,6 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <Resources />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/device-donation"
-              element={
-                <ProtectedRoute>
-                  <DeviceDonation />
                 </ProtectedRoute>
               }
             />
