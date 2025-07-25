@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { tagAPI, filterInteractionsAPI } from "./api"; // import the tagAPI and filterInteractionsAPI functions
 import "./Search.css";
 
@@ -21,24 +21,73 @@ const Search = ({ onSearch }) => {
 
   // predefined filter options
   const distanceOptions = [
-    { id: "5miles", label: "Within 0-5 miles" },
-    { id: "10miles", label: "Within 6-10 miles" },
-    { id: "25miles", label: "Within 11-25 miles" },
-    { id: "25+miles", label: "Over 25+ miles" },
-    { id: "custom", label: "Custom Distance" },
+    {
+      id: "5miles",
+      label: "Within 0-5 miles",
+      tooltip: "Show centers within a 5-mile radius of your location",
+    },
+    {
+      id: "10miles",
+      label: "Within 6-10 miles",
+      tooltip: "Show centers between 6 and 10 miles from your location",
+    },
+    {
+      id: "25miles",
+      label: "Within 11-25 miles",
+      tooltip: "Show centers between 11 and 25 miles from your location",
+    },
+    {
+      id: "25+miles",
+      label: "Over 25+ miles",
+      tooltip: "Show centers more than 25 miles from your location",
+    },
+    {
+      id: "custom",
+      label: "Custom Distance",
+      tooltip: "Set a specific distance radius for your search",
+    },
   ];
 
   const hoursOptions = [
-    { id: "openNow", label: "Open Now" },
-    { id: "openLate", label: "Open Late (until 9pm+)" },
-    { id: "openWeekends", label: "Open Weekends" },
+    {
+      id: "openNow",
+      label: "Open Now",
+      tooltip: "Show only centers that are currently open",
+    },
+    {
+      id: "openLate",
+      label: "Open Late (until 9pm+)",
+      tooltip: "Show centers that stay open until 9pm or later",
+    },
+    {
+      id: "openWeekends",
+      label: "Open Weekends",
+      tooltip: "Show centers that are open on weekends",
+    },
   ];
 
   const ratingOptions = [
-    { id: "highestRated", label: "Highest Rated" },
-    { id: "mostReviewed", label: "Most Reviewed" },
-    { id: "mostRecentlyReviewed", label: "Most Recently Reviewed" },
-    { id: "recommended", label: "Recommended" }, // will combine the highest rated and most reviewed to recommend the best centers
+    {
+      id: "highestRated",
+      label: "Highest Rated",
+      tooltip: "Sort centers by highest average rating",
+    },
+    {
+      id: "mostReviewed",
+      label: "Most Reviewed",
+      tooltip: "Sort centers by number of reviews (most to least)",
+    },
+    {
+      id: "mostRecentlyReviewed",
+      label: "Most Recently Reviewed",
+      tooltip: "Sort centers by most recent review activity",
+    },
+    {
+      id: "recommended",
+      label: "Recommended", // will combine the highest rated and most reviewed to recommend the best centers
+      tooltip:
+        "Show centers that are both highly rated and frequently reviewed",
+    },
   ];
 
   // fetch tags from the api when component mounts instead of hard coding them
@@ -218,9 +267,12 @@ const Search = ({ onSearch }) => {
                 type="button"
                 className={`filter-chip ${isSelected ? "selected" : ""}`}
                 onClick={() => handleFilterClick(filterType, option.id)}
-                title={`Click to ${isSelected ? "deselect" : "select"} ${
-                  option.label
-                }`}
+                title={
+                  option.tooltip ||
+                  `Click to ${isSelected ? "deselect" : "select"} ${
+                    option.label
+                  }`
+                }
               >
                 {option.label}
               </button>
@@ -236,7 +288,11 @@ const Search = ({ onSearch }) => {
       <div className="search-header">
         <h3 className="search-title">Search for Community Centers</h3>
         {hasActiveFilters() && (
-          <button onClick={handleClearAll} className="clear-all-button">
+          <button
+            onClick={handleClearAll}
+            className="clear-all-button"
+            title="Remove all active filters from your search"
+          >
             Clear All Filters
           </button>
         )}
@@ -265,12 +321,13 @@ const Search = ({ onSearch }) => {
                   placeholder="e.g., 15"
                   className="custom-distance-input"
                   disabled={customDistanceSubmitted}
+                  title="Enter a specific distance in miles to search within"
                 />
                 {!customDistanceSubmitted ? (
                   <button
                     onClick={handleCustomDistanceSubmit}
                     className="custom-distance-button"
-                    title="Apply this distance filter"
+                    title="Apply this custom distance filter to your search"
                   >
                     Apply
                   </button>
@@ -278,7 +335,7 @@ const Search = ({ onSearch }) => {
                   <button
                     onClick={clearCustomDistance}
                     className="custom-distance-button clear"
-                    title="Clear this distance filter"
+                    title="Remove this custom distance filter from your search"
                   >
                     Clear
                   </button>

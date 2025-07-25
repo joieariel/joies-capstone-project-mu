@@ -153,7 +153,11 @@ const CenterCard = ({
               // like button
               className={`heart-icon ${isLiked ? "liked" : ""}`}
               onClick={handleLikeClick}
-              title={isLiked ? "Unlike" : "Like"}
+              title={
+                isLiked
+                  ? "Unlike"
+                  : "Like"
+              }
             >
               ❤︎
             </span>
@@ -161,7 +165,11 @@ const CenterCard = ({
               // dislike button
               className={`thumbs-down-icon ${isDisliked ? "disliked" : ""}`}
               onClick={handleDislikeClick}
-              title={isDisliked ? "Remove dislike" : "Dislike"}
+              title={
+                isDisliked
+                  ? "Remove dislike"
+                  : "Dislike"
+              }
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -262,12 +270,14 @@ const CenterCard = ({
           <button
             className="reviews-button"
             onClick={() => handleReviewsClick(center.id)}
+            title="See all reviews for this community center"
           >
             Reviews
           </button>
           <button
             className="map-button"
             onClick={() => handleMapClick(center.id)}
+            title="View this community center on the map"
           >
             Map
           </button>
@@ -293,6 +303,7 @@ const CenterCard = ({
                 // call the provided click handler
                 onSimilarCentersClick(center.id);
               }}
+              title="Find other community centers similar to this one"
             >
               Similar Centers
             </button>
