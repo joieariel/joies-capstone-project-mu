@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react"; // useCallback
+import { useState, useEffect, useCallback } from "react"; // useCallback
 import { useNavigate } from "react-router-dom";
 import { communityAPI } from "./api"; // import communityAPI
 import { useGetUserLocation, useGetCentersWithFilter } from "./utils/hooks"; // import custom hooks
@@ -6,10 +6,12 @@ import "./CommunityCenter.css";
 import Search from "./Search";
 import SimilarCentersModal from "./SimilarCentersModal";
 import CenterCard from "./CenterCard";
+import LoadingSpinner from "./LoadingSpinner";
 
 const CommunityCenter = () => {
   // state to store list of centers from db, initialized as empty
   const [centers, setCenters] = useState([]);
+  // Add artificial delay for loading state to see spinner
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -79,6 +81,10 @@ const CommunityCenter = () => {
         setLoading(true);
         // call the api to get all centers from prisma db
         const data = await communityAPI.getAllCenters();
+
+        // add artificial delay to see the loading spinner (500ms)
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         setCenters(data); // store fetched data in centers state triggers rerender and displays centers
       } catch (err) {
         console.error("Error fetching community centers:", err);
@@ -116,7 +122,7 @@ const CommunityCenter = () => {
           <h1 className="community-center-title">
             Find community centers near you
           </h1>
-          <p>Loading community centers...</p>
+          <LoadingSpinner size="large" text="Loading community centers..." />
         </div>
       </div>
     );

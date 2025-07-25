@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { communityAPI } from "./api";
 import CenterCard from "./CenterCard";
+import LoadingSpinner from "./LoadingSpinner";
 import "./RecommendedCenters.css";
 
 const RecommendedCenters = ({ centerId }) => {
@@ -20,6 +20,9 @@ const RecommendedCenters = ({ centerId }) => {
 
         // call api to get recommended centers based on the current center ID and it will return a list of centers descending order of similarity
         const data = await communityAPI.getRecommendationsForCenter(centerId);
+
+        // add artificial delay to see the loading spinner (500ms)
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         // update the state with the fetched recommendations
         setRecommendedCenters(data);
@@ -42,7 +45,7 @@ const RecommendedCenters = ({ centerId }) => {
     return (
       <div className="recommended-centers-container">
         <h2 className="recommended-centers-title">Recommended Centers</h2>
-        <div className="loading-message">Loading recommended centers...</div>
+        <LoadingSpinner size="medium" text="Loading recommended centers..." />
       </div>
     );
   }
@@ -65,17 +68,17 @@ const RecommendedCenters = ({ centerId }) => {
   // render the recommended centers in a horizontal scrollable container
   return (
     <div className="recommended-centers-container">
-      <h2 className="recommended-centers-title"> Similar Recommended Centers</h2>
+      <h2 className="recommended-centers-title">
+        {" "}
+        Similar Recommended Centers
+      </h2>
       {/* horizontal scrollable container for center cards */}
       <div className="recommended-centers-scroll">
         {/* M,p through each recommended center and render a CenterCard */}
         {recommendedCenters.map((center) => (
           <div key={center.id} className="recommended-center-item">
             {/* use existing CenterCard component but hide the similar centers button*/}
-            <CenterCard
-              center={center}
-              showSimilarButton={false}
-            />
+            <CenterCard center={center} showSimilarButton={false} />
           </div>
         ))}
       </div>

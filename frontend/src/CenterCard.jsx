@@ -153,11 +153,7 @@ const CenterCard = ({
               // like button
               className={`heart-icon ${isLiked ? "liked" : ""}`}
               onClick={handleLikeClick}
-              title={
-                isLiked
-                  ? "Unlike"
-                  : "Like"
-              }
+              title={isLiked ? "Unlike" : "Like"}
             >
               ❤︎
             </span>
@@ -165,11 +161,7 @@ const CenterCard = ({
               // dislike button
               className={`thumbs-down-icon ${isDisliked ? "disliked" : ""}`}
               onClick={handleDislikeClick}
-              title={
-                isDisliked
-                  ? "Remove dislike"
-                  : "Dislike"
-              }
+              title={isDisliked ? "Remove dislike" : "Dislike"}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
