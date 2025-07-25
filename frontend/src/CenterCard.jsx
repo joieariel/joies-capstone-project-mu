@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { likesAPI, dislikesAPI } from "./api";
+import { likesAPI, dislikesAPI, pageInteractionsAPI } from "./api";
 
 // reusable component for displaying a community center card
 // accepts center data and optional props for customization
@@ -92,21 +92,52 @@ const CenterCard = ({
   };
 
   // when user clicks reviews button, show the reviews for that specific center
-  const handleReviewsClick = (centerId) => {
+  const handleReviewsClick = async (centerId) => {
     // if we're in a modal, close it first
     if (onModalClose) {
       onModalClose();
     }
+
+    // track the review button click from the main community center page
+    try {
+      3;
+      // only track clicks from the main community center page
+      //  can identify this by checking if showSimilarButton is true
+      if (showSimilarButton === true) {
+        await pageInteractionsAPI.recordPageInteraction(centerId, {
+          review_clicks: 1,
+        });
+      }
+    } catch (error) {
+      // log error but don't block navigation
+      console.error("Error tracking review click:", error);
+    }
+
     // navigate to reviews page
     navigate(`/reviews/${centerId}`);
   };
 
   // when user clicks map button, show the map view for that specific center
-  const handleMapClick = (centerId) => {
+  const handleMapClick = async (centerId) => {
     // if we're in a modal, close it first
     if (onModalClose) {
       onModalClose();
     }
+
+    // track the map button click from the main community center page
+    try {
+      // only track clicks from the main community center page
+      // can identify this by checking if showSimilarButton is true
+      if (showSimilarButton === true) {
+        await pageInteractionsAPI.recordPageInteraction(centerId, {
+          map_clicks: 1,
+        });
+      }
+    } catch (error) {
+      // log error but don't block navigation
+      console.error("Error tracking map click:", error);
+    }
+
     // navigate to map page
     navigate(`/map/${centerId}`);
   };
@@ -243,7 +274,25 @@ const CenterCard = ({
           {showSimilarButton && (
             <button
               className="similar-centers-button"
-              onClick={() => onSimilarCentersClick(center.id)}
+              onClick={async () => {
+                // track the similar centers button click from the main community center page
+                try {
+                  // only track clicks from the main community center page
+                  // can identify this by checking if showSimilarButton is true (which it is here)
+                  await pageInteractionsAPI.recordPageInteraction(center.id, {
+                    similar_clicks: 1,
+                  });
+                  console.log(
+                    "Similar centers click tracked from main community center page"
+                  );
+                } catch (error) {
+                  // log error but don't block the click handler
+                  console.error("Error tracking similar centers click:", error);
+                }
+
+                // call the provided click handler
+                onSimilarCentersClick(center.id);
+              }}
             >
               Similar Centers
             </button>
