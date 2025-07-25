@@ -3,7 +3,6 @@ import { useAuth } from "./AuthContext";
 import { userAPI } from "./api"; // to make calls to backend
 import { validateEditForm } from "./utils/validation"; // import new validate function from utils
 import LikedCenters from "./LikedCenters";
-import DislikedCenters from "./DislikedCenters";
 import UserRecommendations from "./UserRecommendations";
 import "./Dashboard.css";
 
@@ -338,8 +337,6 @@ const Dashboard = () => {
         {/* add the LikedCenters component */}
         <LikedCenters />
 
-        {/* add the DislikedCenters component for testing */}
-        {/* <DislikedCenters /> */}
       </div>
     </div>
   );
