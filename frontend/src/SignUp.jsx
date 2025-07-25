@@ -257,7 +257,6 @@ const SignUp = () => {
               <option value="">Select your status</option>
               <option value="Job Seeker">Job Seeker</option>
               <option value="Student">Student</option>
-              <option value="Community Supporter">Community Supporter</option>
             </select>
           </div>
 

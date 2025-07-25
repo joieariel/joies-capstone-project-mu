@@ -19,29 +19,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// (POST) create a new tag
-router.post("/", async (req, res) => {
-  try {
-    const { name } = req.body;
-    //validate that name exists and isn't white empty space
-    if (!name || name.trim() === "") {
-      return res.status(400).json({ error: "Tag name is required" });
-    }
-
-    const newTag = await prisma.tag.create({
-      data: {
-        name: name.trim(),
-      },
-    });
-
-    res.status(201).json(newTag);
-  } catch (error) {
-    console.error("Error creating tag:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to create tag", details: error.message });
-  }
-});
 
 // (GET) fetch all tags for a specific community center
 router.get("/center/:center_id", async (req, res) => {
