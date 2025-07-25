@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLoadScript, GoogleMap, MarkerF } from "@react-google-maps/api"; // import the necessary components from @react-google-maps/api
+import LoadingSpinner from "./LoadingSpinner";
 import "./SpecificMap.css";
 
 // define map container style
 const mapContainerStyle = {
-  width: '100%',
-  height: '400px'
+  width: "100%",
+  height: "400px",
 };
 
 const SpecificMap = () => {
@@ -19,10 +20,10 @@ const SpecificMap = () => {
   const [error, setError] = useState(null);
 
   // 2) load google maps javascript api
-    // returns isLoaded (true when maps is ready) and loadError (if loading failed)
+  // returns isLoaded (true when maps is ready) and loadError (if loading failed)
 
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
   });
 
   const handleBackClick = () => {
@@ -34,11 +35,17 @@ const SpecificMap = () => {
     const fetchCenter = async () => {
       try {
         // make http request to backend api endpoint, uses centerid from url to get specific center
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/communityCenters/${centerId}`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/communityCenters/${centerId}`
+        );
         if (!response.ok) {
-          throw new Error('Failed to fetch community center');
+          throw new Error("Failed to fetch community center");
         }
         const data = await response.json();
+
+        // add artificial delay to see the loading spinner (500ms)
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         // store fetched data in state
         setCenter(data);
       } catch (err) {
@@ -67,8 +74,11 @@ const SpecificMap = () => {
           </button>
         </div>
         <div className="map-content">
-          <h1 className="map-title">Loading...</h1>
-          <p>Loading community center location...</p>
+          <h1 className="map-title">Map View</h1>
+          <LoadingSpinner
+            size="large"
+            text="Loading community center location..."
+          />
         </div>
       </div>
     );
@@ -108,25 +118,31 @@ const SpecificMap = () => {
         {/* only show content if loading center data was a success */}
         {center ? (
           <div>
-            <div style={{ marginBottom: '20px' }}>
-              <p><strong>Address:</strong> {center.address}</p>
-              <p><strong>Phone:</strong> {center.phone_number}</p>
+            <div style={{ marginBottom: "20px" }}>
+              <p>
+                <strong>Address:</strong> {center.address}
+              </p>
+              <p>
+                <strong>Phone:</strong> {center.phone_number}
+              </p>
             </div>
 
             {/* add the google map component */}
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
               zoom={15}
-              center={{  // center the map on the community center location
+              center={{
+                // center the map on the community center location
                 lat: center.latitude, // latitude from db
-                lng: center.longitude // longitude from db
+                lng: center.longitude, // longitude from db
               }}
             >
               {/* add a marker for the center */}
               <MarkerF
-                position={{ // position the marker on the community center location (same coordinates)
+                position={{
+                  // position the marker on the community center location (same coordinates)
                   lat: center.latitude, // same latitude as center from db
-                  lng: center.longitude // same longitude as center
+                  lng: center.longitude, // same longitude as center
                 }}
               />
             </GoogleMap>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { communityAPI } from "./api"; // to access recommendation api endpoint
 import "./SimilarCentersModal.css";
 import CenterCard from "./CenterCard";
+import LoadingSpinner from "./LoadingSpinner";
 
 // component to display similar community centers accepts:
 //  takes in id of center to find similar centers of, isOpen bool to control modal visbility, onClose to close modal
@@ -23,6 +24,10 @@ const SimilarCentersModal = ({ centerId, isOpen, onClose }) => {
           centerId,
           5 // limit to 5 similar centers
         );
+
+        // add artificial delay to see the loading spinner (500ms)
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         setSimilarCenters(data); // update state with similar centers
       } catch (err) {
         console.error("Error fetching similar centers:", err);
@@ -49,7 +54,7 @@ const SimilarCentersModal = ({ centerId, isOpen, onClose }) => {
         </div>
         <div className="modal-body">
           {loading ? (
-            <p>Loading similar centers...</p>
+            <LoadingSpinner size="medium" text="Loading similar centers..." />
           ) : error ? (
             <p className="error-message">{error}</p>
           ) : similarCenters.length === 0 ? (

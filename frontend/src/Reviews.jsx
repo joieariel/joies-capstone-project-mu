@@ -15,6 +15,7 @@ import { useAuth } from "./AuthContext"; //. get auth state and current user
 import WriteReview from "./WriteReview";
 import EditReviewForm from "./EditReviewForm"; // for inline editing of reviews
 import RecommendedCenters from "./RecommendedCenters"; // import the new RecommendedCenters component
+import LoadingSpinner from "./LoadingSpinner";
 import "./Reviews.css";
 
 const Reviews = () => {
@@ -131,6 +132,9 @@ const Reviews = () => {
           tagAPI.getPopularCenterTags(centerId, 5), // get top 5 popular tags
         ]);
 
+        // add artificial delay to see the loading spinner (500ms)
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         // store the fetched data in state, will trigger a re-render
         setCenter(centerData);
         setReviews(reviewsData);
@@ -213,7 +217,7 @@ const Reviews = () => {
       <div className="reviews-container">
         <div className="reviews-content">
           <h1 className="reviews-title">Reviews</h1>
-          <div className="loading-message">Loading reviews...</div>
+          <LoadingSpinner size="large" text="Loading reviews..." />
         </div>
       </div>
     );

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLoadScript, GoogleMap, MarkerF } from "@react-google-maps/api";
+import LoadingSpinner from "./LoadingSpinner";
 import "./MapView.css";
 
 // define map container style
@@ -82,6 +83,10 @@ const MapView = () => {
           throw new Error("Failed to fetch community center");
         }
         const data = await response.json();
+
+        // add artificial delay to see the loading spinner (500ms)
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         // store fetched data in state
         setCenters(data);
       } catch (err) {
@@ -104,8 +109,11 @@ const MapView = () => {
           </button>
         </div>
         <div className="mapview-content">
-          <h1 className="mapview-title">Loading...</h1>
-          <p>Loading community centers..</p>
+          <h1 className="mapview-title">Map View</h1>
+          <LoadingSpinner
+            size="large"
+            text="Loading community centers and map..."
+          />
         </div>
       </div>
     );

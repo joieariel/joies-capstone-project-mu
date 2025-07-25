@@ -262,12 +262,14 @@ const CenterCard = ({
           <button
             className="reviews-button"
             onClick={() => handleReviewsClick(center.id)}
+            title="See all reviews for this community center"
           >
             Reviews
           </button>
           <button
             className="map-button"
             onClick={() => handleMapClick(center.id)}
+            title="View this community center on the map"
           >
             Map
           </button>
@@ -293,6 +295,7 @@ const CenterCard = ({
                 // call the provided click handler
                 onSimilarCentersClick(center.id);
               }}
+              title="Find other community centers similar to this one"
             >
               Similar Centers
             </button>
