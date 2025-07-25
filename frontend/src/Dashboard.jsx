@@ -336,6 +336,7 @@ const Dashboard = () => {
 
         {/* add the LikedCenters component */}
         <LikedCenters />
+
       </div>
     </div>
   );
