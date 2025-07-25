@@ -17,7 +17,7 @@ const prisma = new PrismaClient();
 router.get("/", async (req, res) => {
   try {
     // extract all query parameters including new advanced search params
-    const { zip_code, distance, hours, rating, userLat, userLng, tags } =
+    const { distance, hours, rating, userLat, userLng, tags } =
       req.query;
 
     // parse arrays from query parameters using repeated query params instead of commas like og (e.g., ?tags=1&tags=2&tags=3)
@@ -46,9 +46,6 @@ router.get("/", async (req, res) => {
     // parse user location coordinates
     const userLatitude = userLat ? parseFloat(userLat) : null;
     const userLongitude = userLng ? parseFloat(userLng) : null;
-
-    // basic filter for zip code ( existing functionality)
-    const filter = zip_code ? { zip_code: { equals: zip_code } } : {};
 
     // fetch community centers with related data needed for filtering
     const communityCenters = await prisma.CommunityCenter.findMany({
