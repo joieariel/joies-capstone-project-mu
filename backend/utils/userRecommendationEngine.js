@@ -29,7 +29,10 @@ const calculateLikedSimilarity = (
   // calculate similarity to disliked centers using average
   let totalDislikeSimilarity = 0;
   for (const dislikedCenter of dislikedCenters) {
-    const similarity = calculateCenterSimliarity(candidateCenter, dislikedCenter);
+    const similarity = calculateCenterSimliarity(
+      candidateCenter,
+      dislikedCenter
+    );
 
     // handle edge case - if center is too similar (over 80%) to a disliked center, exclude it
     if (similarity > 0.8) {
@@ -105,12 +108,13 @@ const calculateFilterAlignmentScore = (userPreferredFilters, centerTags) => {
   }
 
   // extract tag IDs from center tags - handle different possible formats of tag objects
-  const centerTagIds = centerTags.map((ct) =>
-    typeof ct === "object" && ct.tag_id // handle case where tag object has tag_id property
-      ? ct.tag_id
-      : typeof ct === "object" && ct.id // handle case where tag object has id property
-      ? ct.id
-      : ct // handle case where tag is just a string id
+  const centerTagIds = centerTags.map(
+    (ct) =>
+      typeof ct === "object" && ct.tag_id // handle case where tag object has tag_id property
+        ? ct.tag_id
+        : typeof ct === "object" && ct.id // handle case where tag object has id property
+        ? ct.id
+        : ct // handle case where tag is just a string id
   );
 
   // keep track of how many of the user's preferred filters match the center's tags
@@ -121,7 +125,8 @@ const calculateFilterAlignmentScore = (userPreferredFilters, centerTags) => {
   // filters used more frequently contribute more to the score
   userPreferredFilters.forEach((filter, index) => {
     const tagId = filter.tagId; // extract tag ID from filter object
-    if (centerTagIds.includes(tagId)) { // check if tag ID matches any of the center's tags
+    if (centerTagIds.includes(tagId)) {
+      // check if tag ID matches any of the center's tags
       matchCount++; // increment match count
 
       // apply a weight based on filter position (most clicked = highest weight) and normalize the weight to 0-1

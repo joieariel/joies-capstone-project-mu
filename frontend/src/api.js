@@ -376,5 +376,18 @@ export const filterInteractionsAPI = {
     }),
 };
 
+// api functions for page interaction operations
+export const pageInteractionsAPI = {
+  // record a page interaction when a user interacts with a community center page
+  recordPageInteraction: (centerId, interactionData) =>
+    apiRequest("/pageInteractions", {
+      method: "POST",
+      body: JSON.stringify({
+        center_id: parseInt(centerId, 10), // ensure centerId is an integer
+        interaction_data: interactionData,
+      }),
+    }),
+};
+
 // export the base apiRequest function for custom requests
 export { apiRequest };

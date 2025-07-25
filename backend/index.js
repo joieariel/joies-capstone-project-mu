@@ -12,6 +12,7 @@ const likesRouter = require("./routes/likes");
 const dislikesRouter = require("./routes/dislikes");
 const userRecommendationsRouter = require("./routes/userRecommendations");
 const filterInteractionsRouter = require("./routes/filterInteractions");
+const pageInteractionsRouter = require("./routes/pageInteractions");
 
 app.get("/", (req, res) => {
   res.send("Welcome to my app!");
@@ -27,6 +28,7 @@ app.use("/likes", likesRouter);
 app.use("/dislikes", dislikesRouter);
 app.use("/user-recommendations", userRecommendationsRouter);
 app.use("/filterInteractions", filterInteractionsRouter);
+app.use("/pageInteractions", pageInteractionsRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
