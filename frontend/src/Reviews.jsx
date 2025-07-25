@@ -2,13 +2,9 @@ import { useState, useEffect } from "react";
 // Import useParams hook to read URL parameters so we can extract centerId from url path
 import { useParams, useNavigate } from "react-router-dom";
 // import api functions to fetch reviews and community center info from backend
-import {
-  reviewAPI,
-  communityAPI,
-  userAPI,
-  tagAPI,
-  pageInteractionsAPI,
-} from "./api"; // added pageInteractionsAPI
+import { reviewAPI, communityAPI, userAPI, tagAPI } from "./api";
+// import scroll batcher utility for batched interaction logging
+import { scrollBatcher } from "./utils/scrollBatcher";
 // added tagAPI to fetch popular tags
 import {
   renderStars,
@@ -64,6 +60,7 @@ const Reviews = () => {
   }, [isAuthenticated]); // rerun when auth state changes
 
   // track the scroll depth of the reviews page for personalized recommendations
+  // using batched logging to reduce API calls
   useEffect(() => {
     if (!isAuthenticated || !center) {
       return;
@@ -82,24 +79,21 @@ const Reviews = () => {
       // only record if scroll depth is significant (> 10%)
       if (scrollPercent > 10) {
         try {
-          // record the scroll depth - ensure centerId is a number
-          pageInteractionsAPI.recordPageInteraction(parseInt(centerId, 10), {
-            scroll_depth: scrollPercent,
-          });
+          // add to batch instead of sending immediately to periodically flush to server
+          scrollBatcher.recordScrollDepth(centerId, scrollPercent);
         } catch (err) {
           console.error("Error recording scroll interaction:", err);
         }
       }
     };
 
-    // debounce function to limit api calls (debounce =  limits how often a function can be called in a given time period)
+    // debounce function to limit how often we process scroll events
     let timeoutId;
     const debouncedHandleScroll = () => {
       // clear any existing timeout
       clearTimeout(timeoutId);
       // set a new timeout to call handleScroll after 500ms
       // so the actual tracking function is only ran after a 500ms delay
-
       timeoutId = setTimeout(handleScroll, 500);
     };
     // without the timeout, handleScroll would be called on every scroll event, which could be very frequent and lead to performance issues
@@ -111,6 +105,9 @@ const Reviews = () => {
     return () => {
       window.removeEventListener("scroll", debouncedHandleScroll);
       clearTimeout(timeoutId);
+
+      // flush any remaining scroll data before unmounting
+      scrollBatcher.flush();
     };
   }, [isAuthenticated, centerId, center]);
 
