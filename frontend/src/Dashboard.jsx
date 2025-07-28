@@ -4,6 +4,7 @@ import { userAPI } from "./api"; // to make calls to backend
 import { validateEditForm } from "./utils/validation"; // import new validate function from utils
 import LikedCenters from "./LikedCenters";
 import UserRecommendations from "./UserRecommendations";
+import { US_STATES } from "./constants"; // to use us states array in edit mode
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -288,14 +289,20 @@ const Dashboard = () => {
 
               <div className="form-group">
                 <label htmlFor="state">State</label>
-                <input
-                  type="text"
+                <select
                   id="state"
                   name="state"
                   value={editFormData.state}
                   onChange={handleInputChange}
                   required
-                />
+                  >
+                  <option value="">Select your state</option>
+                  {US_STATES.map((state) => (
+                    <option key={state.value} value={state.value}>
+                      {state.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">

@@ -3,12 +3,13 @@ import LandingPage from "./LandingPage";
 import Header from "./Header";
 import SignUp from "./SignUp";
 import Login from "./Login";
-import Dashboard from "./Dashboard";
 import CommunityCenter from "./CommunityCenter";
 import Reviews from "./Reviews";
 import Resources from "./Resources";
 import MapView from "./MapView";
 import SpecificMap from "./SpecificMap";
+import Dashboard from "./Dashboard";
+import Footer from "./Footer";
 import {
   BrowserRouter as Router,
   Routes,
@@ -75,7 +76,7 @@ const App = () => {
               path="/homepage"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Navigate to="/community-centers" replace />
                 </ProtectedRoute>
               }
             />
@@ -123,7 +124,16 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
+          <Footer />
         </div>
       </Router>
     </AuthProvider>

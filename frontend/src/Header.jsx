@@ -31,7 +31,7 @@ const Header = () => {
   };
   // programmatically navigate to the specified route page
   const handleHomeClick = () => {
-    navigate("/homepage");
+    navigate("/dashboard");
   };
 
   const handleCommunityCentersClick = () => {
@@ -68,7 +68,7 @@ const Header = () => {
                       handleHomeClick(); // and this does the react router navigation
                     }}
                   >
-                    Home
+                    Dashboard
                   </a>
                 </li>
                 <li>
