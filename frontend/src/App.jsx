@@ -8,6 +8,7 @@ import Reviews from "./Reviews";
 import Resources from "./Resources";
 import MapView from "./MapView";
 import SpecificMap from "./SpecificMap";
+import Dashboard from "./Dashboard";
 import {
   BrowserRouter as Router,
   Routes,
@@ -119,6 +120,14 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <Resources />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
                 </ProtectedRoute>
               }
             />

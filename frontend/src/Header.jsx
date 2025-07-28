@@ -31,7 +31,7 @@ const Header = () => {
   };
   // programmatically navigate to the specified route page
   const handleHomeClick = () => {
-    navigate("/homepage");
+    navigate("/dashboard");
   };
 
   const handleCommunityCentersClick = () => {
