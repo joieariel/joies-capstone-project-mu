@@ -68,7 +68,7 @@ const Header = () => {
                       handleHomeClick(); // and this does the react router navigation
                     }}
                   >
-                    Home
+                    Dashboard
                   </a>
                 </li>
                 <li>
