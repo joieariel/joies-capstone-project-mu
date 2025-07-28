@@ -266,13 +266,16 @@ const CenterCard = ({
           >
             Reviews
           </button>
-          <button
-            className="map-button"
-            onClick={() => handleMapClick(center.id)}
-            title="View this community center on the map"
-          >
-            Map
-          </button>
+          {/* only show the Map button if hideMapButton is not true */}
+          {!center.hideMapButton && (
+            <button
+              className="map-button"
+              onClick={() => handleMapClick(center.id)}
+              title="View this community center on the map"
+            >
+              Map
+            </button>
+          )}
           {showSimilarButton && (
             <button
               className="similar-centers-button"

@@ -102,15 +102,65 @@ router.get("/:communityCenterId", async (req, res) => {
       return res.status(400).json({ error: "Invalid community center ID" });
     }
 
+    // extract user location from query parameters if provided
+    const userLatitude = req.query.userLat
+      ? parseFloat(req.query.userLat)
+      : null;
+    const userLongitude = req.query.userLng
+      ? parseFloat(req.query.userLng)
+      : null;
+
+    // fetch the community center with all related data needed for the CenterCard component
     const communityCenter = await prisma.CommunityCenter.findUnique({
       where: { id: communityCenterId },
+      include: {
+        hours: true,
+        reviews: {
+          select: {
+            rating: true,
+            created_at: true,
+          },
+        },
+        centerTags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
     });
 
     if (!communityCenter) {
       return res.status(404).json({ error: "Community center not found" });
     }
 
-    res.json(communityCenter);
+    // create a copy of the center to avoid modifying the original
+    let centerWithDistance = { ...communityCenter };
+
+    // if user location is provided calculate distance
+    if (
+      userLatitude &&
+      userLongitude &&
+      communityCenter.latitude &&
+      communityCenter.longitude
+    ) {
+      // apply distance calculation using the same function used for filtering
+      const centersWithDistance = await applyDistanceFilters(
+        [centerWithDistance],
+        [], // no distance filters, just calculate the distance
+        userLatitude,
+        userLongitude
+      );
+
+      // use the center with calculated distance
+      if (centersWithDistance.length > 0) {
+        centerWithDistance = centersWithDistance[0];
+      }
+    }
+
+    // enrich the center with calculated fields
+    const enrichedCenter = enrichCentersWithData([centerWithDistance])[0];
+
+    res.json(enrichedCenter);
   } catch (error) {
     console.error("Error fetching community center:", error);
     res.status(500).json({ error: "Failed to fetch community center" });
