@@ -298,7 +298,7 @@ const Dashboard = () => {
                   >
                   <option value="">Select your state</option>
                   {US_STATES.map((state) => (
-                    <option key={state} value={state}>
+                    <option key={state.value} value={state.value}>
                       {state.label}
                     </option>
                   ))}
