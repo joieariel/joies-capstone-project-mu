@@ -3,6 +3,7 @@ import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import { userAPI } from "./api";
 import { validateNewUser } from "./utils/validation"; // add new validation function from utils.js
+import { US_STATES } from "./constants"; // add US states array from constants.js
 import "./SignUp.css";
 
 const SignUp = () => {
@@ -309,15 +310,21 @@ const SignUp = () => {
             <label htmlFor="state" className="form-label">
               State
             </label>
-            <input
-              type="text"
+            <select
               id="state"
               name="state"
               value={formData.state}
               onChange={handleInputChange}
               className="form-input"
               required
-            />
+            >
+              <option value="">Select your state</option>
+              {US_STATES.map((state) => (
+                <option key={state.value} value={state.value}>
+                  {state.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <button
