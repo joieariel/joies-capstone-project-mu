@@ -9,6 +9,7 @@ import Resources from "./Resources";
 import MapView from "./MapView";
 import SpecificMap from "./SpecificMap";
 import Dashboard from "./Dashboard";
+import Footer from "./Footer";
 import {
   BrowserRouter as Router,
   Routes,
@@ -132,6 +133,7 @@ const App = () => {
               }
             />
           </Routes>
+          <Footer />
         </div>
       </Router>
     </AuthProvider>
