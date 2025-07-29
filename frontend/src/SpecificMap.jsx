@@ -4,7 +4,8 @@ import {
   useLoadScript,
   GoogleMap,
   MarkerF,
-  PolylineF, // import polyline for drawing lines between points
+  DirectionsService, // used to request directions from google maps API
+  DirectionsRenderer, // used to display the directions on the map instead of polyline
 } from "@react-google-maps/api"; // import the necessary components from @react-google-maps/api
 import LoadingSpinner from "./LoadingSpinner";
 import CenterCard from "./CenterCard";
@@ -28,6 +29,12 @@ const SpecificMap = () => {
   const [error, setError] = useState(null);
   // state to track if similar centers modal is open
   const [modalOpen, setModalOpen] = useState(false);
+  // state to store directions response from api
+  const [directions, setDirections] = useState(null);
+  // state to track if directions request has been made (prevents multiple API calls)
+  const [directionsRequested, setDirectionsRequested] = useState(false);
+  // state to track selected travel mode
+  const [travelMode, setTravelMode] = useState("DRIVING");
 
   // use the custom hook to get the user's location
   const {
@@ -78,8 +85,8 @@ const SpecificMap = () => {
 
           const data = await response.json();
 
-        // add artificial delay to see the loading spinner (500ms)
-        await new Promise((resolve) => setTimeout(resolve, 500));
+          // add artificial delay to see the loading spinner (500ms)
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
           // store fetched data in state
           setCenter(data);
@@ -187,6 +194,27 @@ const SpecificMap = () => {
 
             <h2 className="map-section-title">Location</h2>
 
+            {/* travel mode selector */}
+            {userLocation && (
+              <div className="travel-mode-selector">
+                <label htmlFor="travel-mode">Travel Mode: </label>
+                <select
+                  id="travel-mode"
+                  value={travelMode}
+                  onChange={(e) => {
+                    setTravelMode(e.target.value);
+                    setDirectionsRequested(false); // reset to request new directions
+                    setDirections(null); // clear existing directions
+                  }}
+                >
+                  <option value="DRIVING">Driving</option>
+                  <option value="WALKING">Walking</option>
+                  <option value="BICYCLING">Bicycling</option>
+                  <option value="TRANSIT">Public Transit</option>
+                </select>
+              </div>
+            )}
+
             {/* display location status message */}
             {locationLoading && (
               <div className="location-status">
@@ -238,25 +266,89 @@ const SpecificMap = () => {
                     }}
                   />
 
-                  {/* add a line between user location and community center */}
-                  <PolylineF
-                    path={[
-                      {
-                        lat: userLocation.latitude,
-                        lng: userLocation.longitude,
-                      },
-                      { lat: center.latitude, lng: center.longitude },
-                    ]}
-                    options={{
-                      strokeColor: "#4285F4", // google blue color
-                      strokeOpacity: 0.8,
-                      strokeWeight: 3,
-                      geodesic: true, // draw the shortest path on the Earth's surface
-                    }}
-                  />
+                  {/* only request directions once */}
+                  {!directionsRequested && (
+                    <DirectionsService
+                      options={{
+                        destination: {
+                          lat: center.latitude,
+                          lng: center.longitude,
+                        },
+                        origin: {
+                          lat: userLocation.latitude,
+                          lng: userLocation.longitude,
+                        },
+                        travelMode: travelMode, // use the selected travel mode
+                      }}
+                      callback={(response) => {
+                        setDirectionsRequested(true);
+                        if (response !== null && response.status === "OK") {
+                          // store the directions response which contains routes, legs, steps, etc.
+                          setDirections(response);
+                        }
+                      }}
+                    />
+                  )}
+
+                  {/* render the directions on the map */}
+                  {directions && (
+                    <DirectionsRenderer
+                      options={{
+                        directions: directions,
+                        suppressMarkers: true, // don't show default A/B markers
+                      }}
+                    />
+                  )}
                 </>
               )}
             </GoogleMap>
+
+            {/*
+              Directions Panel - Displays text directions from the Google Maps Directions API
+
+              The directions response object contains detailed information about the route:
+              - routes: Array of possible routes (we use the first/best one)
+              - legs: Segments of the journey (usually just one leg for simple directions)
+              - steps: Turn-by-turn directions within each leg
+
+              Each step contains:
+              - instructions: HTML-formatted direction text (e.g., "Turn right onto Main St")
+              - distance: Object with text and value properties (e.g., {text: "0.2 miles", value: 321})
+              - duration: Object with text and value properties (e.g., {text: "1 min", value: 60})
+
+              This panel is only shown when directions are available.
+            */}
+            {directions && (
+              <div className="directions-panel">
+                <h3>Directions to {center.name}</h3>
+                <div className="directions-summary">
+                  <p>
+                    <strong>Distance:</strong>{" "}
+                    {directions.routes[0].legs[0].distance.text}
+                  </p>
+                  <p>
+                    <strong>Duration:</strong>{" "}
+                    {directions.routes[0].legs[0].duration.text}
+                  </p>
+                </div>
+                <ol className="directions-steps">
+                  {/*
+                    map through each step in the directions and render it
+                    use dangerouslySetInnerHTML bc Google provides HTML-formatted instructions w/ street names in bold, etc.*/}
+                  {directions.routes[0].legs[0].steps.map((step, index) => (
+                    <li key={index}>
+                      <span
+                        dangerouslySetInnerHTML={{ __html: step.instructions }}
+                      />
+                      <span className="step-distance">
+                        {" "}
+                        ({step.distance.text})
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
           </div>
         ) : (
           // fallback content if center data is not available (null/undefined)

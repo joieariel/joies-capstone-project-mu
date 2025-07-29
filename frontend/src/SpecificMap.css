@@ -1,10 +1,35 @@
 .map-container {
   min-height: calc(100vh - 80px); /* Full height minus header */
   background-color: #f8f9fa;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* travel mode selector styles */
+.travel-mode-selector {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 5px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.travel-mode-selector label {
+  margin-right: 10px;
+  font-weight: 500;
+  color: #486284;
+}
+
+.travel-mode-selector select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: white;
+  font-size: 14px;
+  min-width: 150px;
   font-family: "Plus Jakarta Sans", sans-serif;
 }
 
@@ -20,7 +45,8 @@
   max-width: 100%;
   display: flex;
   flex-direction: column;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 /* adjust the center info to be wider */
@@ -58,14 +84,16 @@
   margin: 1.5rem 0 1rem;
   font-weight: 600;
   text-align: left;
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 .back-container {
   width: 100%;
   max-width: 800px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   display: flex;
   justify-content: flex-start;
+  padding-top: 1rem;
 }
 
 .back-button {
@@ -81,6 +109,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 .back-button:hover {
@@ -104,9 +133,11 @@
 .map-title {
   font-size: 2.5rem;
   color: #486284;
-  margin: 0;
+  margin: 0 0 1.5rem 0;
   font-weight: 700;
   line-height: 1.2;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  padding-top: 0.5rem;
 }
 
 /* Responsive Design */
@@ -124,5 +155,69 @@
 @media (max-width: 480px) {
   .map-title {
     font-size: 1.6rem;
+  }
+}
+
+/* directions panel styles */
+.directions-panel {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.directions-panel h3 {
+  color: #486284;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.directions-summary {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.directions-summary p {
+  margin: 5px 20px 5px 0;
+  color: #495057;
+  font-size: 0.95rem;
+}
+
+.directions-summary p strong {
+  color: #486284;
+  font-weight: 600;
+}
+
+.directions-steps {
+  padding-left: 20px;
+}
+
+.directions-steps li {
+  margin-bottom: 15px;
+  line-height: 1.5;
+  color: #495057;
+  font-size: 0.95rem;
+}
+
+.step-distance {
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* make the directions panel responsive */
+@media (max-width: 768px) {
+  .directions-summary {
+    flex-direction: column;
   }
 }
