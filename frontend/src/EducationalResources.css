@@ -1,0 +1,74 @@
+.educational-resources-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    background-color: #f8f9fa;
+}
+
+.educational-resources-title {
+    font-size: 2rem;
+    color: #486284;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.resources-section {
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    color: #486284;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.resource-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.resource-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resource-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.resource-card h3 {
+    font-size: 1.25rem;
+    color: #486284;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.resource-card p {
+    color: #6c757d;
+    line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .resource-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .educational-resources-title {
+        font-size: 1.75rem;
+    }
+
+    .section-title {
+        font-size: 1.35rem;
+    }
+}
