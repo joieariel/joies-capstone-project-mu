@@ -44,6 +44,21 @@
   font-size: larger;
 }
 
+.profile-pic {
+  /* circular like a profile picture */
+  border-radius: 100%;
+  width: 40%;
+}
+
+/* edit form for pfp */
+#profile-picture {
+  /* circular like a profile picture */
+  border-radius: 100%;
+  width: 40%;
+  /* center of the edit form */
+  margin: 0 auto;
+
+}
 
 /* edit button */
 .edit-button {

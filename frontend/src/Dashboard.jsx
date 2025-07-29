@@ -53,6 +53,7 @@ const Dashboard = () => {
 
     // pre-populate edit form with current user data
     setEditFormData({
+      profile_pic: userData.profile_pic, // keep profile pic the same
       first_name: userData.first_name,
       last_name: userData.last_name,
       username: userData.username,
@@ -157,6 +158,10 @@ const Dashboard = () => {
           {userData && !isEditing && (
             <div className="profile-details">
               <p>
+                <strong>Profile Picture:</strong> <br />
+                <img className="profile-pic" src={userData.profile_pic} alt="profile picture" />
+              </p>
+              <p>
                 <strong>Full Name:</strong> {userData.first_name}{" "}
                 {userData.last_name}
               </p>
@@ -200,6 +205,10 @@ const Dashboard = () => {
           {/* show edit form when in edit mode */}
           {isEditing && (
             <form onSubmit={handleSaveEdit} className="edit-form">
+              <div className="form-group">
+                <label htmlFor="profile_pic">Profile Picture</label>
+                <img id="profile-picture" src={editFormData.profile_pic} alt="profile picture" />
+              </div>
               <div className="form-group">
                 <label htmlFor="first_name">First Name</label>
                 <input
