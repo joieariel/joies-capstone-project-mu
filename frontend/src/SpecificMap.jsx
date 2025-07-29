@@ -316,6 +316,10 @@ const SpecificMap = () => {
                 <div className="directions-summary">
                   <p>
                     <strong>Distance:</strong>{" "}
+                    {/* get the distance from the directions response (routes, legs, steps), routes is an array of possible we use 0 bc it gives first/best one */}
+                    {/* legs - segments of the journey */}
+                    {/* steps - individual steps of the journey, turn by turn directiosn within each leg */}
+                    {/* each step has: instructions (HTML formatted text), distance (obj w/ text and value properties), duration (same e.g. text: "1 min", value : 60) */}
                     {directions.routes[0].legs[0].distance.text}
                   </p>
                   <p>
