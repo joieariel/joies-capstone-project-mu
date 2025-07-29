@@ -1,6 +1,16 @@
+import { useState } from "react";
 import "./EducationalResources.css";
 
 const EducationalResources = () => {
+  const [expandedCard, setExpandedCard] = useState(null);
+
+  const toggleCard = (cardId) => {
+    if (expandedCard === cardId) {
+      setExpandedCard(null);
+    } else {
+      setExpandedCard(cardId);
+    }
+  };
   return (
     <div className="educational-resources-container">
       <h1 className="educational-resources-title">Educational Resources</h1>
@@ -10,12 +20,91 @@ const EducationalResources = () => {
         <h2 className="section-title">K-12 Resources</h2>
         <div className="resource-cards">
           {/* placeholder cards for K-12 resources */}
-          <div className="resource-card">
-            <h3>SAT/ACT Preparation</h3>
+          <div
+            className={`resource-card clickable ${
+              expandedCard === "sat-act" ? "expanded" : ""
+            }`}
+            onClick={() => toggleCard("sat-act")}
+          >
+            <div className="card-header">
+              <h3>SAT/ACT Preparation</h3>
+              <span className="click-indicator">
+                {expandedCard === "sat-act" ? "▼" : "▶"}
+              </span>
+            </div>
             <p>
-              Resources for standardized test preparation will be displayed
-              here.
+              Resources for standardized test preparation to help students
+              achieve their best scores.
             </p>
+            <div className="click-note">
+              Click to {expandedCard === "sat-act" ? "collapse" : "expand"}
+            </div>
+            {expandedCard === "sat-act" && (
+              <div className="expanded-content">
+                <hr />
+                <h4>Free Practice Tests</h4>
+                <ul>
+                  <li>
+                    <a
+                      href="https://satsuite.collegeboard.org/practice"
+                      className="resource-link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      College Board Official SAT Practice
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="resource-link">
+                      ACT Academy Free Test Prep
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="resource-link">
+                      Khan Academy SAT Partnership
+                    </a>
+                  </li>
+                </ul>
+
+                <h4>Study Materials</h4>
+                <ul>
+                  <li>
+                    <a href="#" className="resource-link">
+                      Princeton Review Prep Books
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="resource-link">
+                      Barron's Test Prep Guides
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="resource-link">
+                      Kaplan Online Courses
+                    </a>
+                  </li>
+                </ul>
+
+                <h4>Tutoring Services</h4>
+                <ul>
+                  <li>
+                    <a href="#" className="resource-link">
+                      Local Community Center Test Prep Programs
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="resource-link">
+                      Online Tutoring Platforms
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="resource-link">
+                      School-Based Preparation Workshops
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
           <div className="resource-card">
             <h3>Digital Literacy</h3>
