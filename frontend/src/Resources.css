@@ -1,41 +1,75 @@
 .resources-container {
-  min-height: calc(100vh - 80px); /* Full height minus header */
-  background-color: #f8f9fa;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  min-height: calc(100vh - 200px); /* adjust based on header/footer height */
   font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 .resources-content {
-  text-align: center;
-  max-width: 800px;
-  width: 100%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
 }
 
 .resources-title {
-  font-size: 2.5rem;
-  color: #486284;
-  margin: 0;
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.resources-section {
+  margin-bottom: 2rem;
+}
+
+.resources-section h2 {
+  font-size: 1.5rem;
+  color: #444;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.5rem;
+}
+
+.resource-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.resource-card {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resource-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.resource-card h3 {
+  font-size: 1.25rem;
+  color: #333;
+  margin-bottom: 0.75rem;
+}
+
+.resource-card p {
+  color: #666;
+  line-height: 1.5;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .resources-container {
-    padding: 1rem;
-    min-height: calc(100vh - 70px); /* Adjust for smaller header on mobile */
+  .resource-cards {
+    grid-template-columns: 1fr;
   }
 
-  .resources-title {
-    font-size: 2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .resources-title {
-    font-size: 1.6rem;
+  .resources-content {
+    padding: 1.5rem;
   }
 }
