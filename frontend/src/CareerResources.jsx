@@ -6,6 +6,35 @@ const CareerResources = () => {
     <div className="career-resources-container">
       <h1 className="career-resources-title">Career Resources</h1>
 
+    {/* intro section */}
+      <div className="resources-intro">
+        <div className="intro-content">
+          <div className="intro-text">
+            <h3>Bridging the Digital Career Divide</h3>
+            <p>
+              Digital equity in career development means ensuring everyone has equal access to the
+              digital tools, resources, and skills needed to thrive in today's increasingly digital job market.
+              As careers become more technology-dependent, those without digital literacy or access
+              to digital resources risk being left behind in the modern workforce.
+            </p>
+            <p>
+              These carefully curated resources aim to bridge the digital career divide by providing free or low-cost
+              digital career development materials, online job search tools, and guidance for building essential
+              digital skills that employers now demand. Whether you're creating your first digital resume,
+              preparing for virtual interviews, or seeking to enhance your digital professional presence,
+              these resources can help you access quality career support regardless of your current digital literacy
+              level, socioeconomic background, or geographic location.
+            </p>
+          </div>
+          <div className="intro-image">
+            <img
+              src="https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80"
+              alt="Digital divide in career development showing technology access gap"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* section1  */}
       <div className="resources-section">
         <h2 className="section-title">Section 1</h2>
