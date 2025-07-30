@@ -1,10 +1,76 @@
 // util functions for handling image uploads and processing
 
+// funcition to resize an image before converting to base64
+// (this is to avoid memory issues when converting large images to base64 which was causing the app to crash bc of db storage limits etc)
+export const resizeImage = (file, maxWidth = 300, maxHeight = 300, quality = 0.7) => {
+  return new Promise((resolve, reject) => {
+    // create new FileReader object to read the file (built in browser api for reading files)
+    const reader = new FileReader();
+
+    // set up the FileReader onload event
+    reader.onload = (readerEvent) => {
+      // create an image object
+      const img = new Image();
+
+      // set up the image onload event
+      img.onload = () => {
+        // create a canvas element
+        const canvas = document.createElement('canvas');
+
+        // calculate the new dimensions
+        let width = img.width;
+        let height = img.height;
+
+        // resize the image if it exceeds the max dimensions
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        // set the canvas dimensions
+        canvas.width = width;
+        canvas.height = height;
+
+        // draw the resized image on the canvas
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // convert the canvas to a blob (binary data)
+        canvas.toBlob((blob) => {
+          // create a new File object from the blob
+          const resizedFile = new File([blob], file.name, {
+            type: file.type,
+            lastModified: Date.now()
+          });
+
+          // resolve the promise with the resized file
+          resolve(resizedFile);
+        }, file.type, quality);
+      };
+
+      // set the image source to the FileReader result
+      img.src = readerEvent.target.result;
+    };
+
+    // set up the FileReader error event
+    reader.onerror = (error) => reject(error);
+
+    // read the file as a data url
+    reader.readAsDataURL(file);
+  });
+};
+
 // function to convert a file object to a base64 string (a way to represent binary data in text making it easier to pass the image directly in the user db table)
 export const fileToBase64 = (file) => {
-    // check if file exists
   return new Promise((resolve, reject) => {
-    // create new FileReader object (built in browser API for reading files)
+    // create new FileReader object (built in browser api for reading files)
     const reader = new FileReader();
     reader.readAsDataURL(file); // read the file as a data URL
     reader.onload = () => resolve(reader.result); // resolve the promise with the result

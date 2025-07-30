@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { userAPI } from "./api";
 import { validateNewUser } from "./utils/validation"; // add new validation function from utils.js
 import { US_STATES } from "./constants"; // add US states array from constants.js
+import { fileToBase64, validateImageFile, DEFAULT_PROFILE_PIC, resizeImage } from "./utils/imageUtils"; // import image utils
 import "./SignUp.css";
 
 const SignUp = () => {
@@ -36,6 +37,11 @@ const SignUp = () => {
   // state to store success message
   const [success, setSuccess] = useState("");
 
+  // states for profile picture
+  const [profilePic, setProfilePic] = useState(null);
+  const [profilePicPreview, setProfilePicPreview] = useState(null);
+  const [profilePicError, setProfilePicError] = useState("");
+
   // this function runs whenever the user types in the input fields
   const handleInputChange = (e) => {
     // get the name and current value from the input that changed
@@ -46,6 +52,45 @@ const SignUp = () => {
       ...formData,
       [name]: value,
     });
+  };
+
+  // handle profile picture selection
+  const handleProfilePicChange = async (e) => {
+    // safety check - only proceed if a file was selected
+    if (e.target.files && e.target.files[0]) {
+      // get the selected file
+      const file = e.target.files[0];
+
+      // validate the image file with the helper function from imageUtils.js
+      const validationError = validateImageFile(file);
+      if (validationError) {
+        setProfilePicError(validationError);
+        return;
+      }
+
+      try {
+        // first, resize the image to reduce its size to prevent issues with large images
+        const resizedFile = await resizeImage(file, 300, 300, 0.7);
+
+        // convert file to base64 string using the helper function from imageUtils.js
+        const base64 = await fileToBase64(resizedFile);
+        // set the profile pic
+        setProfilePic(base64);
+        // set the preview image
+        setProfilePicPreview(base64);
+        setProfilePicError(""); // clear error message
+      } catch (error) {
+        console.error("Error processing image:", error);
+        setProfilePicError("Failed to process the image. Please try another one.");
+      }
+    }
+  };
+
+  // remove profile picture
+  const handleRemoveProfilePic = () => {
+    setProfilePic(null);
+    setProfilePicPreview(null);
+    setProfilePicError("");
   };
 
   // function that runs when user hits create account
@@ -99,6 +144,7 @@ const SignUp = () => {
       if (authData?.user) {
         const databaseUserData = {
           supabase_user_id: authData.user.id, // link to Supabase auth user
+          profile_pic: profilePic || DEFAULT_PROFILE_PIC, // use the default img if none provided
           first_name: formData.firstName,
           last_name: formData.lastName,
           username: formData.username,
@@ -153,6 +199,49 @@ const SignUp = () => {
         {success && <div className="success-message">{success}</div>}
 
         <form onSubmit={handleSubmit} className="signup-form">
+          {/* profile pic section (optional) */}
+          <div className="form-group">
+            <label htmlFor="profilePic" className="form-label">
+              Profile Picture (Optional)
+            </label>
+            <div className="profile-pic-container">
+              {profilePicPreview && (
+                <div className="profile-pic-preview-container">
+                  <img
+                    src={profilePicPreview}
+                    alt="Profile Preview"
+                    className="profile-pic-preview"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveProfilePic}
+                    className="remove-pic-button"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+              {!profilePicPreview && (
+                <div className="file-input-container">
+                  <label htmlFor="profilePic" className="custom-file-input">
+                    Choose Profile Picture
+                  </label>
+                  <input
+                    type="file"
+                    id="profilePic"
+                    name="profilePic"
+                    accept="image/*"
+                    onChange={handleProfilePicChange}
+                    className="hidden-file-input"
+                  />
+                </div>
+              )}
+              {profilePicError && (
+                <div className="profile-pic-error">{profilePicError}</div>
+              )}
+            </div>
+          </div>
+
           <div className="form-group">
             <label htmlFor="firstName" className="form-label">
               First Name
