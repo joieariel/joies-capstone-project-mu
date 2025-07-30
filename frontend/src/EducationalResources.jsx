@@ -6,7 +6,7 @@ const EducationalResources = () => {
   const satActData = {
     title: "SAT/ACT Preparation",
     description:
-      "Resources for standardized test preparation to help students achieve their best scores.",
+      "Free and low-cost resources for standardized test preparation to help students achieve their best scores without breaking the bank.",
     cardId: "sat-act",
     expandedSections: [
       {
