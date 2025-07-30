@@ -353,7 +353,7 @@ const Reviews = () => {
                 <div className="review-header">
                   <div className="reviewer-info">
                     <span className="reviewer-name">
-                      {review.user.first_name} {review.user.last_name}
+                      {review.user.profile_pic}{review.user.first_name} {review.user.last_name}
                     </span>
                     <span className="review-date">
                       {formatDate(review.created_at)}

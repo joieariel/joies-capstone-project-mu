@@ -58,6 +58,7 @@ router.get("/:userId", authenticateUser, async (req, res) => {
 router.post("/", async (req, res) => {
   const {
     supabase_user_id,
+    profile_pic,
     first_name,
     last_name,
     username,
@@ -73,6 +74,7 @@ router.post("/", async (req, res) => {
     const newUser = await prisma.user.create({
       data: {
         supabase_user_id, // link to supabase auth user
+        profile_pic,
         first_name,
         last_name,
         username,
@@ -97,6 +99,7 @@ router.put("/:userId", authenticateUser, async (req, res) => {
     const { userId } = req.params;
     const {
       first_name,
+      profile_pic,
       last_name,
       username,
       email,
@@ -126,6 +129,7 @@ router.put("/:userId", authenticateUser, async (req, res) => {
     const updatedUser = await prisma.user.update({
       where: { id: parseInt(userId) },
       data: {
+        profile_pic,
         first_name,
         last_name,
         username,
