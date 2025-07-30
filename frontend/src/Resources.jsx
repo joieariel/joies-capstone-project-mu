@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 import { userAPI } from "./api";
+import EducationalResources from "./EducationalResources";
+import CareerResources from "./CareerResources";
 import "./Resources.css";
 
 const Resources = () => {
@@ -27,6 +29,8 @@ const Resources = () => {
     // fetch user data if user is logged in
     if (user) {
       fetchUserData();
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
@@ -51,34 +55,8 @@ const Resources = () => {
   }
 
   return (
-    <div className="resources-container">
-      <div className="resources-content">
-        <h1 className="resources-title">Resources</h1>
-        {/* if the user is a student, display educational resources */}
-        {userData?.status === "Student" ? (
-          <div className="resources-section">
-            <h2>Educational Resources</h2>
-            <div className="resource-cards">
-              {/* placeholder for educational resources */}
-              <div className="resource-card">
-                <h3>Educational Resources</h3>
-                <p>Resources for students will be displayed here.</p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="resources-section">
-            <h2>Career Resources</h2>
-            <div className="resource-cards">
-              {/* placeholder for career resources */}
-              <div className="resource-card">
-                <h3>Career Resources</h3>
-                <p>Resources for job seekers will be displayed here.</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+    <div className="resources-container" style={{ backgroundColor: "#f8f9fa", minHeight: "calc(100vh - 80px)" }}>
+      {userData?.status === "Student" ? <EducationalResources /> : <CareerResources />}
     </div>
   );
 };
