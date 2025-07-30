@@ -62,6 +62,68 @@ const EducationalResources = () => {
       },
     ],
   };
+
+  // K-12 learning tools card data
+  const tutoringData = {
+    title: "K-12 Learning Tools",
+    description:
+      "Access quality educational support with these affordable and free online learning platforms and resources.",
+    cardId: "k12-learning",
+    expandedSections: [
+      {
+        title: "Free Learning Platforms",
+        links: [
+          {
+            text: "Khan Academy",
+            url: "https://www.khanacademy.org/",
+          },
+          {
+            text: "YouTube EDU",
+            url: "#",
+          },
+          {
+            text: "CK-12 Foundation",
+            url: "https://www.ck12.org/",
+          },
+        ],
+      },
+      {
+        title: "Interactive Learning Tools",
+        links: [
+          {
+            text: "IXL Learning",
+            url: "https://www.ixl.com/",
+          },
+          {
+            text: "Quizlet",
+            url: "#",
+          },
+          {
+            text: "Duolingo (Languages)",
+            url: "#",
+          },
+        ],
+      },
+      {
+        title: "Tutoring Services",
+        links: [
+          {
+            text: "Learn To Be (Free Tutoring)",
+            url: "https://www.learntobe.org/",
+          },
+          {
+            text: "Schoolhouse.world",
+            url: "#",
+          },
+          {
+            text: "Public Library Online Tutoring Programs",
+            url: "#",
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="educational-resources-container">
       <h1 className="educational-resources-title">Educational Resources</h1>
@@ -73,14 +135,12 @@ const EducationalResources = () => {
           {/* now using the new ResourceCard component for SAT/ACT prep */}
           <ResourceCard {...satActData} />
 
-          {/* regular cards using ResourceCard component */}
+          {/* using the ResourceCard component for digital tutoring */}
+          <ResourceCard {...tutoringData} />
+
           <ResourceCard
-            title="Digital Literacy"
-            description="Resources for digital literacy and responsible technology use will be displayed here."
-          />
-          <ResourceCard
-            title="K-12 Learning Tools"
-            description="Educational tools and resources for K-12 students will be displayed here."
+            title="Educational Games & Activities"
+            description="Interactive games and activities designed to make learning fun and engaging for K-12 students."
           />
         </div>
       </div>

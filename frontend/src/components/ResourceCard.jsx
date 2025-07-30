@@ -17,7 +17,7 @@ const ResourceCard = ({
 
   return (
     <div
-    // apply the "clickable" and "expanded" classes to the card element based on the state
+      // apply the "clickable" and "expanded" classes to the card element based on the state
       className={`resource-card clickable ${isExpanded ? "expanded" : ""}`}
       onClick={toggleExpand}
     >
