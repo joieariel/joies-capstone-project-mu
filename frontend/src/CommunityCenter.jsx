@@ -82,8 +82,7 @@ const CommunityCenter = () => {
         // call the api to get all centers from prisma db
         const data = await communityAPI.getAllCenters();
 
-        // add artificial delay to see the loading spinner (500ms)
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        // Remove artificial delay - this was causing double loading effect
 
         setCenters(data); // store fetched data in centers state triggers rerender and displays centers
       } catch (err) {
