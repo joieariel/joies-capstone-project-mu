@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react"; // added useRef to create a reference to the file input
 import { useAuth } from "./AuthContext";
 import { userAPI } from "./api"; // to make calls to backend
 import { validateEditForm } from "./utils/validation"; // import new validate function from utils
+import { validateImageFile, resizeImage, fileToBase64, DEFAULT_PROFILE_PIC } from "./utils/imageUtils"; // import image utilities
 import LikedCenters from "./LikedCenters";
 import UserRecommendations from "./UserRecommendations";
 import { US_STATES } from "./constants"; // to use us states array in edit mode
@@ -73,6 +74,9 @@ const Dashboard = () => {
     setUpdateError("");
   };
 
+  // create a ref object with an value of null to store the file input element
+  const fileInputRef = useRef(null);
+
   // function to handle form input changes (runs when user types in any form field)
   const handleInputChange = (e) => {
     const { name, value } = e.target; // get field name and new value
@@ -81,6 +85,49 @@ const Dashboard = () => {
     setEditFormData({
       ...editFormData,
       [name]: value, //update the field that changed
+    });
+  };
+
+  // function to handle profile picture file selection
+  const handleProfilePictureChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // validate the image file
+    const errorMessage = validateImageFile(file);
+    if (errorMessage) {
+      setUpdateError(errorMessage);
+      return;
+    }
+
+    try {
+      // resize the image to optimize file size
+      const resizedFile = await resizeImage(file);
+
+      // convert the resized image to base64 for storage
+      const base64Image = await fileToBase64(resizedFile);
+
+      // update the form data with the new image
+      setEditFormData({
+        ...editFormData,
+        profile_pic: base64Image,
+      });
+    } catch (err) {
+      console.error("Error processing image:", err);
+      setUpdateError("Failed to process the image. Please try again.");
+    }
+  };
+
+  // function to trigger the hidden file input
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
+  };
+
+  // function to remove profile picture and use default
+  const handleRemoveProfilePicture = () => {
+    setEditFormData({
+      ...editFormData,
+      profile_pic: DEFAULT_PROFILE_PIC,
     });
   };
 
@@ -205,9 +252,41 @@ const Dashboard = () => {
           {/* show edit form when in edit mode */}
           {isEditing && (
             <form onSubmit={handleSaveEdit} className="edit-form">
-              <div className="form-group">
+              <div className="form-group profile-pic-container">
                 <label htmlFor="profile_pic">Profile Picture</label>
                 <img id="profile-picture" src={editFormData.profile_pic} alt="profile picture" />
+
+                {/* hidden file input */}
+                <input
+                  type="file"
+                  id="profile_pic_input"
+                  ref={fileInputRef}
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleProfilePictureChange}
+                  style={{ display: 'none' }} // makes the input invisible
+                />
+
+                {/* profile picture action buttons */}
+                <div className="profile-pic-actions">
+                  <button
+                    type="button"
+                    className="change-pic-button"
+                    onClick={triggerFileInput}
+                  >
+                    Change Profile Picture
+                  </button>
+
+                  {/* only show remove button if not using default picture */}
+                  {editFormData.profile_pic !== DEFAULT_PROFILE_PIC && (
+                    <button
+                      type="button"
+                      className="remove-pic-button"
+                      onClick={handleRemoveProfilePicture}
+                    >
+                      Remove Picture
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="form-group">
                 <label htmlFor="first_name">First Name</label>
