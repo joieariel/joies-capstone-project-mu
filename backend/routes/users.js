@@ -4,7 +4,6 @@ const { authenticateUser } = require("../middleware/auth");
 const router = express.Router();
 const prisma = new PrismaClient();
 
-
 // (GET) fetch current user's info by their supabase ID - protected
 // instead of requiring prisma db id, use /me route ro get current user's data
 router.get("/me", authenticateUser, async (req, res) => {
@@ -17,6 +16,14 @@ router.get("/me", authenticateUser, async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
+    }
+
+    // import the DEFAULT_PROFILE_PIC constant
+    const { DEFAULT_PROFILE_PIC } = require("../utils/constants");
+
+    // check if user has a profile picture, if not, assign the default one
+    if (!user.profile_pic) {
+      user.profile_pic = DEFAULT_PROFILE_PIC;
     }
 
     res.json(user); //. return complete user object w all prof data
@@ -45,6 +52,14 @@ router.get("/:userId", authenticateUser, async (req, res) => {
       return res
         .status(403)
         .json({ error: "You can only view your own profile" });
+    }
+
+    // Import the DEFAULT_PROFILE_PIC constant
+    const { DEFAULT_PROFILE_PIC } = require("../utils/constants");
+
+    // Check if user has a profile picture, if not, assign the default one
+    if (!user.profile_pic) {
+      user.profile_pic = DEFAULT_PROFILE_PIC;
     }
 
     res.json(user);
