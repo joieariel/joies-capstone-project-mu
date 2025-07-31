@@ -4,7 +4,6 @@ import { userAPI } from "./api";
 import EducationalResources from "./EducationalResources";
 import CareerResources from "./CareerResources";
 import "./Resources.css";
-import LoadingSpinner from "./LoadingSpinner";
 
 const Resources = () => {
   const { user } = useAuth();
@@ -39,7 +38,7 @@ const Resources = () => {
     return (
       <div className="resources-container">
         <div className="resources-content">
-          <LoadingSpinner size="large" text="Loading resources..." />
+          <p>Loading resources...</p>
         </div>
       </div>
     );
