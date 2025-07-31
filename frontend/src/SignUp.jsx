@@ -4,12 +4,17 @@ import { useNavigate } from "react-router-dom";
 import { userAPI } from "./api";
 import { validateNewUser } from "./utils/validation"; // add new validation function from utils.js
 import { US_STATES } from "./constants"; // add US states array from constants.js
-import { fileToBase64, validateImageFile, DEFAULT_PROFILE_PIC, resizeImage } from "./utils/imageUtils"; // import image utils
+import {
+  fileToBase64,
+  validateImageFile,
+  DEFAULT_PROFILE_PIC,
+  resizeImage,
+} from "./utils/imageUtils"; // import image utils
 import "./SignUp.css";
 
 const SignUp = () => {
   // get auth functions and state from AuthContext instead of calling supabase directly
-  const { signUp, loading } = useAuth();
+  const { signUp, signIn, loading } = useAuth();
 
   // hook to navigate to different routes after successful signup
   // will redirect user to login page after they create an account
@@ -81,7 +86,9 @@ const SignUp = () => {
         setProfilePicError(""); // clear error message
       } catch (error) {
         console.error("Error processing image:", error);
-        setProfilePicError("Failed to process the image. Please try another one.");
+        setProfilePicError(
+          "Failed to process the image. Please try another one."
+        );
       }
     }
   };
@@ -160,9 +167,7 @@ const SignUp = () => {
         await userAPI.createUser(databaseUserData);
       }
 
-      setSuccess(
-        "Account created successfully! Please check your email to verify your account."
-      );
+      setSuccess("Account created successfully! Logging you in...");
 
       // clear the form fields after successful signup
       setFormData({
@@ -179,10 +184,26 @@ const SignUp = () => {
         state: "",
       });
 
-      // redirect user to login page after successful signup
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000); // wait 2 seconds to show success message, then redirect
+      // log the user in automatically after signup
+      const { error: signInError } = await signIn(
+        formData.email,
+        formData.password
+      );
+
+      if (signInError) {
+        setError(
+          "Account created but couldn't log in automatically. Please go to login page."
+        );
+        // redirect to login page if auto-login fails
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      } else {
+        // redirect to homepage on successful auto-login
+        setTimeout(() => {
+          navigate("/homepage");
+        }, 1000);
+      }
     } catch (error) {
       console.error("Signup error:", error);
       setError(error.message || "Failed to create account. Please try again.");
