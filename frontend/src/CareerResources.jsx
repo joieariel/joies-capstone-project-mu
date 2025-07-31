@@ -1,7 +1,24 @@
+import { useState, useEffect } from "react";
 import "./CareerResources.css";
 import ResourceCard from "./components/ResourceCard";
+import LoadingSpinner from "./LoadingSpinner";
 
 const CareerResources = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // set loading to false after resources are ready
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="career-resources-container">
+        <h1 className="career-resources-title">Career Resources</h1>
+        <LoadingSpinner size="large" text="Loading career resources..." />
+      </div>
+    );
+  }
   return (
     <div className="career-resources-container">
       <h1 className="career-resources-title">Career Resources</h1>

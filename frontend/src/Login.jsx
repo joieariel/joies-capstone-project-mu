@@ -68,9 +68,7 @@ const Login = () => {
       });
 
       // redirect user to homepage after successful login
-      setTimeout(() => {
-        navigate("/homepage");
-      }, 1500); // wait 1.5 seconds to show success message, then redirect
+      navigate("/homepage");
     }
   };
 

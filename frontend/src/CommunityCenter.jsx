@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react"; // useCallback
 import { useNavigate } from "react-router-dom";
 import { communityAPI } from "./api"; // import communityAPI
 import { useGetUserLocation, useGetCentersWithFilter } from "./utils/hooks"; // import custom hooks
+import { useScrollPosition } from "./utils/ScrollPositionContext"; // import scroll position context
 import "./CommunityCenter.css";
 import Search from "./Search";
 import SimilarCentersModal from "./SimilarCentersModal";
@@ -40,6 +41,9 @@ const CommunityCenter = () => {
 
   const navigate = useNavigate();
 
+  // get scroll position context
+  const { saveScrollPosition, getScrollPosition } = useScrollPosition();
+
   // when user clicks map view button at top of page, show the map view ( navigate to map page and show all community centers on map)
   const handleMapViewClick = () => {
     navigate("/mapview"); // navigate to /map which will show all community centers on map
@@ -75,15 +79,43 @@ const CommunityCenter = () => {
     }
   }, []);
 
+  // restore the scroll position when component mounts
+  useEffect(() => {
+    const savedPosition = getScrollPosition("communityCenters");
+    if (savedPosition > 0) {
+      setTimeout(() => {
+        window.scrollTo(0, savedPosition);
+      }, 100); // small delay to ensure DOM is ready
+    }
+  }, [getScrollPosition]);
+
+  // save scroll position when user scrolls
+  useEffect(() => {
+    const handleScroll = () => {
+      saveScrollPosition("communityCenters", window.scrollY);
+    };
+
+    // use a debounced version of the scroll handler to avoid excessive updates
+    let timeoutId;
+    const debouncedHandleScroll = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleScroll, 100);
+    };
+
+    window.addEventListener("scroll", debouncedHandleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", debouncedHandleScroll);
+      clearTimeout(timeoutId);
+    };
+  }, [saveScrollPosition]);
+
   useEffect(() => {
     const fetchCenters = async () => {
       try {
         setLoading(true);
         // call the api to get all centers from prisma db
         const data = await communityAPI.getAllCenters();
-
-        // add artificial delay to see the loading spinner (500ms)
-        await new Promise((resolve) => setTimeout(resolve, 500));
 
         setCenters(data); // store fetched data in centers state triggers rerender and displays centers
       } catch (err) {
@@ -189,11 +221,30 @@ const CommunityCenter = () => {
         {hasSearched && (
           <div className="search-results-summary">
             <p>
-              {centers.length === 0
-                ? "No community centers match your search criteria."
-                : `Found ${centers.length} community center${
-                    centers.length !== 1 ? "s" : ""
-                  } matching your search criteria.`}
+              {centers.length === 0 ? (
+                "No community centers match your search criteria."
+              ) : (
+                <>
+                  {currentFilters?.rating?.length > 0 ? (
+                    <>
+                      {currentFilters.rating[0] === "highestRated" &&
+                        "Sorted by highest to lowest rated centers"}
+                      {currentFilters.rating[0] === "mostReviewed" &&
+                        "Sorted by most to least reviewed centers"}
+                      {currentFilters.rating[0] === "mostRecentlyReviewed" &&
+                        "Sorted by most recently reviewed centers"}
+                      {currentFilters.rating[0] === "recommended" &&
+                        "Sorted by our general recommendations based on ratings and popularity"}
+                    </>
+                  ) : (
+                    <>
+                      Found {centers.length} community center
+                      {centers.length !== 1 ? "s" : ""} matching your search
+                      criteria.
+                    </>
+                  )}
+                </>
+              )}
             </p>
           </div>
         )}

@@ -7,6 +7,7 @@ import {
   DirectionsService, // used to request directions from google maps API
   DirectionsRenderer, // used to display the directions on the map instead of polyline
 } from "@react-google-maps/api"; // import the necessary components from @react-google-maps/api
+import { useScrollPosition } from "./utils/ScrollPositionContext"; // import the custom hook to get scroll position
 import LoadingSpinner from "./LoadingSpinner";
 import CenterCard from "./CenterCard";
 import SimilarCentersModal from "./SimilarCentersModal";
@@ -29,6 +30,9 @@ const SpecificMap = () => {
   const [error, setError] = useState(null);
   // state to track if similar centers modal is open
   const [modalOpen, setModalOpen] = useState(false);
+
+  // get scroll position context
+  useScrollPosition();
 
   // state to store directions response from api
   const [directions, setDirections] = useState(null);
@@ -300,11 +304,6 @@ const SpecificMap = () => {
                       }}
                     />
                   )}
-
-
-
-
-
                 </>
               )}
             </GoogleMap>
