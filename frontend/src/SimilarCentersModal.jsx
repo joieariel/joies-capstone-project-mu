@@ -19,10 +19,10 @@ const SimilarCentersModal = ({ centerId, isOpen, onClose }) => {
 
       try {
         setLoading(true);
-        // call the api to get similar centers
+        // call the api to get similar centers - using 6 for a 3x2 grid (more even layout)
         const data = await communityAPI.getRecommendationsForCenter(
           centerId,
-          5 // limit to 5 similar centers
+          6 // limit to 6 similar centers (2 rows of 3)
         );
 
         // add artificial delay to see the loading spinner (500ms)

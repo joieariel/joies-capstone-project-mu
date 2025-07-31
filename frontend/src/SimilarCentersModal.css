@@ -81,12 +81,57 @@
 
 /* Similar centers grid */
 .similar-centers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 10px; /* add some padding for the scrollbar */
+}
+
+/* make the center cards in the grid more compact */
+.similar-centers-grid .center-card {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  height: 100%;
+}
+
+.similar-centers-grid .center-image {
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+  width: 100%;
+}
+
+.similar-centers-grid .center-info {
+  padding: 15px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.similar-centers-grid .center-name {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.similar-centers-grid .center-description {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* responsive design */
+@media (max-width: 1024px) {
+  .similar-centers-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .modal-content {
     width: 95%;
@@ -95,6 +140,10 @@
 
   .modal-header h2 {
     font-size: 1.5rem;
+  }
+
+  .similar-centers-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -109,5 +158,9 @@
 
   .modal-header h2 {
     font-size: 1.3rem;
+  }
+
+  .similar-centers-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -17,6 +17,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./AuthContext";
+import { ScrollPositionProvider } from "./utils/ScrollPositionContext"; // import to wrap the app in the scroll position context
 
 // protected route component for authenticated users
 const ProtectedRoute = ({ children }) => {
@@ -44,98 +45,101 @@ const App = () => {
   return (
     // wrap the app in the auth provider, now everything inside will have access to user state, login/out functions, etc.
     <AuthProvider>
-      <Router>
-        <div className="app">
-          <Header />
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <PublicRoute>
-                  <LandingPage />
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/signup"
-              element={
-                <PublicRoute>
-                  <SignUp />
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/login"
-              element={
-                <PublicRoute>
-                  <Login />
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/homepage"
-              element={
-                <ProtectedRoute>
-                  <Navigate to="/community-centers" replace />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/community-centers"
-              element={
-                <ProtectedRoute>
-                  <CommunityCenter />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              // updated route to accept centerId as a url param
-              path="/reviews/:centerId"
-              element={
-                <ProtectedRoute>
-                  <Reviews />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              // route for specific center on map
-              path="/map/:centerId"
-              element={
-                <ProtectedRoute>
-                  <SpecificMap />
-                </ProtectedRoute>
-              }
-            />
-            {/* add route for mapview in community center */}
-            <Route
-              path="/mapview"
-              element={
-                <ProtectedRoute>
-                  <MapView />
-                </ProtectedRoute>
-              }
-            />
+      {/* wrap the app in the scroll position context */}
+      <ScrollPositionProvider>
+        <Router>
+          <div className="app">
+            <Header />
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <PublicRoute>
+                    <LandingPage />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  <PublicRoute>
+                    <SignUp />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/login"
+                element={
+                  <PublicRoute>
+                    <Login />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/homepage"
+                element={
+                  <ProtectedRoute>
+                    <Navigate to="/community-centers" replace />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/community-centers"
+                element={
+                  <ProtectedRoute>
+                    <CommunityCenter />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                // updated route to accept centerId as a url param
+                path="/reviews/:centerId"
+                element={
+                  <ProtectedRoute>
+                    <Reviews />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                // route for specific center on map
+                path="/map/:centerId"
+                element={
+                  <ProtectedRoute>
+                    <SpecificMap />
+                  </ProtectedRoute>
+                }
+              />
+              {/* add route for mapview in community center */}
+              <Route
+                path="/mapview"
+                element={
+                  <ProtectedRoute>
+                    <MapView />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/resources"
-              element={
-                <ProtectedRoute>
-                  <Resources />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-          <Footer />
-        </div>
-      </Router>
+              <Route
+                path="/resources"
+                element={
+                  <ProtectedRoute>
+                    <Resources />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+            <Footer />
+          </div>
+        </Router>
+      </ScrollPositionProvider>
     </AuthProvider>
   );
 };

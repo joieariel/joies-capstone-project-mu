@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { reviewAPI, communityAPI, userAPI, tagAPI } from "./api";
 // import scroll batcher utility for batched interaction logging
 import { scrollBatcher } from "./utils/scrollBatcher";
+import { useScrollPosition } from "./utils/ScrollPositionContext"; // import scroll position context to get scroll position
 // added tagAPI to fetch popular tags
 import {
   renderStars,
@@ -207,6 +208,9 @@ const Reviews = () => {
     setEditingReview(null);
   };
 
+  // get scroll position context
+  useScrollPosition();
+
   // function to handle back button click
   const handleBackClick = () => {
     navigate("/community-centers");
@@ -353,7 +357,8 @@ const Reviews = () => {
                 <div className="review-header">
                   <div className="reviewer-info">
                     <span className="reviewer-name">
-                      {review.user.profile_pic}{review.user.first_name} {review.user.last_name}
+                      {review.user.profile_pic}
+                      {review.user.first_name} {review.user.last_name}
                     </span>
                     <span className="review-date">
                       {formatDate(review.created_at)}
