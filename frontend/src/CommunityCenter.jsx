@@ -82,8 +82,6 @@ const CommunityCenter = () => {
         // call the api to get all centers from prisma db
         const data = await communityAPI.getAllCenters();
 
-        // Remove artificial delay - this was causing double loading effect
-
         setCenters(data); // store fetched data in centers state triggers rerender and displays centers
       } catch (err) {
         console.error("Error fetching community centers:", err);
@@ -188,11 +186,30 @@ const CommunityCenter = () => {
         {hasSearched && (
           <div className="search-results-summary">
             <p>
-              {centers.length === 0
-                ? "No community centers match your search criteria."
-                : `Found ${centers.length} community center${
-                    centers.length !== 1 ? "s" : ""
-                  } matching your search criteria.`}
+              {centers.length === 0 ? (
+                "No community centers match your search criteria."
+              ) : (
+                <>
+                  {currentFilters?.rating?.length > 0 ? (
+                    <>
+                      {currentFilters.rating[0] === "highestRated" &&
+                        "Sorted by highest to lowest rated centers"}
+                      {currentFilters.rating[0] === "mostReviewed" &&
+                        "Sorted by most to least reviewed centers"}
+                      {currentFilters.rating[0] === "mostRecentlyReviewed" &&
+                        "Sorted by most recently reviewed centers"}
+                      {currentFilters.rating[0] === "recommended" &&
+                        "Sorted by our general recommendations based on ratings and popularity"}
+                    </>
+                  ) : (
+                    <>
+                      Found {centers.length} community center
+                      {centers.length !== 1 ? "s" : ""} matching your search
+                      criteria.
+                    </>
+                  )}
+                </>
+              )}
             </p>
           </div>
         )}

@@ -68,7 +68,7 @@ const Login = () => {
       });
 
       // redirect user to homepage after successful login
-        navigate("/homepage");
+      navigate("/homepage");
     }
   };
 

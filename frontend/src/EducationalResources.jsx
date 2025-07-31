@@ -1,7 +1,24 @@
+import { useState, useEffect } from "react";
 import "./EducationalResources.css";
 import ResourceCard from "./components/ResourceCard";
+import LoadingSpinner from "./LoadingSpinner";
 
 const EducationalResources = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // set loading to false after resources are ready
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="educational-resources-container">
+        <h1 className="educational-resources-title">Educational Resources</h1>
+        <LoadingSpinner size="large" text="Loading educational resources..." />
+      </div>
+    );
+  }
   // SAT/ACT prep card data
   const satActData = {
     title: "SAT/ACT Preparation",
