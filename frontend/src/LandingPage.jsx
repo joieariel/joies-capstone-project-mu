@@ -10,7 +10,7 @@ const LandingPage = () => {
       {/* app features section */}
       <section className="features-section">
         <div className="features-container">
-          <h2 className="features-title">🌟 App Features</h2>
+          <h2 className="features-title">🌟 Website Features</h2>
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">📶</div>

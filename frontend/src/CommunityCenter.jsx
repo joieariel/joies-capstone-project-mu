@@ -176,19 +176,18 @@ const CommunityCenter = () => {
   return (
     <div className="community-center-container">
       <div className="community-center-content">
-        <h1 className="community-center-title">
-          Find community centers near you
-        </h1>
+        <h1 className="community-center-title">Find Community Centers</h1>
         <div className="community-center-search">
           <Search onSearch={handleSearch} />
         </div>
         <div className="community-center-nav">
           {/* add a nav within the communnity center page to switch from list view to map view */}
+          <p>Want to find free/low cost WiFi locations near you? Click below to find community centers closest to you on the map!</p>
           <button
             className="mapview-button"
             onClick={() => handleMapViewClick()}
           >
-            Map View
+            Find Centers Near You
           </button>
         </div>
         {/* display location status to the user */}

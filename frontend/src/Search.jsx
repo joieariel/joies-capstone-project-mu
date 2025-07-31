@@ -11,6 +11,9 @@ const Search = ({ onSearch }) => {
     tags: [],
   });
 
+  // state to track if filters are expanded or collapsed - default to collapsed on page load
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
+
   // state for custom distance input
   const [customDistance, setCustomDistance] = useState("");
   const [showCustomDistance, setShowCustomDistance] = useState(false);
@@ -286,7 +289,28 @@ const Search = ({ onSearch }) => {
   return (
     <div className="search-container">
       <div className="search-header">
-        <h3 className="search-title">Search for Community Centers</h3>
+        <div className="search-title-container">
+          <h3 className="search-title">Search for Community Centers</h3>
+          <button
+            className={`toggle-filters-button ${
+              // add active class if filters are expanded and there are active filters
+              !filtersExpanded && hasActiveFilters() ? "has-active-filters" : ""
+            }`}
+            onClick={() => setFiltersExpanded(!filtersExpanded)}
+            title={filtersExpanded ? "Collapse filters" : "Expand filters"}
+          >
+            {filtersExpanded ? "Hide Filters ▲" : "Show Filters ▼"}
+            {!filtersExpanded && hasActiveFilters() && (
+              <span className="active-filter-indicator">
+                {/* add active filter indicator if filters are collapsed and there are active filters */}
+                {Object.values(selectedFilters).reduce(
+                  (total, filters) => total + filters.length,
+                  0
+                )}
+              </span>
+            )}
+          </button>
+        </div>
         {hasActiveFilters() && (
           <button
             onClick={handleClearAll}
@@ -298,7 +322,11 @@ const Search = ({ onSearch }) => {
         )}
       </div>
       {/* container for all filter sections */}
-      <div className="advanced-search-container">
+      <div
+        className={`advanced-search-container ${
+          filtersExpanded ? "expanded" : "collapsed"
+        }`}
+      >
         {/* the 3 filter sections using reusable render function */}
         {renderFilterSection("Distance", distanceOptions, "distance")}
 
