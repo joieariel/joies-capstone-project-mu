@@ -20,5 +20,4 @@ https://www.figma.com/proto/VCXJrCp6wBfmEfSkGzrSe0/Digital-Capstone-Equity-Proje
 <add any other links here as you work on your project>
 
 ## Demo Video
-
-[TBD](<insert link in Week 9!>)
+https://drive.google.com/file/d/13BmIsnk-cNpMiAXIice7yivNQldDXknI/view?usp=drive_link
