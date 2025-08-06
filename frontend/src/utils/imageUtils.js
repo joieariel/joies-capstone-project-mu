@@ -1,4 +1,4 @@
-// util functions for handling image uploads and processing
+ // util functions for handling image uploads and processing
 
 // funcition to resize an image before converting to base64
 // (this is to avoid memory issues when converting large images to base64 which was causing the app to crash bc of db storage limits etc)
